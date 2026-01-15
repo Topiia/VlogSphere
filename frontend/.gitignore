@@ -13,13 +13,16 @@ build/
 .next/
 out/
 
-# Environment variables
+# Environment variables (ignore real env files)
 .env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
 .env*.local
+
+# Allow env example
+!.env.example
 
 # Debug
 npm-debug.log*
@@ -59,7 +62,7 @@ temp/
 # Optional npm cache
 .npm
 
-# Optional eslint cache  
+# Optional eslint cache
 .eslintcache
 
 # Yarn

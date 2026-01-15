@@ -1,18 +1,17 @@
 # --- Dependencies ---
 node_modules/
 
-
 # --- Secrets & Environment (CRITICAL) ---
 .env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
-*.env
-*.env.*
-.env*
-backend/.env
-frontend/.env
+
+# Allow env example files (must be committed)
+!.env.example
+!**/.env.example
+
 *.key
 *.pem
 *.cert
@@ -80,7 +79,6 @@ trash_files/
 *_IMPLEMENTATION.md
 *.md.resolved
 UPLOAD_QUICK_START.md
-
 
 *.txt
 temp_*
