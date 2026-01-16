@@ -35,7 +35,7 @@ export const AuthProvider = ({ children }) => {
       setRefreshToken(null)
       setIsAuthenticated(false)
 
-      // Clear storage
+      // Clear storage from BOTH storages (cleanup any legacy tokens)
       localStorage.removeItem('token')
       localStorage.removeItem('refreshToken')
       sessionStorage.removeItem('token')
@@ -58,14 +58,10 @@ export const AuthProvider = ({ children }) => {
       setUser(userData)
       setIsAuthenticated(true)
 
-      // Store tokens
-      if (rememberMe) {
-        localStorage.setItem('token', newToken)
-        localStorage.setItem('refreshToken', newRefreshToken)
-      } else {
-        sessionStorage.setItem('token', newToken)
-        sessionStorage.setItem('refreshToken', newRefreshToken)
-      }
+      // Store tokens in localStorage for cross-tab persistence
+      // Always use localStorage to ensure auth works across tabs and page refresh
+      localStorage.setItem('token', newToken)
+      localStorage.setItem('refreshToken', newRefreshToken)
 
       // Set auth header
       authAPI.setAuthHeader(newToken)
@@ -217,7 +213,7 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const initAuth = async () => {
       // Try to recover session if we have tokens
-      // Read directly from storage for initial check, as state `token` and `refreshToken` might be null initially
+      // Check localStorage first (primary), fallback to sessionStorage (legacy)
       const storedToken = localStorage.getItem('token') || sessionStorage.getItem('token')
       const storedRefreshToken = localStorage.getItem('refreshToken') || sessionStorage.getItem('refreshToken')
 
