@@ -73,11 +73,60 @@ export const AuthProvider = ({ children }) => {
       toast.success('Welcome back!')
       return { success: true }
     } catch (error) {
-      const message = error.response?.data?.error?.message || 'Login failed'
-      toast.error(message)
-      return { success: false, error: message }
+      // Enhanced error handling for all failure types
+      let message = 'Login failed. Please try again.'
+      let errorType = 'unknown'
+
+      // Network errors (server unreachable, CORS, timeout)
+      if (!error.response) {
+        if (error.message === 'Network Error') {
+          message = 'Unable to connect to server. Please check your internet connection.'
+          errorType = 'network'
+        } else if (error.code === 'ECONNABORTED') {
+          message = 'Request timed out. Please try again.'
+          errorType = 'timeout'
+        } else {
+          message = 'Connection failed. Please check if the server is running.'
+          errorType = 'connection'
+        }
+      }
+      // HTTP errors with response
+      else if (error.response) {
+        const status = error.response.status
+        const serverMessage = error.response.data?.error?.message || error.response.data?.message
+
+        switch (status) {
+          case 401:
+            message = serverMessage || 'Invalid email or password. Please try again.'
+            errorType = 'auth'
+            break
+          case 400:
+            message = serverMessage || 'Please provide valid email and password.'
+            errorType = 'validation'
+            break
+          case 429:
+            message = 'Too many login attempts. Please try again in a few minutes.'
+            errorType = 'ratelimit'
+            break
+          case 500:
+          case 502:
+          case 503:
+            message = 'Server error. Please try again later.'
+            errorType = 'server'
+            break
+          default:
+            message = serverMessage || 'An unexpected error occurred. Please try again.'
+            errorType = 'other'
+        }
+      }
+
+      // Log error for debugging (helps identify issues)
+      console.error('Login error:', { errorType, status: error.response?.status, message })
+
+      toast.error(message, { duration: 5000 })
+      return { success: false, error: message, errorType }
     }
-  }, []) // No external dependencies from component state
+  }, [])
 
   const register = useCallback(async (userData) => {
     try {
@@ -99,8 +148,42 @@ export const AuthProvider = ({ children }) => {
       toast.success('Account created successfully!')
       return { success: true }
     } catch (error) {
-      const message = error.response?.data?.error?.message || 'Registration failed'
-      toast.error(message)
+      // Enhanced error handling for all failure types
+      let message = 'Registration failed. Please try again.'
+
+      // Network errors
+      if (!error.response) {
+        if (error.message === 'Network Error') {
+          message = 'Unable to connect to server. Please check your internet connection.'
+        } else {
+          message = 'Connection failed. Please check if the server is running.'
+        }
+      }
+      // HTTP errors with response
+      else if (error.response) {
+        const status = error.response.status
+        const serverMessage = error.response.data?.error?.message || error.response.data?.message
+
+        switch (status) {
+          case 400:
+            message = serverMessage || 'User already exists or invalid data provided.'
+            break
+          case 429:
+            message = 'Too many registration attempts. Please try again later.'
+            break
+          case 500:
+          case 502:
+          case 503:
+            message = 'Server error. Please try again later.'
+            break
+          default:
+            message = serverMessage || 'Registration failed. Please try again.'
+        }
+      }
+
+      console.error('Registration error:', { status: error.response?.status, message })
+
+      toast.error(message, { duration: 5000 })
       return { success: false, error: message }
     }
   }, []) // No external dependencies from component state

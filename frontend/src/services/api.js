@@ -1,8 +1,45 @@
 import axios from 'axios'
 
-// Create axios instance
+// PRODUCTION SAFETY: Validate API URL configuration using Vite's built-in env
+const getApiBaseURL = () => {
+  const apiUrl = import.meta.env.VITE_API_URL
+
+  // CRITICAL: In production builds, API URL MUST be explicitly set
+  // Vite sets import.meta.env.PROD = true in production builds
+  if (import.meta.env.PROD && !apiUrl) {
+    const errorMsg = '❌ CRITICAL: VITE_API_URL is not configured for production build!'
+    console.error(errorMsg)
+    console.error('Set VITE_API_URL in Vercel environment variables')
+    console.error('Expected: https://vlogsphere-backend.onrender.com/api')
+    throw new Error('API URL not configured for production')
+  }
+
+  // In development, provide helpful fallback with warning
+  // Vite sets import.meta.env.DEV = true in development
+  if (import.meta.env.DEV && !apiUrl) {
+    console.warn('⚠️ VITE_API_URL not set in .env file')
+    console.warn('Falling back to: http://localhost:5000/api')
+    console.warn('Create .env with: VITE_API_URL=http://localhost:5000/api')
+    return 'http://localhost:5000/api'
+  }
+
+  // Validate URL format (must start with http/https or be relative)
+  if (!apiUrl.startsWith('http://') && !apiUrl.startsWith('https://') && !apiUrl.startsWith('/')) {
+    console.error(`❌ Invalid API URL format: ${apiUrl}`)
+    console.error('URL must start with http://, https://, or /')
+    throw new Error('Invalid API URL format')
+  }
+
+  // Log the final API URL (helps with debugging production issues)
+  const envType = import.meta.env.PROD ? 'PRODUCTION' : 'DEVELOPMENT'
+  console.log(`🔗 [${envType}] API Base URL: ${apiUrl}`)
+
+  return apiUrl
+}
+
+// Create axios instance with validated base URL
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || '/api',
+  baseURL: getApiBaseURL(),
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
