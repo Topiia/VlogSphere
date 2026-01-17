@@ -13,15 +13,17 @@ export const useAuth = () => {
   return context
 }
 
+// CRITICAL FIX: Global singleton guard to prevent duplicate auth initialization
+// Using module-level variable instead of useRef to persist across ALL instances
+// This prevents multiple /me requests even with multiple AuthProvider instances or re-renders
+let globalAuthInitialized = false;
+let globalAuthInitializing = false;
+
 export const AuthProvider = ({ children }) => {
   // COOKIE-ONLY AUTH: No token state needed, cookies handled by browser
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
-
-  // Deduplication guard: Prevent multiple parallel session init requests
-  const isInitializing = useRef(false)
-  const hasInitialized = useRef(false)
 
   // Logout: Call API to clear cookies, then clear state
   const logout = useCallback(async () => {
@@ -186,21 +188,26 @@ export const AuthProvider = ({ children }) => {
   }, [])
 
   // COOKIE-ONLY AUTH: Session restoration via /me endpoint
-  // Cookies sent automatically by browser with withCredentials: true
+  // CRITICAL: Global singleton guard prevents duplicate requests
   useEffect(() => {
     const initAuth = async () => {
-      // Prevent duplicate requests (React 18 StrictMode calls effects twice in dev)
-      if (isInitializing.current || hasInitialized.current) {
+      // PRODUCTION FIX: Check global flag first (prevents duplicate requests)
+      if (globalAuthInitializing || globalAuthInitialized) {
+        console.log('[AuthContext] Skipping duplicate auth initialization')
+        // Still need to set loading to false for this instance
+        setLoading(false)
         return
       }
 
-      isInitializing.current = true
+      globalAuthInitializing = true
+      console.log('[AuthContext] Initializing authentication...')
 
       try {
         // Try to get current user (cookie sent automatically)
         const response = await authAPI.getMe()
         setUser(response.data.user)
         setIsAuthenticated(true)
+        console.log('[AuthContext] User authenticated via session cookie')
       } catch (error) {
         // If 401, try to refresh token
         if (error.response?.status === 401) {
@@ -241,12 +248,14 @@ export const AuthProvider = ({ children }) => {
           setIsAuthenticated(false)
         } else {
           // Other error, assume not logged in
+          console.log('[AuthContext] No active session')
           setIsAuthenticated(false)
         }
       } finally {
         setLoading(false)
-        isInitializing.current = false
-        hasInitialized.current = true
+        globalAuthInitializing = false
+        globalAuthInitialized = true
+        console.log('[AuthContext] Authentication initialization complete')
       }
     }
 
