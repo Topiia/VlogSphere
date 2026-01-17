@@ -14,9 +14,9 @@ const logger = require('./logger');
 // Redis connection configuration
 const redisConfig = {
   host: process.env.REDIS_HOST || 'localhost',
-  port: parseInt(process.env.REDIS_PORT) || 6379,
+  port: parseInt(process.env.REDIS_PORT, 10) || 6379,
   password: process.env.REDIS_PASSWORD || undefined,
-  db: parseInt(process.env.REDIS_DB) || 0,
+  db: parseInt(process.env.REDIS_DB, 10) || 0,
   retryStrategy: (times) => {
     const delay = Math.min(times * 50, 2000);
     return delay;
@@ -62,15 +62,27 @@ redis.on('reconnecting', () => {
   logger.info('Redis reconnecting...');
 });
 
-// Connect to Redis
-redis.connect().catch((err) => {
-  logger.error('Failed to connect to Redis', {
-    error: {
-      message: err.message,
-      stack: err.stack,
-    },
+// Connect to Redis (PRODUCTION SAFE: Optional, non-blocking)
+let isRedisConnected = false;
+
+redis.connect()
+  .then(() => {
+    isRedisConnected = true;
+    logger.info('Redis connected successfully');
+  })
+  .catch((err) => {
+    isRedisConnected = false;
+    logger.warn('Redis connection failed - running without cache', {
+      error: {
+        message: err.message,
+        code: err.code,
+      },
+    });
+    console.warn('[WARN] Redis unavailable - caching disabled');
   });
-});
+
+// Export connection status for conditional logic
+redis.isConnected = () => isRedisConnected;
 
 // Graceful shutdown
 process.on('SIGTERM', async () => {
@@ -83,7 +95,7 @@ process.on('SIGTERM', async () => {
  * @param {string} key - Cache key
  * @returns {Promise<any>} - Parsed JSON data or null
  */
-redis.getJSON = async function (key) {
+redis.getJSON = async function getJSON(key) {
   try {
     const data = await this.get(key);
     return data ? JSON.parse(data) : null;
@@ -100,7 +112,7 @@ redis.getJSON = async function (key) {
  * @param {number} ttl - Time to live in seconds
  * @returns {Promise<string>} - OK or null
  */
-redis.setJSON = async function (key, value, ttl = 300) {
+redis.setJSON = async function setJSON(key, value, ttl = 300) {
   try {
     const serialized = JSON.stringify(value);
     if (ttl) {
@@ -118,7 +130,7 @@ redis.setJSON = async function (key, value, ttl = 300) {
  * @param {string} pattern - Key pattern (e.g., 'cache:vlogs:*')
  * @returns {Promise<number>} - Number of keys deleted
  */
-redis.delPattern = async function (pattern) {
+redis.delPattern = async function delPattern(pattern) {
   try {
     const keys = await this.keys(pattern);
     if (keys.length === 0) return 0;

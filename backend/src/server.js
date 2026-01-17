@@ -13,9 +13,57 @@ const mongoose = require('mongoose');
 const logger = require('./config/logger');
 const { correlationMiddleware } = require('./middleware/correlation');
 
+// PRODUCTION SAFETY: Early crash handlers (before any async code)
+process.on('uncaughtException', (err) => {
+  console.error('[FATAL] Uncaught Exception:', err.message);
+  console.error(err.stack);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (err) => {
+  console.error('[FATAL] Unhandled Promise Rejection:', err.message);
+  console.error(err.stack);
+  process.exit(1);
+});
+
 // Load environment variables
 if (process.env.NODE_ENV !== 'production') {
   dotenv.config();
+}
+
+// PRODUCTION SAFETY: Validate CRITICAL environment variables EARLY
+// Fail fast if truly critical vars are missing
+const criticalEnv = ['MONGODB_URI', 'JWT_SECRET', 'JWT_REFRESH_SECRET'];
+const missingCritical = criticalEnv.filter((key) => !process.env[key]);
+
+if (missingCritical.length > 0) {
+  console.error('='.repeat(60));
+  console.error('[FATAL] Missing CRITICAL environment variables:');
+  missingCritical.forEach((key) => console.error(`  - ${key}`));
+  console.error('='.repeat(60));
+  console.error('Server cannot start without these variables.');
+  console.error('Set them in Render dashboard: Settings > Environment');
+  console.error('='.repeat(60));
+  process.exit(1);
+}
+
+// Warn about optional services (graceful degradation)
+const optionalServices = {
+  CLOUDINARY_CLOUD_NAME: 'File uploads',
+  CLOUDINARY_API_KEY: 'File uploads',
+  CLOUDINARY_API_SECRET: 'File uploads',
+  RESEND_API_KEY: 'Email notifications',
+  REDIS_HOST: 'Caching & job queues',
+};
+
+const missingOptional = Object.keys(optionalServices)
+  .filter((key) => !process.env[key])
+  .map((key) => `${key} (${optionalServices[key]})`);
+
+if (missingOptional.length > 0) {
+  console.warn('[WARN] Optional services will be disabled:');
+  missingOptional.forEach((msg) => console.warn(`  - ${msg}`));
+  console.warn('[WARN] App will run with reduced functionality.');
 }
 
 // Import middleware
@@ -247,23 +295,9 @@ app.use('*', (req, res) => {
 // Error handler middleware (must be last)
 app.use(errorHandler);
 
-// Validate critical environment variables
-const requiredEnv = [
-  'MONGODB_URI', 'JWT_SECRET', 'JWT_REFRESH_SECRET',
-  'CLOUDINARY_CLOUD_NAME', 'CLOUDINARY_API_KEY', 'CLOUDINARY_API_SECRET',
-  'RESEND_API_KEY', 'FRONTEND_URL', 'FROM_EMAIL', 'NODE_ENV',
-];
-
-const missingEnv = requiredEnv.filter((key) => !process.env[key]);
-
-if (missingEnv.length > 0) {
-  logger.error('Missing critical environment variables:', { missing: missingEnv });
-  // Exit process with failure code
-  process.exit(1);
-}
-
 const PORT = process.env.PORT || 5000;
 
+// Start server and export for potential shutdown handling
 const server = app.listen(PORT, () => {
   logger.info('Server started', {
     port: PORT,
@@ -272,29 +306,5 @@ const server = app.listen(PORT, () => {
   });
 });
 
-// Handle unhandled promise rejections
-process.on('unhandledRejection', (err, _) => {
-  logger.error('Unhandled Promise Rejection', {
-    error: {
-      message: err.message,
-      stack: err.stack,
-    },
-  });
-  // Close server & exit process
-  server.close(() => {
-    process.exit(1);
-  });
-});
-
-// Handle uncaught exceptions
-process.on('uncaughtException', (err) => {
-  logger.error('Uncaught Exception', {
-    error: {
-      message: err.message,
-      stack: err.stack,
-    },
-  });
-  process.exit(1);
-});
-
 module.exports = app;
+module.exports.server = server; // Export server for graceful shutdown if needed
