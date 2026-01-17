@@ -177,17 +177,19 @@ api.interceptors.response.use(
         break
 
       case 401: {
+        // PRODUCTION FIX: Do NOT use window.location.href (causes infinite reload loop)
+        // Let AuthContext handle the 401 and manage logout/redirect via React Router
+
         error.message = data.error?.message || data.message || 'Your session has expired. Please log in again.'
 
-        // COOKIE-ONLY AUTH: No localStorage to clear (cookies cleared by server)
-        // Store current location for redirect after login
+        // Store current location for redirect after login (but only if not already on auth pages)
         const currentPath = window.location.pathname
         if (currentPath !== '/login' && currentPath !== '/register') {
           localStorage.setItem('redirectAfterLogin', currentPath)
         }
 
-        // Redirect to login page
-        window.location.href = '/login'
+        // CRITICAL: Do NOT redirect here - just reject the error
+        // AuthContext will handle logout and navigation without page reload
         break
       }
 
