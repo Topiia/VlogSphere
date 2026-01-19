@@ -1,4 +1,5 @@
 import axios from 'axios'
+import toast from 'react-hot-toast'
 
 // PRODUCTION SAFETY: Validate API URL configuration using Vite's built-in env
 const getApiBaseURL = () => {
@@ -146,7 +147,14 @@ api.interceptors.response.use(
 
     // Handle network errors with retry logic
     if (!error.response) {
-      // Check if we should retry
+      // Timeout handling - do NOT retry timeouts
+      if (error.code === 'ECONNABORTED') {
+        error.message = 'Request timed out. Server is not responding.'
+        toast.error(error.message, { duration: 5000 })
+        return Promise.reject(error)
+      }
+
+      // Check if we should retry (network errors only, not timeouts)
       const maxRetries = 2
       const retryCount = originalRequest.retryCount || 0
 
@@ -161,8 +169,9 @@ api.interceptors.response.use(
         return api(originalRequest)
       }
 
-      // Max retries reached
+      // Max retries reached (network error, not timeout)
       error.message = 'Network error. Please check your connection.'
+      toast.error(error.message, { duration: 5000 })
       return Promise.reject(error)
     }
 
