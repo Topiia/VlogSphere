@@ -33,7 +33,18 @@ if (process.env.NODE_ENV !== 'production') {
 
 // PRODUCTION SAFETY: Validate CRITICAL environment variables EARLY
 // Fail fast if truly critical vars are missing
-const criticalEnv = ['MONGODB_URI', 'JWT_SECRET', 'JWT_REFRESH_SECRET'];
+const criticalEnv = [
+  'MONGODB_URI',
+  'JWT_SECRET',
+  'JWT_REFRESH_SECRET',
+  'CLOUDINARY_CLOUD_NAME',
+  'CLOUDINARY_API_KEY',
+  'CLOUDINARY_API_SECRET',
+  'RESEND_API_KEY',
+  'FRONTEND_URL',
+  'FROM_EMAIL',
+  'NODE_ENV',
+];
 const missingCritical = criticalEnv.filter((key) => !process.env[key]);
 
 if (missingCritical.length > 0) {
@@ -49,10 +60,6 @@ if (missingCritical.length > 0) {
 
 // Warn about optional services (graceful degradation)
 const optionalServices = {
-  CLOUDINARY_CLOUD_NAME: 'File uploads',
-  CLOUDINARY_API_KEY: 'File uploads',
-  CLOUDINARY_API_SECRET: 'File uploads',
-  RESEND_API_KEY: 'Email notifications',
   REDIS_HOST: 'Caching & job queues',
 };
 
