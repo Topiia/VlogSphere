@@ -219,11 +219,16 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Health check endpoint
 app.get('/health', (req, res) => {
+  const env = process.env.NODE_ENV || 'unknown';
+  const isProduction = env === 'production';
+
   res.status(200).json({
     status: 'ok',
     service: 'vlogsphere-backend',
-    env: process.env.NODE_ENV,
+    env,
+    isProduction,
     timestamp: new Date().toISOString(),
+    warning: !isProduction ? 'Not running in production mode!' : undefined,
   });
 });
 
