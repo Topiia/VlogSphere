@@ -91,16 +91,14 @@ export const uploadAPI = {
   uploadSingle: (file) => {
     const formData = new FormData()
     formData.append('image', file)
-    return api.post('/upload/single', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    })
+    // Let axios set Content-Type automatically with multipart boundary
+    return api.post('/upload/single', formData)
   },
   uploadMultiple: (files) => {
     const formData = new FormData()
     files.forEach(file => formData.append('images', file))
-    return api.post('/upload/multiple', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    })
+    // Let axios set Content-Type automatically with multipart boundary
+    return api.post('/upload/multiple', formData)
   },
   deleteImage: (publicId) => api.delete(`/upload/${publicId}`),
 }
