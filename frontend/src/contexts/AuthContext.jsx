@@ -19,6 +19,27 @@ export const useAuth = () => {
 let globalAuthInitialized = false;
 let globalAuthInitializing = false;
 
+/*
+  ============================================================
+  AUTO TOKEN REFRESH (TEMPORARILY DISABLED)
+  ============================================================
+
+  Reason:
+  - Backend currently uses long-lived access tokens (~7 days).
+  - Auto-refreshing every few minutes is unnecessary in this setup and adds
+    extra requests + complexity.
+  - Refresh failures (network/CORS/cookie issues) could cause avoidable logouts.
+
+  Enable later ONLY when:
+  - Access token expiry is short-lived (15–30 minutes), which is the recommended
+    production security model.
+  - CORS + cookie settings (SameSite/Secure/Domain) are verified in production.
+
+  Future improvement:
+  - Prefer refresh-on-demand (refresh on 401 + retry request) over fixed intervals.
+*/
+const ENABLE_AUTO_TOKEN_REFRESH = false;
+
 export const AuthProvider = ({ children }) => {
   // COOKIE-ONLY AUTH: No token state needed, cookies handled by browser
   const [user, setUser] = useState(null)
@@ -261,6 +282,73 @@ export const AuthProvider = ({ children }) => {
 
     initAuth()
   }, []) // No dependencies, run once on mount
+
+
+
+  // PRODUCTION: Automatic token refresh to prevent session expiration during active use
+  // Refreshes every 6 minutes with retry logic for transient failures
+  useEffect(() => {
+    // Feature flag: Disabled until backend uses short-lived access tokens
+    if (!ENABLE_AUTO_TOKEN_REFRESH) return;
+
+    // Only run refresh interval when user is authenticated
+    if (!isAuthenticated) return;
+
+    console.log('[Auth] Starting automatic token refresh interval (every 6 minutes)');
+
+    const refreshInterval = setInterval(async () => {
+      // Attempt 1: Try refresh
+      try {
+        await authAPI.refreshToken();
+        console.log('[Auth] Token refreshed successfully');
+        return; // Success, exit early
+      } catch (firstError) {
+        console.warn('[Auth] Refresh attempt 1 failed, retrying in 1 second...');
+        toast.info('Connection issue. Retrying session refresh...', { duration: 2000 });
+
+        // Wait 1 second before retry
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        // Attempt 2: Retry once
+        try {
+          await authAPI.refreshToken();
+          console.log('[Auth] Token refreshed successfully (retry)');
+          return; // Success on retry, exit
+        } catch (secondError) {
+          // Both attempts failed - classify error type
+          const isNetworkError = !secondError.response;
+          const isServerError = secondError.response?.status >= 500;
+          const isAuthError = secondError.response?.status === 401;
+
+          if (isNetworkError || isServerError) {
+            // Transient failure - warn user but DON'T logout
+            console.warn('[Auth] Refresh failed due to network/server issue. User can continue.', {
+              isNetworkError,
+              status: secondError.response?.status,
+            });
+            toast.warning('Unable to refresh session. Please check your connection.', {
+              duration: 4000,
+            });
+          } else if (isAuthError) {
+            // Real auth failure (token revoked, expired, reuse detected) - logout required
+            const message = secondError.response?.data?.error?.message || 'Session expired';
+            console.error('[Auth] Session invalidated:', message);
+            toast.error('Session expired. Please log in again.', { duration: 5000 });
+            await logout();
+          } else {
+            // Other errors - log but don't logout
+            console.warn('[Auth] Unexpected refresh error:', secondError.response?.status);
+          }
+        }
+      }
+    }, 6 * 60 * 1000); // 6 minutes (360,000ms)
+
+    // Cleanup: Clear interval on unmount or when authentication state changes
+    return () => {
+      console.log('[Auth] Clearing automatic token refresh interval');
+      clearInterval(refreshInterval);
+    };
+  }, [isAuthenticated, logout])
 
   const value = {
     user,
