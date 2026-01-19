@@ -232,13 +232,15 @@ exports.logout = asyncHandler(async (req, res, _next) => {
   }
 
   // PRODUCTION FIX: Clear cookies with matching attributes
-  // Cookies must be cleared with same sameSite/secure settings or they won't delete
+  // Cookies must be cleared with same path/sameSite/secure settings or they won't delete
   const isProduction = process.env.NODE_ENV === 'production';
   const clearOptions = {
     httpOnly: true,
     secure: isProduction,
     sameSite: isProduction ? 'none' : 'lax',
+    path: '/', // CRITICAL: Must match path used when setting cookies
     maxAge: 0, // Expire immediately
+    expires: new Date(0), // Belt and suspenders: also set explicit expiry date
   };
 
   res.cookie('token', '', clearOptions);
