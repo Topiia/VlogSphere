@@ -67,14 +67,94 @@ const handleError = (err, res) => {
   return res.status(400).json({ success: false, error: err.message });
 };
 
+/* -------------------- Cleanup Helper -------------------- */
+// Deletes uploaded Cloudinary files to prevent orphans on failed requests
+const cleanupCloudinaryUploads = async (publicIds) => {
+  if (!publicIds?.length) return;
+
+  const results = await Promise.allSettled(
+    publicIds.map((id) => cloudinary.uploader.destroy(id)),
+  );
+
+  // Log any cleanup failures (don't throw - cleanup is best-effort)
+  results.forEach((result, index) => {
+    if (result.status === 'rejected') {
+      console.error(`Failed to cleanup Cloudinary file: ${publicIds[index]}`, result.reason);
+    }
+  });
+};
+
+/* -------------------- Cleanup Middleware -------------------- */
+// Attaches cleanup listener to response - runs on error or non-2xx status
+const attachCleanupListener = (req, res) => {
+  // Track uploaded files for potential cleanup
+  req.cloudinaryUploads = req.cloudinaryUploads || [];
+
+  // Cleanup on response finish if request failed
+  const originalSend = res.send;
+  res.send = function sendWithCleanup(data) {
+    // Only cleanup if response indicates failure (4xx, 5xx)
+    if (res.statusCode >= 400 && req.cloudinaryUploads.length > 0) {
+      // Cleanup asynchronously (don't block response)
+      setImmediate(async () => {
+        console.log(`Cleaning up ${req.cloudinaryUploads.length} orphaned Cloudinary files due to failed request`);
+        await cleanupCloudinaryUploads(req.cloudinaryUploads);
+      });
+    }
+    return originalSend.call(this, data);
+  };
+};
+
 /* -------------------- Single Upload -------------------- */
 exports.uploadSingle = (field = 'image') => (req, res, next) => {
-  upload.single(field)(req, res, (err) => (err ? handleError(err, res) : next()));
+  attachCleanupListener(req, res);
+
+  upload.single(field)(req, res, (err) => {
+    if (err) {
+      // Upload failed - no cleanup needed (files never uploaded)
+      return handleError(err, res);
+    }
+
+    // Track uploaded file for potential cleanup
+    if (req.file?.filename) {
+      req.cloudinaryUploads.push(req.file.filename);
+    }
+
+    next();
+  });
 };
 
 /* -------------------- Multiple Upload -------------------- */
 exports.uploadMultiple = (field = 'images', max = 10) => (req, res, next) => {
-  upload.array(field, max)(req, res, (err) => (err ? handleError(err, res) : next()));
+  attachCleanupListener(req, res);
+
+  upload.array(field, max)(req, res, (err) => {
+    if (err) {
+      // Partial upload might have succeeded - cleanup uploaded files
+      if (req.files?.length > 0) {
+        const uploadedIds = req.files.map((f) => f.filename).filter(Boolean);
+        if (uploadedIds.length > 0) {
+          // Cleanup asynchronously
+          setImmediate(async () => {
+            console.log(`Cleaning up ${uploadedIds.length} Cloudinary files due to upload error`);
+            await cleanupCloudinaryUploads(uploadedIds);
+          });
+        }
+      }
+      return handleError(err, res);
+    }
+
+    // Track all uploaded files for potential cleanup
+    if (req.files?.length > 0) {
+      req.files.forEach((file) => {
+        if (file.filename) {
+          req.cloudinaryUploads.push(file.filename);
+        }
+      });
+    }
+
+    next();
+  });
 };
 
 /* -------------------- Delete Image (Cloudinary Only) -------------------- */
