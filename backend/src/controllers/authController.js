@@ -40,6 +40,12 @@ const getCookieOptions = (maxAge) => {
   };
 };
 
+// Helper to set both auth cookies (DRY principle)
+const setCookies = (res, token, refreshToken) => {
+  res.cookie('token', token, getCookieOptions(7 * 24 * 60 * 60 * 1000)); // 7 days
+  res.cookie('refreshToken', refreshToken, getCookieOptions(30 * 24 * 60 * 60 * 1000)); // 30 days
+};
+
 // @desc    Register user
 // @route   POST /api/auth/register
 // @access  Public
@@ -132,11 +138,8 @@ The VlogSphere Team`,
     }
   }
 
-  // PRODUCTION FIX: Set cookies with cross-site support
-  // Always set cookies (both dev and prod) for consistent behavior
-  // Cross-site attributes (SameSite=None; Secure) enable Vercel → Render auth
-  res.cookie('token', token, getCookieOptions(7 * 24 * 60 * 60 * 1000)); // 7 days
-  res.cookie('refreshToken', refreshToken, getCookieOptions(30 * 24 * 60 * 60 * 1000)); // 30 days
+  // Set auth cookies
+  setCookies(res, token, refreshToken);
 
   res.status(201).json({
     success: true,
@@ -253,11 +256,8 @@ The VlogSphere Team`,
     }
   }
 
-  // PRODUCTION FIX: Set cookies with cross-site support
-  // Always set cookies (both dev and prod) for consistent behavior
-  // Cross-site attributes (SameSite=None; Secure) enable Vercel → Render auth
-  res.cookie('token', token, getCookieOptions(7 * 24 * 60 * 60 * 1000)); // 7 days
-  res.cookie('refreshToken', refreshToken, getCookieOptions(30 * 24 * 60 * 60 * 1000)); // 30 days
+  // Set auth cookies
+  setCookies(res, token, refreshToken);
 
   res.status(200).json({
     success: true,
