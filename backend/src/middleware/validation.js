@@ -238,4 +238,13 @@ exports.searchValidation = [
     .escape(),
 ];
 
+// Account deletion password confirmation validation
+exports.validatePasswordConfirmation = [
+  body('password')
+    .optional()
+    .isLength({ min: 6 })
+    .withMessage('Password must be at least 6 characters'),
+  exports.validate,
+];
+
 module.exports = exports;

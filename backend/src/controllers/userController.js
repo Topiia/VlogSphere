@@ -2,6 +2,7 @@ const User = require('../models/User');
 const Vlog = require('../models/Vlog');
 const asyncHandler = require('../middleware/asyncHandler');
 const ErrorResponse = require('../utils/errorResponse');
+const userDeletionService = require('../services/userDeletionService');
 
 /* ----------------------------------------------------------
    GET USER BOOKMARKS
@@ -11,19 +12,18 @@ exports.getBookmarks = asyncHandler(async (req, res, next) => {
   const limit = parseInt(req.query.limit, 10) || 20;
   const skip = (page - 1) * limit;
 
-  const user = await User.findById(req.user.id)
-    .populate({
-      path: 'bookmarks',
-      options: {
-        skip,
-        limit,
-        sort: { createdAt: -1 },
-      },
-      populate: {
-        path: 'author',
-        select: 'username avatar bio followerCount',
-      },
-    });
+  const user = await User.findById(req.user.id).populate({
+    path: 'bookmarks',
+    options: {
+      skip,
+      limit,
+      sort: { createdAt: -1 },
+    },
+    populate: {
+      path: 'author',
+      select: 'username avatar bio followerCount',
+    },
+  });
 
   if (!user) {
     return next(new ErrorResponse('User not found', 404));
@@ -154,8 +154,12 @@ exports.unfollowUser = asyncHandler(async (req, res, next) => {
   }
 
   // Update both users atomically
-  follower.following = follower.following.filter((id) => id.toString() !== userId);
-  userToUnfollow.followers = userToUnfollow.followers.filter((id) => id.toString() !== followerId);
+  follower.following = follower.following.filter(
+    (id) => id.toString() !== userId,
+  );
+  userToUnfollow.followers = userToUnfollow.followers.filter(
+    (id) => id.toString() !== followerId,
+  );
 
   await Promise.all([follower.save(), userToUnfollow.save()]);
 
@@ -179,15 +183,14 @@ exports.getFollowers = asyncHandler(async (req, res, next) => {
   const limit = parseInt(req.query.limit, 10) || 20;
   const skip = (page - 1) * limit;
 
-  const user = await User.findById(userId)
-    .populate({
-      path: 'followers',
-      select: 'username avatar bio followerCount',
-      options: {
-        skip,
-        limit,
-      },
-    });
+  const user = await User.findById(userId).populate({
+    path: 'followers',
+    select: 'username avatar bio followerCount',
+    options: {
+      skip,
+      limit,
+    },
+  });
 
   if (!user) {
     return next(new ErrorResponse('User not found', 404));
@@ -200,7 +203,9 @@ exports.getFollowers = asyncHandler(async (req, res, next) => {
   const currentUser = req.user ? await User.findById(req.user.id) : null;
   const followersWithStatus = user.followers.map((follower) => ({
     ...follower.toObject(),
-    isFollowing: currentUser ? currentUser.following.includes(follower._id) : false,
+    isFollowing: currentUser
+      ? currentUser.following.includes(follower._id)
+      : false,
   }));
 
   res.status(200).json({
@@ -222,15 +227,14 @@ exports.getFollowing = asyncHandler(async (req, res, next) => {
   const limit = parseInt(req.query.limit, 10) || 20;
   const skip = (page - 1) * limit;
 
-  const user = await User.findById(userId)
-    .populate({
-      path: 'following',
-      select: 'username avatar bio followerCount',
-      options: {
-        skip,
-        limit,
-      },
-    });
+  const user = await User.findById(userId).populate({
+    path: 'following',
+    select: 'username avatar bio followerCount',
+    options: {
+      skip,
+      limit,
+    },
+  });
 
   if (!user) {
     return next(new ErrorResponse('User not found', 404));
@@ -243,7 +247,9 @@ exports.getFollowing = asyncHandler(async (req, res, next) => {
   const currentUser = req.user ? await User.findById(req.user.id) : null;
   const followingWithStatus = user.following.map((followedUser) => ({
     ...followedUser.toObject(),
-    isFollowing: currentUser ? currentUser.following.includes(followedUser._id) : false,
+    isFollowing: currentUser
+      ? currentUser.following.includes(followedUser._id)
+      : false,
   }));
 
   res.status(200).json({
@@ -262,8 +268,9 @@ exports.getFollowing = asyncHandler(async (req, res, next) => {
 exports.getUserByUsername = asyncHandler(async (req, res, next) => {
   const { username } = req.params;
 
-  const user = await User.findOne({ username })
-    .select('_id username avatar bio followerCount followingCount createdAt');
+  const user = await User.findOne({ username }).select(
+    '_id username avatar bio followerCount followingCount createdAt',
+  );
 
   if (!user) {
     return next(new ErrorResponse('User not found', 404));
@@ -315,6 +322,56 @@ exports.getLikedVlogs = asyncHandler(async (req, res) => {
     currentPage: page,
     hasNextPage: page < totalPages,
     hasPrevPage: page > 1,
-    data: vlogs,
   });
+});
+
+/* ----------------------------------------------------------
+   DELETE USER ACCOUNT (SECURE CASCADE DELETION)
+---------------------------------------------------------- */
+exports.deleteAccount = asyncHandler(async (req, res, next) => {
+  const userId = req.user.id;
+  const { password } = req.body;
+
+  // Optional password verification for additional security
+  if (password) {
+    const user = await User.findById(userId).select('+password');
+
+    if (!user) {
+      return next(new ErrorResponse('User not found', 404));
+    }
+
+    const isPasswordMatch = await user.comparePassword(password);
+    if (!isPasswordMatch) {
+      return next(new ErrorResponse('Invalid password', 401));
+    }
+  }
+
+  try {
+    // Perform cascade deletion
+    const result = await userDeletionService.deleteUser(userId, {
+      correlationId: req.id,
+      ip: req.ip,
+    });
+
+    // Clear authentication cookies
+    const clearOptions = {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      expires: new Date(0),
+    };
+
+    res.cookie('token', '', clearOptions);
+    res.cookie('refreshToken', '', clearOptions);
+
+    res.status(200).json({
+      success: true,
+      message: 'Account deleted successfully',
+      data: result.deletedCounts,
+    });
+  } catch (error) {
+    return next(
+      new ErrorResponse(`Account deletion failed: ${error.message}`, 500),
+    );
+  }
 });
