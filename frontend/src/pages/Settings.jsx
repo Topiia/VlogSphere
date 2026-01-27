@@ -1,10 +1,12 @@
-import { useState } from 'react'
-import { motion } from 'framer-motion'
-import { useForm } from 'react-hook-form'
-import toast from 'react-hot-toast'
-import { useAuth } from '../contexts/AuthContext'
-import { useTheme } from '../contexts/ThemeContext'
-import Button from '../components/UI/Button'
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import toast from "react-hot-toast";
+import { useAuth } from "../contexts/AuthContext";
+import { useTheme } from "../contexts/ThemeContext";
+import Button from "../components/UI/Button";
+import DeleteAccountModal from "../components/UI/DeleteAccountModal";
 import {
   Cog6ToothIcon,
   UserIcon,
@@ -14,19 +16,19 @@ import {
   MapPinIcon,
   LinkIcon,
   EnvelopeIcon,
-  LockClosedIcon
-} from '@heroicons/react/24/outline'
+  LockClosedIcon,
+} from "@heroicons/react/24/outline";
 
 const Settings = () => {
-  const { user } = useAuth()
-  const [activeTab, setActiveTab] = useState('account')
+
+  const [activeTab, setActiveTab] = useState("account");
 
   const tabs = [
-    { id: 'account', label: 'Account', icon: UserIcon },
-    { id: 'privacy', label: 'Privacy', icon: ShieldCheckIcon },
-    { id: 'notifications', label: 'Notifications', icon: BellIcon },
-    { id: 'appearance', label: 'Appearance', icon: PaintBrushIcon }
-  ]
+    { id: "account", label: "Account", icon: UserIcon },
+    { id: "privacy", label: "Privacy", icon: ShieldCheckIcon },
+    { id: "notifications", label: "Notifications", icon: BellIcon },
+    { id: "appearance", label: "Appearance", icon: PaintBrushIcon },
+  ];
 
   return (
     <div className="min-h-screen">
@@ -58,7 +60,7 @@ const Settings = () => {
         <div className="border-b border-white/10">
           <nav className="flex overflow-x-auto">
             {tabs.map((tab) => {
-              const Icon = tab.icon
+              const Icon = tab.icon;
               return (
                 <button
                   key={tab.id}
@@ -67,93 +69,98 @@ const Settings = () => {
                     flex items-center space-x-2 px-6 py-4 font-medium text-sm whitespace-nowrap
                     transition-all duration-200 border-b-2
                     ${activeTab === tab.id
-                      ? 'border-[var(--theme-accent)] text-[var(--theme-accent)]'
-                      : 'border-transparent text-[var(--theme-text-secondary)] hover:text-[var(--theme-text)] hover:border-white/20'
+                      ? "border-[var(--theme-accent)] text-[var(--theme-accent)]"
+                      : "border-transparent text-[var(--theme-text-secondary)] hover:text-[var(--theme-text)] hover:border-white/20"
                     }
                   `}
                 >
                   <Icon className="w-5 h-5" />
                   <span>{tab.label}</span>
                 </button>
-              )
+              );
             })}
           </nav>
         </div>
 
         {/* Tab Content */}
         <div className="p-6 md:p-8">
-          {activeTab === 'account' && <AccountSettings />}
-          {activeTab === 'privacy' && <PrivacySettings />}
-          {activeTab === 'notifications' && <NotificationsSettings />}
-          {activeTab === 'appearance' && <AppearanceSettings />}
+          {activeTab === "account" && <AccountSettings />}
+          {activeTab === "privacy" && <PrivacySettings />}
+          {activeTab === "notifications" && <NotificationsSettings />}
+          {activeTab === "appearance" && <AppearanceSettings />}
         </div>
       </motion.div>
     </div>
-  )
-}
+  );
+};
 
 // Account Settings Section
 const AccountSettings = () => {
-  const { user, updateUser, updatePassword } = useAuth()
-  const [isUpdating, setIsUpdating] = useState(false)
-  const [showPasswordForm, setShowPasswordForm] = useState(false)
+  const navigate = useNavigate();
+  const { user, updateUser, updatePassword, logout } = useAuth();
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [showPasswordForm, setShowPasswordForm] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   // Profile form
   const {
     register: registerProfile,
     handleSubmit: handleProfileSubmit,
-    formState: { errors: profileErrors }
+    formState: { errors: profileErrors },
   } = useForm({
     defaultValues: {
-      username: user?.username || '',
-      email: user?.email || '',
-      bio: user?.bio || '',
-      location: user?.location || '',
-      website: user?.website || ''
-    }
-  })
+      username: user?.username || "",
+      email: user?.email || "",
+      bio: user?.bio || "",
+      location: user?.location || "",
+      website: user?.website || "",
+    },
+  });
 
   // Password form
   const {
     register: registerPassword,
     handleSubmit: handlePasswordSubmit,
     formState: { errors: passwordErrors },
-    reset: resetPasswordForm
-  } = useForm()
+    reset: resetPasswordForm,
+  } = useForm();
 
   const onProfileSubmit = async (data) => {
-    setIsUpdating(true)
+    setIsUpdating(true);
     try {
-      const result = await updateUser(data)
+      const result = await updateUser(data);
       if (result.success) {
-        toast.success('Profile updated successfully')
+        toast.success("Profile updated successfully");
       }
     } catch (error) {
-      toast.error('Failed to update profile')
+      toast.error("Failed to update profile");
     } finally {
-      setIsUpdating(false)
+      setIsUpdating(false);
     }
-  }
+  };
 
   const onPasswordSubmit = async (data) => {
     if (data.newPassword !== data.confirmPassword) {
-      toast.error('Passwords do not match')
-      return
+      toast.error("Passwords do not match");
+      return;
     }
 
-    setIsUpdating(true)
+    setIsUpdating(true);
     try {
-      const result = await updatePassword(data.currentPassword, data.newPassword)
+      const result = await updatePassword(
+        data.currentPassword,
+        data.newPassword,
+      );
       if (result.success) {
-        resetPasswordForm()
-        setShowPasswordForm(false)
+        resetPasswordForm();
+        setShowPasswordForm(false);
       }
     } catch (error) {
-      toast.error('Failed to update password')
+      toast.error("Failed to update password");
     } finally {
-      setIsUpdating(false)
+      setIsUpdating(false);
     }
-  }
+  };
 
   return (
     <motion.div
@@ -166,8 +173,11 @@ const AccountSettings = () => {
         <h2 className="text-xl font-bold text-[var(--theme-text)] mb-6">
           Profile Information
         </h2>
-        
-        <form onSubmit={handleProfileSubmit(onProfileSubmit)} className="space-y-6">
+
+        <form
+          onSubmit={handleProfileSubmit(onProfileSubmit)}
+          className="space-y-6"
+        >
           {/* Username */}
           <div>
             <label className="block text-sm font-medium text-[var(--theme-text)] mb-2">
@@ -177,16 +187,21 @@ const AccountSettings = () => {
               <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--theme-text-secondary)]" />
               <input
                 type="text"
-                {...registerProfile('username', {
-                  required: 'Username is required',
-                  minLength: { value: 3, message: 'Username must be at least 3 characters' }
+                {...registerProfile("username", {
+                  required: "Username is required",
+                  minLength: {
+                    value: 3,
+                    message: "Username must be at least 3 characters",
+                  },
                 })}
                 className="w-full pl-10 pr-4 py-3 bg-[var(--glass-white)] border border-white/10 rounded-lg text-[var(--theme-text)] placeholder-[var(--theme-text-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)] transition-all"
                 placeholder="Enter your username"
               />
             </div>
             {profileErrors.username && (
-              <p className="mt-1 text-sm text-red-400">{profileErrors.username.message}</p>
+              <p className="mt-1 text-sm text-red-400">
+                {profileErrors.username.message}
+              </p>
             )}
           </div>
 
@@ -199,16 +214,21 @@ const AccountSettings = () => {
               <EnvelopeIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--theme-text-secondary)]" />
               <input
                 type="email"
-                {...registerProfile('email', {
-                  required: 'Email is required',
-                  pattern: { value: /^\S+@\S+$/i, message: 'Invalid email address' }
+                {...registerProfile("email", {
+                  required: "Email is required",
+                  pattern: {
+                    value: /^\S+@\S+$/i,
+                    message: "Invalid email address",
+                  },
                 })}
                 className="w-full pl-10 pr-4 py-3 bg-[var(--glass-white)] border border-white/10 rounded-lg text-[var(--theme-text)] placeholder-[var(--theme-text-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)] transition-all"
                 placeholder="Enter your email"
               />
             </div>
             {profileErrors.email && (
-              <p className="mt-1 text-sm text-red-400">{profileErrors.email.message}</p>
+              <p className="mt-1 text-sm text-red-400">
+                {profileErrors.email.message}
+              </p>
             )}
           </div>
 
@@ -218,15 +238,20 @@ const AccountSettings = () => {
               Bio
             </label>
             <textarea
-              {...registerProfile('bio', {
-                maxLength: { value: 200, message: 'Bio must be less than 200 characters' }
+              {...registerProfile("bio", {
+                maxLength: {
+                  value: 200,
+                  message: "Bio must be less than 200 characters",
+                },
               })}
               rows={4}
               className="w-full px-4 py-3 bg-[var(--glass-white)] border border-white/10 rounded-lg text-[var(--theme-text)] placeholder-[var(--theme-text-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)] transition-all resize-none"
               placeholder="Tell us about yourself"
             />
             {profileErrors.bio && (
-              <p className="mt-1 text-sm text-red-400">{profileErrors.bio.message}</p>
+              <p className="mt-1 text-sm text-red-400">
+                {profileErrors.bio.message}
+              </p>
             )}
           </div>
 
@@ -239,7 +264,7 @@ const AccountSettings = () => {
               <MapPinIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--theme-text-secondary)]" />
               <input
                 type="text"
-                {...registerProfile('location')}
+                {...registerProfile("location")}
                 className="w-full pl-10 pr-4 py-3 bg-[var(--glass-white)] border border-white/10 rounded-lg text-[var(--theme-text)] placeholder-[var(--theme-text-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)] transition-all"
                 placeholder="Your location"
               />
@@ -255,15 +280,20 @@ const AccountSettings = () => {
               <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--theme-text-secondary)]" />
               <input
                 type="url"
-                {...registerProfile('website', {
-                  pattern: { value: /^https?:\/\/.+/i, message: 'Invalid URL format' }
+                {...registerProfile("website", {
+                  pattern: {
+                    value: /^https?:\/\/.+/i,
+                    message: "Invalid URL format",
+                  },
                 })}
                 className="w-full pl-10 pr-4 py-3 bg-[var(--glass-white)] border border-white/10 rounded-lg text-[var(--theme-text)] placeholder-[var(--theme-text-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)] transition-all"
                 placeholder="https://yourwebsite.com"
               />
             </div>
             {profileErrors.website && (
-              <p className="mt-1 text-sm text-red-400">{profileErrors.website.message}</p>
+              <p className="mt-1 text-sm text-red-400">
+                {profileErrors.website.message}
+              </p>
             )}
           </div>
 
@@ -291,7 +321,10 @@ const AccountSettings = () => {
             Change Password
           </Button>
         ) : (
-          <form onSubmit={handlePasswordSubmit(onPasswordSubmit)} className="space-y-6">
+          <form
+            onSubmit={handlePasswordSubmit(onPasswordSubmit)}
+            className="space-y-6"
+          >
             {/* Current Password */}
             <div>
               <label className="block text-sm font-medium text-[var(--theme-text)] mb-2">
@@ -299,14 +332,16 @@ const AccountSettings = () => {
               </label>
               <input
                 type="password"
-                {...registerPassword('currentPassword', {
-                  required: 'Current password is required'
+                {...registerPassword("currentPassword", {
+                  required: "Current password is required",
                 })}
                 className="w-full px-4 py-3 bg-[var(--glass-white)] border border-white/10 rounded-lg text-[var(--theme-text)] placeholder-[var(--theme-text-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)] transition-all"
                 placeholder="Enter current password"
               />
               {passwordErrors.currentPassword && (
-                <p className="mt-1 text-sm text-red-400">{passwordErrors.currentPassword.message}</p>
+                <p className="mt-1 text-sm text-red-400">
+                  {passwordErrors.currentPassword.message}
+                </p>
               )}
             </div>
 
@@ -317,15 +352,20 @@ const AccountSettings = () => {
               </label>
               <input
                 type="password"
-                {...registerPassword('newPassword', {
-                  required: 'New password is required',
-                  minLength: { value: 6, message: 'Password must be at least 6 characters' }
+                {...registerPassword("newPassword", {
+                  required: "New password is required",
+                  minLength: {
+                    value: 6,
+                    message: "Password must be at least 6 characters",
+                  },
                 })}
                 className="w-full px-4 py-3 bg-[var(--glass-white)] border border-white/10 rounded-lg text-[var(--theme-text)] placeholder-[var(--theme-text-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)] transition-all"
                 placeholder="Enter new password"
               />
               {passwordErrors.newPassword && (
-                <p className="mt-1 text-sm text-red-400">{passwordErrors.newPassword.message}</p>
+                <p className="mt-1 text-sm text-red-400">
+                  {passwordErrors.newPassword.message}
+                </p>
               )}
             </div>
 
@@ -336,14 +376,16 @@ const AccountSettings = () => {
               </label>
               <input
                 type="password"
-                {...registerPassword('confirmPassword', {
-                  required: 'Please confirm your password'
+                {...registerPassword("confirmPassword", {
+                  required: "Please confirm your password",
                 })}
                 className="w-full px-4 py-3 bg-[var(--glass-white)] border border-white/10 rounded-lg text-[var(--theme-text)] placeholder-[var(--theme-text-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)] transition-all"
                 placeholder="Confirm new password"
               />
               {passwordErrors.confirmPassword && (
-                <p className="mt-1 text-sm text-red-400">{passwordErrors.confirmPassword.message}</p>
+                <p className="mt-1 text-sm text-red-400">
+                  {passwordErrors.confirmPassword.message}
+                </p>
               )}
             </div>
 
@@ -353,8 +395,8 @@ const AccountSettings = () => {
                 type="button"
                 variant="ghost"
                 onClick={() => {
-                  setShowPasswordForm(false)
-                  resetPasswordForm()
+                  setShowPasswordForm(false);
+                  resetPasswordForm();
                 }}
               >
                 Cancel
@@ -366,46 +408,82 @@ const AccountSettings = () => {
           </form>
         )}
       </div>
+
+      {/* Danger Zone - Delete Account */}
+      <div className="pt-8 border-t border-white/10">
+        <h2 className="text-xl font-bold text-red-400 mb-6">⚠️ Danger Zone</h2>
+
+        <div className="glass-card p-6 border-2 border-red-500/30 rounded-lg">
+          <h3 className="text-lg font-semibold text-white mb-3">
+            Delete Account
+          </h3>
+          <p className="text-gray-300 mb-4">
+            Once you delete your account, there is no going back. This will
+            permanently delete:
+          </p>
+          <ul className="list-disc list-inside text-gray-400 mb-6 space-y-1">
+            <li>Your profile and account data</li>
+            <li>All vlogs you&apos;ve created</li>
+            <li>All comments and likes</li>
+            <li>All uploaded images</li>
+          </ul>
+          <Button variant="danger" onClick={() => setShowDeleteModal(true)}>
+            Delete Account
+          </Button>
+        </div>
+      </div>
+
+      {/* Delete Account Modal */}
+      <DeleteAccountModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onSuccess={() => {
+          // Auto logout and redirect to home
+          logout();
+          navigate("/");
+          toast.success("Account deleted successfully");
+        }}
+      />
     </motion.div>
-  )
-}
+  );
+};
 
 // Privacy Settings Section
 const PrivacySettings = () => {
   const [privacySettings, setPrivacySettings] = useState({
-    profileVisibility: 'public',
+    profileVisibility: "public",
     showActivity: true,
     allowMessages: true,
-    blockedUsers: []
-  })
-  const [isSaving, setIsSaving] = useState(false)
+    blockedUsers: [],
+  });
+  const [isSaving, setIsSaving] = useState(false);
 
   const handleToggle = (setting) => {
-    setPrivacySettings(prev => ({
+    setPrivacySettings((prev) => ({
       ...prev,
-      [setting]: !prev[setting]
-    }))
-  }
+      [setting]: !prev[setting],
+    }));
+  };
 
   const handleVisibilityChange = (value) => {
-    setPrivacySettings(prev => ({
+    setPrivacySettings((prev) => ({
       ...prev,
-      profileVisibility: value
-    }))
-  }
+      profileVisibility: value,
+    }));
+  };
 
   const handleSave = async () => {
-    setIsSaving(true)
+    setIsSaving(true);
     try {
       // API call would go here
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      toast.success('Privacy settings updated')
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      toast.success("Privacy settings updated");
     } catch (error) {
-      toast.error('Failed to update privacy settings')
+      toast.error("Failed to update privacy settings");
     } finally {
-      setIsSaving(false)
+      setIsSaving(false);
     }
-  }
+  };
 
   return (
     <motion.div
@@ -426,17 +504,29 @@ const PrivacySettings = () => {
             </h3>
             <div className="space-y-3">
               {[
-                { value: 'public', label: 'Public', description: 'Anyone can view your profile' },
-                { value: 'private', label: 'Private', description: 'Only you can view your profile' },
-                { value: 'followers', label: 'Followers Only', description: 'Only your followers can view your profile' }
+                {
+                  value: "public",
+                  label: "Public",
+                  description: "Anyone can view your profile",
+                },
+                {
+                  value: "private",
+                  label: "Private",
+                  description: "Only you can view your profile",
+                },
+                {
+                  value: "followers",
+                  label: "Followers Only",
+                  description: "Only your followers can view your profile",
+                },
               ].map((option) => (
                 <label
                   key={option.value}
                   className={`
                     flex items-start p-4 rounded-lg border-2 cursor-pointer transition-all
                     ${privacySettings.profileVisibility === option.value
-                      ? 'border-[var(--theme-accent)] bg-[var(--theme-accent)]/10'
-                      : 'border-white/10 hover:border-white/20 bg-[var(--glass-white)]'
+                      ? "border-[var(--theme-accent)] bg-[var(--theme-accent)]/10"
+                      : "border-white/10 hover:border-white/20 bg-[var(--glass-white)]"
                     }
                   `}
                 >
@@ -449,8 +539,12 @@ const PrivacySettings = () => {
                     className="mt-1 w-4 h-4 text-[var(--theme-accent)] focus:ring-[var(--theme-accent)]"
                   />
                   <div className="ml-3 flex-1">
-                    <div className="font-medium text-[var(--theme-text)]">{option.label}</div>
-                    <div className="text-sm text-[var(--theme-text-secondary)]">{option.description}</div>
+                    <div className="font-medium text-[var(--theme-text)]">
+                      {option.label}
+                    </div>
+                    <div className="text-sm text-[var(--theme-text-secondary)]">
+                      {option.description}
+                    </div>
                   </div>
                 </label>
               ))}
@@ -465,20 +559,20 @@ const PrivacySettings = () => {
                   Show Activity Status
                 </h3>
                 <p className="text-sm text-[var(--theme-text-secondary)]">
-                  Let others see when you're online
+                  Let others see when you&apos;re online
                 </p>
               </div>
               <button
-                onClick={() => handleToggle('showActivity')}
+                onClick={() => handleToggle("showActivity")}
                 className={`
                   relative inline-flex h-6 w-11 items-center rounded-full transition-colors
-                  ${privacySettings.showActivity ? 'bg-[var(--theme-accent)]' : 'bg-gray-600'}
+                  ${privacySettings.showActivity ? "bg-[var(--theme-accent)]" : "bg-gray-600"}
                 `}
               >
                 <span
                   className={`
                     inline-block h-4 w-4 transform rounded-full bg-white transition-transform
-                    ${privacySettings.showActivity ? 'translate-x-6' : 'translate-x-1'}
+                    ${privacySettings.showActivity ? "translate-x-6" : "translate-x-1"}
                   `}
                 />
               </button>
@@ -497,16 +591,16 @@ const PrivacySettings = () => {
                 </p>
               </div>
               <button
-                onClick={() => handleToggle('allowMessages')}
+                onClick={() => handleToggle("allowMessages")}
                 className={`
                   relative inline-flex h-6 w-11 items-center rounded-full transition-colors
-                  ${privacySettings.allowMessages ? 'bg-[var(--theme-accent)]' : 'bg-gray-600'}
+                  ${privacySettings.allowMessages ? "bg-[var(--theme-accent)]" : "bg-gray-600"}
                 `}
               >
                 <span
                   className={`
                     inline-block h-4 w-4 transform rounded-full bg-white transition-transform
-                    ${privacySettings.allowMessages ? 'translate-x-6' : 'translate-x-1'}
+                    ${privacySettings.allowMessages ? "translate-x-6" : "translate-x-1"}
                   `}
                 />
               </button>
@@ -522,13 +616,16 @@ const PrivacySettings = () => {
               <div className="text-center py-8 glass-card rounded-lg">
                 <ShieldCheckIcon className="w-12 h-12 mx-auto mb-3 text-[var(--theme-text-secondary)]" />
                 <p className="text-[var(--theme-text-secondary)]">
-                  You haven't blocked any users
+                  You haven&apos;t blocked any users
                 </p>
               </div>
             ) : (
               <div className="space-y-2">
                 {privacySettings.blockedUsers.map((user) => (
-                  <div key={user} className="flex items-center justify-between p-3 glass-card rounded-lg">
+                  <div
+                    key={user}
+                    className="flex items-center justify-between p-3 glass-card rounded-lg"
+                  >
                     <span className="text-[var(--theme-text)]">{user}</span>
                     <Button variant="ghost" size="sm">
                       Unblock
@@ -548,8 +645,8 @@ const PrivacySettings = () => {
         </div>
       </div>
     </motion.div>
-  )
-}
+  );
+};
 
 // Notifications Settings Section
 const NotificationsSettings = () => {
@@ -558,66 +655,66 @@ const NotificationsSettings = () => {
       newFollower: true,
       newComment: true,
       newLike: true,
-      weeklyDigest: false
+      weeklyDigest: false,
     },
     pushNotifications: {
       enabled: true,
       newFollower: true,
       newComment: true,
-      newLike: false
-    }
-  })
-  const [isSaving, setIsSaving] = useState(false)
+      newLike: false,
+    },
+  });
+  const [isSaving, setIsSaving] = useState(false);
 
   const handleEmailToggle = (setting) => {
-    setNotificationSettings(prev => ({
+    setNotificationSettings((prev) => ({
       ...prev,
       emailNotifications: {
         ...prev.emailNotifications,
-        [setting]: !prev.emailNotifications[setting]
-      }
-    }))
-  }
+        [setting]: !prev.emailNotifications[setting],
+      },
+    }));
+  };
 
   const handlePushToggle = (setting) => {
-    setNotificationSettings(prev => ({
+    setNotificationSettings((prev) => ({
       ...prev,
       pushNotifications: {
         ...prev.pushNotifications,
-        [setting]: !prev.pushNotifications[setting]
-      }
-    }))
-  }
+        [setting]: !prev.pushNotifications[setting],
+      },
+    }));
+  };
 
   const handleSave = async () => {
-    setIsSaving(true)
+    setIsSaving(true);
     try {
       // API call would go here
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      toast.success('Notification settings updated')
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      toast.success("Notification settings updated");
     } catch (error) {
-      toast.error('Failed to update notification settings')
+      toast.error("Failed to update notification settings");
     } finally {
-      setIsSaving(false)
+      setIsSaving(false);
     }
-  }
+  };
 
   const ToggleSwitch = ({ checked, onChange }) => (
     <button
       onClick={onChange}
       className={`
         relative inline-flex h-6 w-11 items-center rounded-full transition-colors
-        ${checked ? 'bg-[var(--theme-accent)]' : 'bg-gray-600'}
+        ${checked ? "bg-[var(--theme-accent)]" : "bg-gray-600"}
       `}
     >
       <span
         className={`
           inline-block h-4 w-4 transform rounded-full bg-white transition-transform
-          ${checked ? 'translate-x-6' : 'translate-x-1'}
+          ${checked ? "translate-x-6" : "translate-x-1"}
         `}
       />
     </button>
-  )
+  );
 
   return (
     <motion.div
@@ -648,7 +745,7 @@ const NotificationsSettings = () => {
                 </div>
                 <ToggleSwitch
                   checked={notificationSettings.emailNotifications.newFollower}
-                  onChange={() => handleEmailToggle('newFollower')}
+                  onChange={() => handleEmailToggle("newFollower")}
                 />
               </div>
 
@@ -663,7 +760,7 @@ const NotificationsSettings = () => {
                 </div>
                 <ToggleSwitch
                   checked={notificationSettings.emailNotifications.newComment}
-                  onChange={() => handleEmailToggle('newComment')}
+                  onChange={() => handleEmailToggle("newComment")}
                 />
               </div>
 
@@ -678,7 +775,7 @@ const NotificationsSettings = () => {
                 </div>
                 <ToggleSwitch
                   checked={notificationSettings.emailNotifications.newLike}
-                  onChange={() => handleEmailToggle('newLike')}
+                  onChange={() => handleEmailToggle("newLike")}
                 />
               </div>
 
@@ -693,7 +790,7 @@ const NotificationsSettings = () => {
                 </div>
                 <ToggleSwitch
                   checked={notificationSettings.emailNotifications.weeklyDigest}
-                  onChange={() => handleEmailToggle('weeklyDigest')}
+                  onChange={() => handleEmailToggle("weeklyDigest")}
                 />
               </div>
             </div>
@@ -716,7 +813,7 @@ const NotificationsSettings = () => {
                 </div>
                 <ToggleSwitch
                   checked={notificationSettings.pushNotifications.enabled}
-                  onChange={() => handlePushToggle('enabled')}
+                  onChange={() => handlePushToggle("enabled")}
                 />
               </div>
 
@@ -732,8 +829,10 @@ const NotificationsSettings = () => {
                       </div>
                     </div>
                     <ToggleSwitch
-                      checked={notificationSettings.pushNotifications.newFollower}
-                      onChange={() => handlePushToggle('newFollower')}
+                      checked={
+                        notificationSettings.pushNotifications.newFollower
+                      }
+                      onChange={() => handlePushToggle("newFollower")}
                     />
                   </div>
 
@@ -747,8 +846,10 @@ const NotificationsSettings = () => {
                       </div>
                     </div>
                     <ToggleSwitch
-                      checked={notificationSettings.pushNotifications.newComment}
-                      onChange={() => handlePushToggle('newComment')}
+                      checked={
+                        notificationSettings.pushNotifications.newComment
+                      }
+                      onChange={() => handlePushToggle("newComment")}
                     />
                   </div>
 
@@ -763,7 +864,7 @@ const NotificationsSettings = () => {
                     </div>
                     <ToggleSwitch
                       checked={notificationSettings.pushNotifications.newLike}
-                      onChange={() => handlePushToggle('newLike')}
+                      onChange={() => handlePushToggle("newLike")}
                     />
                   </div>
                 </>
@@ -780,62 +881,62 @@ const NotificationsSettings = () => {
         </div>
       </div>
     </motion.div>
-  )
-}
+  );
+};
 
 // Appearance Settings Section
 const AppearanceSettings = () => {
-  const { theme, themes, changeTheme, currentTheme } = useTheme()
+  const { theme, themes, changeTheme, currentTheme } = useTheme();
   const [appearanceSettings, setAppearanceSettings] = useState({
-    displayDensity: 'comfortable',
+    displayDensity: "comfortable",
     autoplayVideos: true,
-    reducedMotion: false
-  })
-  const [isSaving, setIsSaving] = useState(false)
+    reducedMotion: false,
+  });
+  const [isSaving, setIsSaving] = useState(false);
 
   const handleToggle = (setting) => {
-    setAppearanceSettings(prev => ({
+    setAppearanceSettings((prev) => ({
       ...prev,
-      [setting]: !prev[setting]
-    }))
-  }
+      [setting]: !prev[setting],
+    }));
+  };
 
   const handleDensityChange = (value) => {
-    setAppearanceSettings(prev => ({
+    setAppearanceSettings((prev) => ({
       ...prev,
-      displayDensity: value
-    }))
-  }
+      displayDensity: value,
+    }));
+  };
 
   const handleSave = async () => {
-    setIsSaving(true)
+    setIsSaving(true);
     try {
       // API call would go here
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      toast.success('Appearance settings updated')
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      toast.success("Appearance settings updated");
     } catch (error) {
-      toast.error('Failed to update appearance settings')
+      toast.error("Failed to update appearance settings");
     } finally {
-      setIsSaving(false)
+      setIsSaving(false);
     }
-  }
+  };
 
   const ToggleSwitch = ({ checked, onChange }) => (
     <button
       onClick={onChange}
       className={`
         relative inline-flex h-6 w-11 items-center rounded-full transition-colors
-        ${checked ? 'bg-[var(--theme-accent)]' : 'bg-gray-600'}
+        ${checked ? "bg-[var(--theme-accent)]" : "bg-gray-600"}
       `}
     >
       <span
         className={`
           inline-block h-4 w-4 transform rounded-full bg-white transition-transform
-          ${checked ? 'translate-x-6' : 'translate-x-1'}
+          ${checked ? "translate-x-6" : "translate-x-1"}
         `}
       />
     </button>
-  )
+  );
 
   return (
     <motion.div
@@ -864,15 +965,17 @@ const AppearanceSettings = () => {
                   className={`
                     p-4 rounded-lg border-2 transition-all duration-200
                     ${theme === key
-                      ? 'border-[var(--theme-accent)] bg-[var(--theme-accent)]/20'
-                      : 'border-white/10 hover:border-white/20 bg-[var(--glass-white)]'
+                      ? "border-[var(--theme-accent)] bg-[var(--theme-accent)]/20"
+                      : "border-white/10 hover:border-white/20 bg-[var(--glass-white)]"
                     }
                   `}
                 >
                   <div className="flex flex-col items-center space-y-3">
                     {/* Theme Preview */}
-                    <div className={`w-16 h-16 rounded-lg bg-gradient-to-br ${themeOption.gradient} shadow-lg`} />
-                    
+                    <div
+                      className={`w-16 h-16 rounded-lg bg-gradient-to-br ${themeOption.gradient} shadow-lg`}
+                    />
+
                     <div className="text-center">
                       <h4 className="font-medium text-[var(--theme-text)] mb-1">
                         {themeOption.name}
@@ -881,7 +984,7 @@ const AppearanceSettings = () => {
                         {themeOption.description}
                       </p>
                     </div>
-                    
+
                     {/* Active Indicator */}
                     {theme === key && (
                       <motion.div
@@ -889,8 +992,16 @@ const AppearanceSettings = () => {
                         animate={{ scale: 1 }}
                         className="w-6 h-6 bg-[var(--theme-accent)] rounded-full flex items-center justify-center"
                       >
-                        <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        <svg
+                          className="w-4 h-4 text-white"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                            clipRule="evenodd"
+                          />
                         </svg>
                       </motion.div>
                     )}
@@ -899,7 +1010,9 @@ const AppearanceSettings = () => {
               ))}
             </div>
             <div className="mt-3 flex items-center space-x-2 text-sm text-[var(--theme-text-secondary)]">
-              <div className={`w-4 h-4 rounded bg-gradient-to-br ${currentTheme.gradient}`} />
+              <div
+                className={`w-4 h-4 rounded bg-gradient-to-br ${currentTheme.gradient}`}
+              />
               <span>Current theme: {currentTheme.name}</span>
             </div>
           </div>
@@ -911,16 +1024,24 @@ const AppearanceSettings = () => {
             </h3>
             <div className="space-y-3">
               {[
-                { value: 'comfortable', label: 'Comfortable', description: 'More spacing between elements' },
-                { value: 'compact', label: 'Compact', description: 'Less spacing, more content visible' }
+                {
+                  value: "comfortable",
+                  label: "Comfortable",
+                  description: "More spacing between elements",
+                },
+                {
+                  value: "compact",
+                  label: "Compact",
+                  description: "Less spacing, more content visible",
+                },
               ].map((option) => (
                 <label
                   key={option.value}
                   className={`
                     flex items-start p-4 rounded-lg border-2 cursor-pointer transition-all
                     ${appearanceSettings.displayDensity === option.value
-                      ? 'border-[var(--theme-accent)] bg-[var(--theme-accent)]/10'
-                      : 'border-white/10 hover:border-white/20 bg-[var(--glass-white)]'
+                      ? "border-[var(--theme-accent)] bg-[var(--theme-accent)]/10"
+                      : "border-white/10 hover:border-white/20 bg-[var(--glass-white)]"
                     }
                   `}
                 >
@@ -933,8 +1054,12 @@ const AppearanceSettings = () => {
                     className="mt-1 w-4 h-4 text-[var(--theme-accent)] focus:ring-[var(--theme-accent)]"
                   />
                   <div className="ml-3 flex-1">
-                    <div className="font-medium text-[var(--theme-text)]">{option.label}</div>
-                    <div className="text-sm text-[var(--theme-text-secondary)]">{option.description}</div>
+                    <div className="font-medium text-[var(--theme-text)]">
+                      {option.label}
+                    </div>
+                    <div className="text-sm text-[var(--theme-text-secondary)]">
+                      {option.description}
+                    </div>
                   </div>
                 </label>
               ))}
@@ -954,7 +1079,7 @@ const AppearanceSettings = () => {
               </div>
               <ToggleSwitch
                 checked={appearanceSettings.autoplayVideos}
-                onChange={() => handleToggle('autoplayVideos')}
+                onChange={() => handleToggle("autoplayVideos")}
               />
             </div>
           </div>
@@ -972,7 +1097,7 @@ const AppearanceSettings = () => {
               </div>
               <ToggleSwitch
                 checked={appearanceSettings.reducedMotion}
-                onChange={() => handleToggle('reducedMotion')}
+                onChange={() => handleToggle("reducedMotion")}
               />
             </div>
           </div>
@@ -986,7 +1111,7 @@ const AppearanceSettings = () => {
         </div>
       </div>
     </motion.div>
-  )
-}
+  );
+};
 
-export default Settings
+export default Settings;
