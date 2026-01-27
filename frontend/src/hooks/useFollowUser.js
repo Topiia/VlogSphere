@@ -1,9 +1,9 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { userAPI } from '../services/api';
-import { useToast } from '../contexts/ToastContext';
-import { useAuth } from '../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
-import { updateFollowCache } from '../utils/cacheHelpers';
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { userAPI } from "../services/api";
+import { useToast } from "../contexts/ToastContext";
+import { useAuth } from "../contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
+import { updateFollowCache } from "../utils/cacheHelpers";
 
 export const useFollowUser = () => {
   const queryClient = useQueryClient();
@@ -17,57 +17,57 @@ export const useFollowUser = () => {
     onMutate: async (userId) => {
       // Check authentication
       if (!isAuthenticated) {
-        showToast('Please log in to follow users', 'info');
-        navigate('/login', { state: { from: window.location.pathname } });
-        throw new Error('Not authenticated');
+        showToast("Please log in to follow users", "info");
+        navigate("/login", { state: { from: window.location.pathname } });
+        throw new Error("Not authenticated");
       }
 
       // Cancel outgoing queries to prevent race conditions
-      await queryClient.cancelQueries({ queryKey: ['user', userId] });
-      await queryClient.cancelQueries({ queryKey: ['currentUser'] });
-      await queryClient.cancelQueries({ queryKey: ['vlogs'] });
-      await queryClient.cancelQueries({ queryKey: ['vlog'] });
+      await queryClient.cancelQueries({ queryKey: ["user", userId] });
+      await queryClient.cancelQueries({ queryKey: ["currentUser"] });
+      await queryClient.cancelQueries({ queryKey: ["vlogs"] });
+      await queryClient.cancelQueries({ queryKey: ["vlog"] });
 
       // Snapshot previous state for rollback
-      const previousUserData = queryClient.getQueryData(['user', userId]);
-      const previousCurrentUser = queryClient.getQueryData(['currentUser']);
-      const previousVlogs = queryClient.getQueriesData({ queryKey: ['vlogs'] });
-      const previousVlog = queryClient.getQueriesData({ queryKey: ['vlog'] });
+      const previousUserData = queryClient.getQueryData(["user", userId]);
+      const previousCurrentUser = queryClient.getQueryData(["currentUser"]);
+      const previousVlogs = queryClient.getQueriesData({ queryKey: ["vlogs"] });
+      const previousVlog = queryClient.getQueriesData({ queryKey: ["vlog"] });
 
       // Optimistically update using unified function
       updateFollowCache(queryClient, userId, true, user._id);
 
-      return { 
-        previousUserData, 
+      return {
+        previousUserData,
         previousCurrentUser,
         previousVlogs,
-        previousVlog
+        previousVlog,
       };
     },
     onSuccess: (response) => {
-      showToast('User followed!', 'success');
-      
+      showToast("User followed!", "success");
+
       // Use server response to ensure accuracy
       const { following } = response.data.data;
       if (following) {
-        queryClient.setQueryData(['currentUser'], (old) => ({
+        queryClient.setQueryData(["currentUser"], (old) => ({
           ...old,
-          following
+          following,
         }));
       }
-      
+
       // Invalidate caches to update UI reactively
-      queryClient.invalidateQueries({ queryKey: ['userProfile'] });
-      queryClient.invalidateQueries({ queryKey: ['currentUser'] });
-      queryClient.invalidateQueries({ queryKey: ['vlog'] });
+      queryClient.invalidateQueries({ queryKey: ["userProfile"] });
+      queryClient.invalidateQueries({ queryKey: ["currentUser"] });
+      queryClient.invalidateQueries({ queryKey: ["vlog"] });
     },
     onError: (error, userId, context) => {
       // Rollback optimistic updates
       if (context?.previousUserData) {
-        queryClient.setQueryData(['user', userId], context.previousUserData);
+        queryClient.setQueryData(["user", userId], context.previousUserData);
       }
       if (context?.previousCurrentUser) {
-        queryClient.setQueryData(['currentUser'], context.previousCurrentUser);
+        queryClient.setQueryData(["currentUser"], context.previousCurrentUser);
       }
       if (context?.previousVlogs) {
         context.previousVlogs.forEach(([key, data]) => {
@@ -79,13 +79,16 @@ export const useFollowUser = () => {
           queryClient.setQueryData(key, data);
         });
       }
-      
-      showToast(error.message || 'Failed to follow user', 'error');
+
+      showToast(error.message || "Failed to follow user", "error");
     },
     onSettled: (data, error, userId) => {
       // Only invalidate specific queries, not everything
-      queryClient.invalidateQueries({ queryKey: ['user', userId], exact: true });
-      queryClient.invalidateQueries({ queryKey: ['currentUser'], exact: true });
+      queryClient.invalidateQueries({
+        queryKey: ["user", userId],
+        exact: true,
+      });
+      queryClient.invalidateQueries({ queryKey: ["currentUser"], exact: true });
     },
   });
 
@@ -95,57 +98,57 @@ export const useFollowUser = () => {
     onMutate: async (userId) => {
       // Check authentication
       if (!isAuthenticated) {
-        showToast('Please log in to unfollow users', 'info');
-        navigate('/login', { state: { from: window.location.pathname } });
-        throw new Error('Not authenticated');
+        showToast("Please log in to unfollow users", "info");
+        navigate("/login", { state: { from: window.location.pathname } });
+        throw new Error("Not authenticated");
       }
 
       // Cancel outgoing queries
-      await queryClient.cancelQueries({ queryKey: ['user', userId] });
-      await queryClient.cancelQueries({ queryKey: ['currentUser'] });
-      await queryClient.cancelQueries({ queryKey: ['vlogs'] });
-      await queryClient.cancelQueries({ queryKey: ['vlog'] });
+      await queryClient.cancelQueries({ queryKey: ["user", userId] });
+      await queryClient.cancelQueries({ queryKey: ["currentUser"] });
+      await queryClient.cancelQueries({ queryKey: ["vlogs"] });
+      await queryClient.cancelQueries({ queryKey: ["vlog"] });
 
       // Snapshot previous state
-      const previousUserData = queryClient.getQueryData(['user', userId]);
-      const previousCurrentUser = queryClient.getQueryData(['currentUser']);
-      const previousVlogs = queryClient.getQueriesData({ queryKey: ['vlogs'] });
-      const previousVlog = queryClient.getQueriesData({ queryKey: ['vlog'] });
+      const previousUserData = queryClient.getQueryData(["user", userId]);
+      const previousCurrentUser = queryClient.getQueryData(["currentUser"]);
+      const previousVlogs = queryClient.getQueriesData({ queryKey: ["vlogs"] });
+      const previousVlog = queryClient.getQueriesData({ queryKey: ["vlog"] });
 
       // Optimistically update using unified function
       updateFollowCache(queryClient, userId, false, user._id);
 
-      return { 
-        previousUserData, 
+      return {
+        previousUserData,
         previousCurrentUser,
         previousVlogs,
-        previousVlog
+        previousVlog,
       };
     },
     onSuccess: (response) => {
-      showToast('User unfollowed', 'success');
-      
+      showToast("User unfollowed", "success");
+
       // Use server response to ensure accuracy
       const { following } = response.data.data;
       if (following) {
-        queryClient.setQueryData(['currentUser'], (old) => ({
+        queryClient.setQueryData(["currentUser"], (old) => ({
           ...old,
-          following
+          following,
         }));
       }
-      
+
       // Invalidate caches to update UI reactively
-      queryClient.invalidateQueries({ queryKey: ['userProfile'] });
-      queryClient.invalidateQueries({ queryKey: ['currentUser'] });
-      queryClient.invalidateQueries({ queryKey: ['vlog'] });
+      queryClient.invalidateQueries({ queryKey: ["userProfile"] });
+      queryClient.invalidateQueries({ queryKey: ["currentUser"] });
+      queryClient.invalidateQueries({ queryKey: ["vlog"] });
     },
     onError: (error, userId, context) => {
       // Rollback optimistic updates
       if (context?.previousUserData) {
-        queryClient.setQueryData(['user', userId], context.previousUserData);
+        queryClient.setQueryData(["user", userId], context.previousUserData);
       }
       if (context?.previousCurrentUser) {
-        queryClient.setQueryData(['currentUser'], context.previousCurrentUser);
+        queryClient.setQueryData(["currentUser"], context.previousCurrentUser);
       }
       if (context?.previousVlogs) {
         context.previousVlogs.forEach(([key, data]) => {
@@ -157,13 +160,16 @@ export const useFollowUser = () => {
           queryClient.setQueryData(key, data);
         });
       }
-      
-      showToast(error.message || 'Failed to unfollow user', 'error');
+
+      showToast(error.message || "Failed to unfollow user", "error");
     },
     onSettled: (data, error, userId) => {
       // Only invalidate specific queries
-      queryClient.invalidateQueries({ queryKey: ['user', userId], exact: true });
-      queryClient.invalidateQueries({ queryKey: ['currentUser'], exact: true });
+      queryClient.invalidateQueries({
+        queryKey: ["user", userId],
+        exact: true,
+      });
+      queryClient.invalidateQueries({ queryKey: ["currentUser"], exact: true });
     },
   });
 

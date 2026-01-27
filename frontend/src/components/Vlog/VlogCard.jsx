@@ -1,10 +1,14 @@
-import { motion } from 'framer-motion'
-import { Link } from 'react-router-dom'
-import { formatRelativeTime, formatNumber, truncateText } from '../../utils/helpers'
-import { useAuth } from '../../contexts/AuthContext'
-import { useVlogInteractions } from '../../hooks/useVlogInteractions'
-import Button from '../UI/Button'
-import FollowButton from '../UI/FollowButton'
+import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
+import {
+  formatRelativeTime,
+  formatNumber,
+  truncateText,
+} from "../../utils/helpers";
+import { useAuth } from "../../contexts/AuthContext";
+import { useVlogInteractions } from "../../hooks/useVlogInteractions";
+import Button from "../UI/Button";
+import FollowButton from "../UI/FollowButton";
 import {
   HeartIcon,
   EyeIcon,
@@ -12,13 +16,13 @@ import {
   ShareIcon,
   BookmarkIcon,
   PlayIcon,
-  HandThumbDownIcon
-} from '@heroicons/react/24/outline'
+  HandThumbDownIcon,
+} from "@heroicons/react/24/outline";
 import {
   HeartIcon as HeartIconSolid,
   BookmarkIcon as BookmarkIconSolid,
-  HandThumbDownIcon as HandThumbDownIconSolid
-} from '@heroicons/react/24/solid'
+  HandThumbDownIcon as HandThumbDownIconSolid,
+} from "@heroicons/react/24/solid";
 
 // Utility to get initials from a username or full name
 const getInitials = (name = "") => {
@@ -28,9 +32,8 @@ const getInitials = (name = "") => {
   return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
 };
 
-
 const VlogCard = ({ vlog, featured = false, compact = false }) => {
-  const { isAuthenticated, user } = useAuth()
+  const { isAuthenticated, user } = useAuth();
   const {
     toggleLike,
     toggleDislike,
@@ -39,47 +42,47 @@ const VlogCard = ({ vlog, featured = false, compact = false }) => {
     isLiking,
     isDisliking,
     isSharing,
-    isBookmarking
-  } = useVlogInteractions()
+    isBookmarking,
+  } = useVlogInteractions();
 
   // Compute interaction states
-  const isLiked = vlog.likes?.includes(user?._id) || false
-  const isDisliked = vlog.dislikes?.includes(user?._id) || false
-  const isBookmarked = vlog.isBookmarked || false
-  const likeCount = vlog.likes?.length || 0
-  const dislikeCount = vlog.dislikes?.length || 0
+  const isLiked = vlog.likes?.includes(user?._id) || false;
+  const isDisliked = vlog.dislikes?.includes(user?._id) || false;
+  const isBookmarked = vlog.isBookmarked || false;
+  const likeCount = vlog.likes?.length || 0;
+  const dislikeCount = vlog.dislikes?.length || 0;
 
   const handleLike = (e) => {
-    e.preventDefault()
-    e.stopPropagation()
+    e.preventDefault();
+    e.stopPropagation();
 
     // Hook will handle authentication check and show toast
-    toggleLike(vlog._id)
-  }
+    toggleLike(vlog._id);
+  };
 
   const handleDislike = (e) => {
-    e.preventDefault()
-    e.stopPropagation()
+    e.preventDefault();
+    e.stopPropagation();
 
     // Hook will handle authentication check and show toast
-    toggleDislike(vlog._id)
-  }
+    toggleDislike(vlog._id);
+  };
 
   const handleBookmark = (e) => {
-    e.preventDefault()
-    e.stopPropagation()
+    e.preventDefault();
+    e.stopPropagation();
 
     // Hook will handle authentication check and show toast
-    toggleBookmark(vlog._id, isBookmarked)
-  }
+    toggleBookmark(vlog._id, isBookmarked);
+  };
 
   const handleShare = (e) => {
-    e.preventDefault()
-    e.stopPropagation()
+    e.preventDefault();
+    e.stopPropagation();
 
     // Hook will handle authentication check and show toast
-    shareVlog(vlog._id, vlog)
-  }
+    shareVlog(vlog._id, vlog);
+  };
 
   const cardVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -89,27 +92,27 @@ const VlogCard = ({ vlog, featured = false, compact = false }) => {
       transition: {
         type: "spring",
         stiffness: 100,
-        damping: 15
-      }
+        damping: 15,
+      },
     },
     hover: {
       y: -5,
       transition: {
         type: "spring",
         stiffness: 400,
-        damping: 25
-      }
-    }
-  }
+        damping: 25,
+      },
+    },
+  };
 
   const imageVariants = {
     hover: {
       scale: 1.05,
       transition: {
-        duration: 0.3
-      }
-    }
-  }
+        duration: 0.3,
+      },
+    },
+  };
 
   if (compact) {
     return (
@@ -125,7 +128,10 @@ const VlogCard = ({ vlog, featured = false, compact = false }) => {
           <div className="relative aspect-video overflow-hidden">
             <motion.img
               variants={imageVariants}
-              src={vlog.images?.[0]?.url || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"%3E%3Crect width="400" height="225" fill="%23374151"/%3E%3Ctext x="50%25" y="50%25" fill="%23d1d5db" font-family="Arial, sans-serif" font-size="18" text-anchor="middle" dy=".3em"%3ENo Image%3C/text%3E%3C/svg%3E'}
+              src={
+                vlog.images?.[0]?.url ||
+                'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"%3E%3Crect width="400" height="225" fill="%23374151"/%3E%3Ctext x="50%25" y="50%25" fill="%23d1d5db" font-family="Arial, sans-serif" font-size="18" text-anchor="middle" dy=".3em"%3ENo Image%3C/text%3E%3C/svg%3E'
+              }
               alt={vlog.title}
               className="w-full h-full object-cover"
             />
@@ -177,7 +183,7 @@ const VlogCard = ({ vlog, featured = false, compact = false }) => {
           </div>
         </Link>
       </motion.div>
-    )
+    );
   }
 
   return (
@@ -186,15 +192,19 @@ const VlogCard = ({ vlog, featured = false, compact = false }) => {
       initial="hidden"
       animate="visible"
       whileHover="hover"
-      className={`glass-card rounded-2xl overflow-hidden group cursor-pointer ${featured ? 'lg:col-span-2' : ''
-        }`}
+      className={`glass-card rounded-2xl overflow-hidden group cursor-pointer ${
+        featured ? "lg:col-span-2" : ""
+      }`}
     >
       <Link to={`/vlog/${vlog._id}`}>
         {/* Image Section */}
         <div className="relative aspect-video overflow-hidden">
           <motion.img
             variants={imageVariants}
-            src={vlog.images?.[0]?.url || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"%3E%3Crect width="400" height="225" fill="%23374151"/%3E%3Ctext x="50%25" y="50%25" fill="%23d1d5db" font-family="Arial, sans-serif" font-size="18" text-anchor="middle" dy=".3em"%3ENo Image%3C/text%3E%3C/svg%3E'}
+            src={
+              vlog.images?.[0]?.url ||
+              'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"%3E%3Crect width="400" height="225" fill="%23374151"/%3E%3Ctext x="50%25" y="50%25" fill="%23d1d5db" font-family="Arial, sans-serif" font-size="18" text-anchor="middle" dy=".3em"%3ENo Image%3C/text%3E%3C/svg%3E'
+            }
             alt={vlog.title}
             className="w-full h-full object-cover"
           />
@@ -224,7 +234,11 @@ const VlogCard = ({ vlog, featured = false, compact = false }) => {
           {featured && (
             <div className="absolute top-4 right-4">
               <span className="px-3 py-1 bg-yellow-500 text-black text-xs font-medium rounded-full flex items-center space-x-1">
-                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                <svg
+                  className="w-3 h-3"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
                   <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                 </svg>
                 <span>Featured</span>
@@ -244,19 +258,30 @@ const VlogCard = ({ vlog, featured = false, compact = false }) => {
             <motion.button
               onClick={handleLike}
               disabled={isLiking}
-              title={!isAuthenticated ? 'Login to interact' : isLiked ? 'Unlike' : 'Like'}
+              title={
+                !isAuthenticated
+                  ? "Login to interact"
+                  : isLiked
+                    ? "Unlike"
+                    : "Like"
+              }
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               animate={isLiking ? { scale: [1, 1.1, 1] } : {}}
               transition={isLiking ? { repeat: Infinity, duration: 0.6 } : {}}
-              className={`p-2.5 rounded-full transition-all duration-300 ${isLiked
-                ? 'bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-lg shadow-red-500/30'
-                : 'bg-white/10 backdrop-blur-md text-white hover:bg-white/20 border border-white/20'
-                } ${isLiking ? 'opacity-50 cursor-not-allowed' : ''}`}
-              style={!isLiked ? {
-                backdropFilter: 'blur(12px) saturate(180%)',
-                WebkitBackdropFilter: 'blur(12px) saturate(180%)',
-              } : {}}
+              className={`p-2.5 rounded-full transition-all duration-300 ${
+                isLiked
+                  ? "bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-lg shadow-red-500/30"
+                  : "bg-white/10 backdrop-blur-md text-white hover:bg-white/20 border border-white/20"
+              } ${isLiking ? "opacity-50 cursor-not-allowed" : ""}`}
+              style={
+                !isLiked
+                  ? {
+                      backdropFilter: "blur(12px) saturate(180%)",
+                      WebkitBackdropFilter: "blur(12px) saturate(180%)",
+                    }
+                  : {}
+              }
             >
               {isLiked ? (
                 <HeartIconSolid className="w-4 h-4" />
@@ -268,19 +293,32 @@ const VlogCard = ({ vlog, featured = false, compact = false }) => {
             <motion.button
               onClick={handleDislike}
               disabled={isDisliking}
-              title={!isAuthenticated ? 'Login to interact' : isDisliked ? 'Remove dislike' : 'Dislike'}
+              title={
+                !isAuthenticated
+                  ? "Login to interact"
+                  : isDisliked
+                    ? "Remove dislike"
+                    : "Dislike"
+              }
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               animate={isDisliking ? { scale: [1, 1.1, 1] } : {}}
-              transition={isDisliking ? { repeat: Infinity, duration: 0.6 } : {}}
-              className={`p-2.5 rounded-full transition-all duration-300 ${isDisliked
-                ? 'bg-gradient-to-r from-[var(--theme-accent)] to-[var(--theme-secondary)] text-white shadow-lg'
-                : 'bg-white/10 backdrop-blur-md text-white hover:bg-white/20 border border-white/20'
-                } ${isDisliking ? 'opacity-50 cursor-not-allowed' : ''}`}
-              style={!isDisliked ? {
-                backdropFilter: 'blur(12px) saturate(180%)',
-                WebkitBackdropFilter: 'blur(12px) saturate(180%)',
-              } : {}}
+              transition={
+                isDisliking ? { repeat: Infinity, duration: 0.6 } : {}
+              }
+              className={`p-2.5 rounded-full transition-all duration-300 ${
+                isDisliked
+                  ? "bg-gradient-to-r from-[var(--theme-accent)] to-[var(--theme-secondary)] text-white shadow-lg"
+                  : "bg-white/10 backdrop-blur-md text-white hover:bg-white/20 border border-white/20"
+              } ${isDisliking ? "opacity-50 cursor-not-allowed" : ""}`}
+              style={
+                !isDisliked
+                  ? {
+                      backdropFilter: "blur(12px) saturate(180%)",
+                      WebkitBackdropFilter: "blur(12px) saturate(180%)",
+                    }
+                  : {}
+              }
             >
               {isDisliked ? (
                 <HandThumbDownIconSolid className="w-4 h-4" />
@@ -292,19 +330,32 @@ const VlogCard = ({ vlog, featured = false, compact = false }) => {
             <motion.button
               onClick={handleBookmark}
               disabled={isBookmarking}
-              title={!isAuthenticated ? 'Login to interact' : isBookmarked ? 'Remove bookmark' : 'Bookmark'}
+              title={
+                !isAuthenticated
+                  ? "Login to interact"
+                  : isBookmarked
+                    ? "Remove bookmark"
+                    : "Bookmark"
+              }
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               animate={isBookmarking ? { scale: [1, 1.1, 1] } : {}}
-              transition={isBookmarking ? { repeat: Infinity, duration: 0.6 } : {}}
-              className={`p-2.5 rounded-full transition-all duration-300 ${isBookmarked
-                ? 'bg-gradient-to-r from-[var(--theme-accent)] to-[var(--theme-secondary)] text-white shadow-lg'
-                : 'bg-white/10 backdrop-blur-md text-white hover:bg-white/20 border border-white/20'
-                } ${isBookmarking ? 'opacity-50 cursor-not-allowed' : ''}`}
-              style={!isBookmarked ? {
-                backdropFilter: 'blur(12px) saturate(180%)',
-                WebkitBackdropFilter: 'blur(12px) saturate(180%)',
-              } : {}}
+              transition={
+                isBookmarking ? { repeat: Infinity, duration: 0.6 } : {}
+              }
+              className={`p-2.5 rounded-full transition-all duration-300 ${
+                isBookmarked
+                  ? "bg-gradient-to-r from-[var(--theme-accent)] to-[var(--theme-secondary)] text-white shadow-lg"
+                  : "bg-white/10 backdrop-blur-md text-white hover:bg-white/20 border border-white/20"
+              } ${isBookmarking ? "opacity-50 cursor-not-allowed" : ""}`}
+              style={
+                !isBookmarked
+                  ? {
+                      backdropFilter: "blur(12px) saturate(180%)",
+                      WebkitBackdropFilter: "blur(12px) saturate(180%)",
+                    }
+                  : {}
+              }
             >
               {isBookmarked ? (
                 <BookmarkIconSolid className="w-4 h-4" />
@@ -337,15 +388,16 @@ const VlogCard = ({ vlog, featured = false, compact = false }) => {
                 <p
                   className="font-medium text-[var(--theme-text)] hover:text-[var(--theme-accent)] transition-colors cursor-pointer"
                   onClick={(e) => {
-                    e.preventDefault()
-                    e.stopPropagation()
-                    window.location.href = `/profile/${vlog.author?.username}`
+                    e.preventDefault();
+                    e.stopPropagation();
+                    window.location.href = `/profile/${vlog.author?.username}`;
                   }}
                 >
                   {vlog.author?.username}
                 </p>
                 <p className="text-sm text-[var(--theme-text-secondary)]">
-                  {formatRelativeTime(vlog.createdAt)} • {formatNumber(vlog.author?.followerCount || 0)} followers
+                  {formatRelativeTime(vlog.createdAt)} •{" "}
+                  {formatNumber(vlog.author?.followerCount || 0)} followers
                 </p>
               </div>
             </div>
@@ -359,8 +411,11 @@ const VlogCard = ({ vlog, featured = false, compact = false }) => {
           </div>
 
           {/* Title and Description */}
-          <h3 className={`font-bold text-[var(--theme-text)] mb-2 ${featured ? 'text-2xl' : 'text-lg'
-            }`}>
+          <h3
+            className={`font-bold text-[var(--theme-text)] mb-2 ${
+              featured ? "text-2xl" : "text-lg"
+            }`}
+          >
             {vlog.title}
           </h3>
 
@@ -400,15 +455,22 @@ const VlogCard = ({ vlog, featured = false, compact = false }) => {
               <motion.button
                 onClick={handleLike}
                 disabled={isLiking}
-                title={!isAuthenticated ? 'Login to interact' : isLiked ? 'Unlike' : 'Like'}
+                title={
+                  !isAuthenticated
+                    ? "Login to interact"
+                    : isLiked
+                      ? "Unlike"
+                      : "Like"
+                }
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 animate={isLiking ? { scale: [1, 1.05, 1] } : {}}
                 transition={isLiking ? { repeat: Infinity, duration: 0.6 } : {}}
-                className={`flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg transition-all duration-300 ${isLiked
-                  ? 'bg-gradient-to-r from-red-500/20 to-pink-500/20 backdrop-blur-sm border border-red-500/30'
-                  : 'hover:bg-white/5'
-                  }`}
+                className={`flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg transition-all duration-300 ${
+                  isLiked
+                    ? "bg-gradient-to-r from-red-500/20 to-pink-500/20 backdrop-blur-sm border border-red-500/30"
+                    : "hover:bg-white/5"
+                }`}
               >
                 <motion.div
                   animate={isLiked ? { scale: [1, 1.2, 1] } : {}}
@@ -425,7 +487,7 @@ const VlogCard = ({ vlog, featured = false, compact = false }) => {
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3 }}
-                  className={isLiked ? 'text-red-500 font-medium' : ''}
+                  className={isLiked ? "text-red-500 font-medium" : ""}
                 >
                   {formatNumber(likeCount)}
                 </motion.span>
@@ -434,15 +496,24 @@ const VlogCard = ({ vlog, featured = false, compact = false }) => {
               <motion.button
                 onClick={handleDislike}
                 disabled={isDisliking}
-                title={!isAuthenticated ? 'Login to interact' : isDisliked ? 'Remove dislike' : 'Dislike'}
+                title={
+                  !isAuthenticated
+                    ? "Login to interact"
+                    : isDisliked
+                      ? "Remove dislike"
+                      : "Dislike"
+                }
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 animate={isDisliking ? { scale: [1, 1.05, 1] } : {}}
-                transition={isDisliking ? { repeat: Infinity, duration: 0.6 } : {}}
-                className={`flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg transition-all duration-300 ${isDisliked
-                  ? 'bg-gradient-to-r from-[var(--theme-accent)]/20 to-[var(--theme-secondary)]/20 backdrop-blur-sm border border-[var(--theme-accent)]/30'
-                  : 'hover:bg-white/5'
-                  }`}
+                transition={
+                  isDisliking ? { repeat: Infinity, duration: 0.6 } : {}
+                }
+                className={`flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg transition-all duration-300 ${
+                  isDisliked
+                    ? "bg-gradient-to-r from-[var(--theme-accent)]/20 to-[var(--theme-secondary)]/20 backdrop-blur-sm border border-[var(--theme-accent)]/30"
+                    : "hover:bg-white/5"
+                }`}
               >
                 <motion.div
                   animate={isDisliked ? { scale: [1, 1.2, 1] } : {}}
@@ -459,7 +530,9 @@ const VlogCard = ({ vlog, featured = false, compact = false }) => {
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3 }}
-                  className={isDisliked ? 'text-[var(--theme-accent)] font-medium' : ''}
+                  className={
+                    isDisliked ? "text-[var(--theme-accent)] font-medium" : ""
+                  }
                 >
                   {formatNumber(dislikeCount)}
                 </motion.span>
@@ -473,7 +546,9 @@ const VlogCard = ({ vlog, featured = false, compact = false }) => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3 }}
                 >
-                  {formatNumber(vlog.commentCount || vlog.comments?.length || 0)}
+                  {formatNumber(
+                    vlog.commentCount || vlog.comments?.length || 0,
+                  )}
                 </motion.span>
               </div>
             </div>
@@ -482,7 +557,7 @@ const VlogCard = ({ vlog, featured = false, compact = false }) => {
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                title={!isAuthenticated ? 'Login to interact' : 'Share'}
+                title={!isAuthenticated ? "Login to interact" : "Share"}
               >
                 <Button
                   size="sm"
@@ -491,7 +566,7 @@ const VlogCard = ({ vlog, featured = false, compact = false }) => {
                   onClick={handleShare}
                   disabled={isSharing}
                 >
-                  {isSharing ? 'Sharing...' : 'Share'}
+                  {isSharing ? "Sharing..." : "Share"}
                 </Button>
               </motion.div>
             </div>
@@ -499,7 +574,7 @@ const VlogCard = ({ vlog, featured = false, compact = false }) => {
         </div>
       </Link>
     </motion.div>
-  )
-}
+  );
+};
 
-export default VlogCard
+export default VlogCard;

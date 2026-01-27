@@ -37,7 +37,8 @@ describe('Property 7: Image cleanup on deletion', () => {
 
     // Connect to test database
     if (mongoose.connection.readyState === 0) {
-      const mongoUri = process.env.MONGO_URI_TEST || 'mongodb://localhost:27017/vlogsphere-test';
+      const mongoUri = process.env.MONGO_URI_TEST
+        || 'mongodb://localhost:27017/vlogsphere-test';
       await mongoose.connect(mongoUri, {
         useNewUrlParser: true,
         useUnifiedTopology: true,
@@ -72,9 +73,13 @@ describe('Property 7: Image cleanup on deletion', () => {
   // Helper function to create a user and get JWT token
   const createUserWithToken = async (userData) => {
     const user = await User.create(userData);
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET || 'test-secret', {
-      expiresIn: '1h',
-    });
+    const token = jwt.sign(
+      { id: user._id },
+      process.env.JWT_SECRET || 'test-secret',
+      {
+        expiresIn: '1h',
+      },
+    );
     return { user, token };
   };
 
@@ -87,18 +92,22 @@ describe('Property 7: Image cleanup on deletion', () => {
   // Arbitrary for generating valid user data
   const userArbitrary = fc.record({
     username: fc.stringMatching(/^[a-zA-Z0-9_]{3,20}$/),
-    email: fc.tuple(
-      fc.stringMatching(/^[a-zA-Z0-9]{3,10}$/),
-      fc.stringMatching(/^[a-zA-Z0-9]{2,8}$/),
-      fc.constantFrom('com', 'org', 'net', 'edu'),
-    ).map(([local, domain, tld]) => `${local}@${domain}.${tld}`),
+    email: fc
+      .tuple(
+        fc.stringMatching(/^[a-zA-Z0-9]{3,10}$/),
+        fc.stringMatching(/^[a-zA-Z0-9]{2,8}$/),
+        fc.constantFrom('com', 'org', 'net', 'edu'),
+      )
+      .map(([local, domain, tld]) => `${local}@${domain}.${tld}`),
     password: fc.stringMatching(/^[a-zA-Z0-9!@#$%^&*]{6,20}$/),
   });
 
   // Arbitrary for generating valid vlog data with images
   const vlogArbitrary = fc.record({
     title: fc.stringMatching(/^[a-zA-Z0-9][a-zA-Z0-9 ]{1,48}[a-zA-Z0-9]$/), // Ensure at least 3 chars after trim
-    description: fc.stringMatching(/^[a-zA-Z0-9][a-zA-Z0-9 .,!?]{8,198}[a-zA-Z0-9]$/), // Ensure at least 10 chars after trim
+    description: fc.stringMatching(
+      /^[a-zA-Z0-9][a-zA-Z0-9 .,!?]{8,198}[a-zA-Z0-9]$/,
+    ), // Ensure at least 10 chars after trim
     category: fc.constantFrom(
       'technology',
       'travel',
@@ -111,10 +120,7 @@ describe('Property 7: Image cleanup on deletion', () => {
       'business',
       'education',
     ),
-    tags: fc.array(
-      fc.stringMatching(/^[a-zA-Z0-9]{1,20}$/),
-      { maxLength: 5 },
-    ),
+    tags: fc.array(fc.stringMatching(/^[a-zA-Z0-9]{1,20}$/), { maxLength: 5 }),
     images: fc.array(
       fc.record({
         url: fc.webUrl(),
@@ -194,7 +200,9 @@ describe('Property 7: Image cleanup on deletion', () => {
             mockDeleteImage.mockClear();
 
             // Mock deleteImage to fail for some images
-            mockDeleteImage.mockRejectedValue(new Error('Cloudinary deletion failed'));
+            mockDeleteImage.mockRejectedValue(
+              new Error('Cloudinary deletion failed'),
+            );
 
             // Create author and their vlog
             const { user: author, token } = await createUserWithToken(authorData);

@@ -1,49 +1,56 @@
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
-import { motion } from 'framer-motion'
-import { useForm } from 'react-hook-form'
-import { authAPI } from '../../services/api'
-import Button from '../../components/UI/Button'
-import Logo from '../../components/UI/Logo'
-import { EnvelopeIcon } from '@heroicons/react/24/outline'
-import toast from 'react-hot-toast'
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
+import { useForm } from "react-hook-form";
+import { authAPI } from "../../services/api";
+import Button from "../../components/UI/Button";
+import Logo from "../../components/UI/Logo";
+import { EnvelopeIcon } from "@heroicons/react/24/outline";
+import toast from "react-hot-toast";
 
 const ForgotPassword = () => {
-  const [loading, setLoading] = useState(false)
-  const [submitted, setSubmitted] = useState(false)
+  const [loading, setLoading] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
 
   const {
     register,
     handleSubmit,
-    formState: { errors }
+    formState: { errors },
   } = useForm({
     defaultValues: {
-      email: ''
-    }
-  })
+      email: "",
+    },
+  });
 
   const onSubmit = async (data) => {
-    setLoading(true)
+    setLoading(true);
     try {
-      await authAPI.forgotPassword(data.email)
-      setSubmitted(true)
-      toast.success('If an account exists with this email, you will receive a password reset link.')
+      await authAPI.forgotPassword(data.email);
+      setSubmitted(true);
+      toast.success(
+        "If an account exists with this email, you will receive a password reset link.",
+      );
     } catch (error) {
       // For security reasons, always show the same message whether the email exists or not
       // This prevents email enumeration attacks
       if (error.response?.status === 404) {
         // Email not found - but don't tell the user
-        setSubmitted(true)
-        toast.success('If an account exists with this email, you will receive a password reset link.')
+        setSubmitted(true);
+        toast.success(
+          "If an account exists with this email, you will receive a password reset link.",
+        );
       } else {
         // Only show actual errors (network issues, server errors, etc.)
-        const message = error.response?.data?.error?.message || error.message || 'Failed to send reset email'
-        toast.error(message)
+        const message =
+          error.response?.data?.error?.message ||
+          error.message ||
+          "Failed to send reset email";
+        toast.error(message);
       }
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const containerVariants = {
     hidden: { opacity: 0, scale: 0.9 },
@@ -53,10 +60,10 @@ const ForgotPassword = () => {
       transition: {
         type: "spring",
         stiffness: 100,
-        damping: 15
-      }
-    }
-  }
+        damping: 15,
+      },
+    },
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
@@ -81,10 +88,9 @@ const ForgotPassword = () => {
             Forgot Password?
           </h2>
           <p className="text-[var(--theme-text-secondary)]">
-            {submitted 
+            {submitted
               ? "Check your email for reset instructions"
-              : "Enter your email to receive a password reset link"
-            }
+              : "Enter your email to receive a password reset link"}
           </p>
         </div>
 
@@ -93,7 +99,10 @@ const ForgotPassword = () => {
             <div className="glass-card p-8 rounded-2xl space-y-6">
               {/* Email Field */}
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-[var(--theme-text)] mb-2">
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium text-[var(--theme-text)] mb-2"
+                >
                   Email Address
                 </label>
                 <div className="relative">
@@ -101,12 +110,12 @@ const ForgotPassword = () => {
                     <EnvelopeIcon className="h-5 w-5 text-[var(--theme-text-secondary)]" />
                   </div>
                   <input
-                    {...register('email', {
-                      required: 'Email is required',
+                    {...register("email", {
+                      required: "Email is required",
                       pattern: {
                         value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                        message: 'Invalid email address'
-                      }
+                        message: "Invalid email address",
+                      },
                     })}
                     type="email"
                     id="email"
@@ -137,7 +146,7 @@ const ForgotPassword = () => {
                   loading={loading}
                   className="mt-4"
                 >
-                  {loading ? 'Sending...' : 'Send Reset Link'}
+                  {loading ? "Sending..." : "Send Reset Link"}
                 </Button>
               </div>
             </div>
@@ -146,12 +155,23 @@ const ForgotPassword = () => {
           <div className="glass-card p-8 rounded-2xl">
             <div className="text-center space-y-4">
               <div className="mx-auto w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center">
-                <svg className="w-8 h-8 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                <svg
+                  className="w-8 h-8 text-green-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
                 </svg>
               </div>
               <p className="text-[var(--theme-text)]">
-                If an account exists with this email, you will receive a password reset link shortly.
+                If an account exists with this email, you will receive a
+                password reset link shortly.
               </p>
               <p className="text-sm text-[var(--theme-text-secondary)]">
                 Please check your inbox and spam folder.
@@ -166,15 +186,25 @@ const ForgotPassword = () => {
             to="/login"
             className="text-[var(--theme-accent)] hover:text-[var(--theme-accent)]/80 font-medium transition-colors inline-flex items-center space-x-2"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M10 19l-7-7m0 0l7-7m-7 7h18"
+              />
             </svg>
             <span>Back to Login</span>
           </Link>
         </div>
       </motion.div>
     </div>
-  )
-}
+  );
+};
 
-export default ForgotPassword
+export default ForgotPassword;

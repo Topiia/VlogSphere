@@ -43,7 +43,11 @@ const getCookieOptions = (maxAge) => {
 // Helper to set both auth cookies (DRY principle)
 const setCookies = (res, token, refreshToken) => {
   res.cookie('token', token, getCookieOptions(7 * 24 * 60 * 60 * 1000)); // 7 days
-  res.cookie('refreshToken', refreshToken, getCookieOptions(30 * 24 * 60 * 60 * 1000)); // 30 days
+  res.cookie(
+    'refreshToken',
+    refreshToken,
+    getCookieOptions(30 * 24 * 60 * 60 * 1000),
+  ); // 30 days
 };
 
 // @desc    Register user
@@ -58,7 +62,9 @@ exports.register = asyncHandler(async (req, res, next) => {
   });
 
   if (existingUser) {
-    return next(new ErrorResponse('User already exists with this email or username', 400));
+    return next(
+      new ErrorResponse('User already exists with this email or username', 400),
+    );
   }
 
   // Create user
@@ -83,7 +89,11 @@ exports.register = asyncHandler(async (req, res, next) => {
   const token = generateToken(user._id);
   const tokenFamily = crypto.randomBytes(16).toString('hex');
   const tokenVersion = 1;
-  const refreshToken = generateRefreshToken(user._id, tokenFamily, tokenVersion);
+  const refreshToken = generateRefreshToken(
+    user._id,
+    tokenFamily,
+    tokenVersion,
+  );
 
   // SECURITY: Hash refresh token before storing (prevents database breach replay)
   user.refreshTokenHash = await user.hashRefreshToken(refreshToken);
@@ -197,7 +207,11 @@ exports.login = asyncHandler(async (req, res, next) => {
   const token = generateToken(user._id);
   const tokenFamily = crypto.randomBytes(16).toString('hex');
   const tokenVersion = 1;
-  const refreshToken = generateRefreshToken(user._id, tokenFamily, tokenVersion);
+  const refreshToken = generateRefreshToken(
+    user._id,
+    tokenFamily,
+    tokenVersion,
+  );
 
   // SECURITY: Hash refresh token before storing (prevents database breach replay)
   user.refreshTokenHash = await user.hashRefreshToken(refreshToken);
@@ -320,14 +334,10 @@ exports.updateDetails = asyncHandler(async (req, res, _next) => {
   if (avatar) fieldsToUpdate.avatar = avatar;
   if (preferences) fieldsToUpdate.preferences = preferences;
 
-  const user = await User.findByIdAndUpdate(
-    req.user.id,
-    fieldsToUpdate,
-    {
-      new: true,
-      runValidators: true,
-    },
-  );
+  const user = await User.findByIdAndUpdate(req.user.id, fieldsToUpdate, {
+    new: true,
+    runValidators: true,
+  });
 
   res.status(200).json({
     success: true,
@@ -476,8 +486,15 @@ exports.resetPassword = asyncHandler(async (req, res, next) => {
 
   // SECURITY: Check if token has already been used (single-use enforcement)
   if (user.passwordResetUsed) {
-    console.warn(`[SECURITY] Attempted reuse of password reset token - User: ${user.username}`);
-    return next(new ErrorResponse('This password reset link has already been used. Please request a new one.', 400));
+    console.warn(
+      `[SECURITY] Attempted reuse of password reset token - User: ${user.username}`,
+    );
+    return next(
+      new ErrorResponse(
+        'This password reset link has already been used. Please request a new one.',
+        400,
+      ),
+    );
   }
 
   // Set new password

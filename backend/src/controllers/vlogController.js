@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 const Vlog = require('../models/Vlog');
 const { deleteImage } = require('../middleware/upload');
 const asyncHandler = require('../middleware/asyncHandler');
@@ -32,11 +33,20 @@ exports.getVlogs = asyncHandler(async (req, res) => {
 
   let sortBy = '-createdAt';
   switch (req.query.sort) {
-    case 'popular': sortBy = '-views'; break;
-    case 'liked': sortBy = '-likeCount'; break; // Updated to use new field
-    case 'oldest': sortBy = 'createdAt'; break;
-    case 'alphabetical': sortBy = 'title'; break;
-    default: sortBy = '-createdAt';
+    case 'popular':
+      sortBy = '-views';
+      break;
+    case 'liked':
+      sortBy = '-likeCount';
+      break; // Updated to use new field
+    case 'oldest':
+      sortBy = 'createdAt';
+      break;
+    case 'alphabetical':
+      sortBy = 'title';
+      break;
+    default:
+      sortBy = '-createdAt';
   }
 
   const vlogs = await Vlog.find(query)
@@ -73,7 +83,10 @@ exports.getVlog = asyncHandler(async (req, res, next) => {
   const vlogData = await VlogService.getVlog(req.params.id, userId);
 
   // Authorization check for private vlogs
-  if (!vlogData.isPublic && (!userId || vlogData.author._id.toString() !== userId)) {
+  if (
+    !vlogData.isPublic
+    && (!userId || vlogData.author._id.toString() !== userId)
+  ) {
     return next(new ErrorResponse('Not authorized to view this vlog', 403));
   }
 
@@ -180,13 +193,18 @@ exports.deleteVlog = asyncHandler(async (req, res, next) => {
   }
 
   if (vlog.images?.length > 0) {
-    await Promise.all(vlog.images.map(async (img) => {
-      try {
-        await deleteImage(img.publicId);
-      } catch (error) {
-        console.error(`Failed to delete image ${img.publicId}: `, error.message);
-      }
-    }));
+    await Promise.all(
+      vlog.images.map(async (img) => {
+        try {
+          await deleteImage(img.publicId);
+        } catch (error) {
+          console.error(
+            `Failed to delete image ${img.publicId}: `,
+            error.message,
+          );
+        }
+      }),
+    );
   }
 
   await vlog.deleteOne();
@@ -221,7 +239,11 @@ exports.toggleDislike = asyncHandler(async (req, res) => {
    ADD COMMENT
 ---------------------------------------------------------- */
 exports.addComment = asyncHandler(async (req, res) => {
-  const comment = await VlogService.addComment(req.params.id, req.user.id, req.body.text);
+  const comment = await VlogService.addComment(
+    req.params.id,
+    req.user.id,
+    req.body.text,
+  );
   res.status(201).json({ success: true, data: comment });
 });
 
@@ -242,7 +264,11 @@ exports.deleteComment = asyncHandler(async (req, res) => {
    INCREMENT SHARE COUNT
 ---------------------------------------------------------- */
 exports.incrementShare = asyncHandler(async (req, res, next) => {
-  const vlog = await Vlog.findByIdAndUpdate(req.params.id, { $inc: { shares: 1 } }, { new: true });
+  const vlog = await Vlog.findByIdAndUpdate(
+    req.params.id,
+    { $inc: { shares: 1 } },
+    { new: true },
+  );
   if (!vlog) return next(new ErrorResponse('Vlog not found', 404));
   res.status(200).json({ success: true, data: { shares: vlog.shares } });
 });
@@ -285,7 +311,10 @@ exports.getUserVlogs = asyncHandler(async (req, res) => {
     .skip(skip)
     .limit(limit);
 
-  const total = await Vlog.countDocuments({ author: req.params.userId, isPublic: true });
+  const total = await Vlog.countDocuments({
+    author: req.params.userId,
+    isPublic: true,
+  });
   const totalPages = Math.ceil(total / limit);
 
   res.status(200).json({
@@ -302,22 +331,42 @@ exports.getUserVlogs = asyncHandler(async (req, res) => {
 
 /* ----------------------------------------------------------
    RECORD VIEW
+
+   CRITICAL: This endpoint should ONLY be called ONCE per user visit to detail page
+   DO NOT call from:
+   - List fetches (GET /api/vlogs)
+   - React Query refetches
+   - Cache warming
+   - Background jobs
+   - WebSocket events
 ---------------------------------------------------------- */
 exports.recordView = asyncHandler(async (req, res) => {
-  // If user is logged in, use Service to record (which might eventually handle uniqueness)
-  // If not, just increment
+  // Generate unique viewer ID with priority: userId > sessionID > IP hash
+  let viewerId;
   if (req.user) {
-    await VlogService.recordView(req.params.id, req.user.id);
+    viewerId = req.user.id;
+  } else if (req.sessionID) {
+    viewerId = req.sessionID;
   } else {
-    await Vlog.findByIdAndUpdate(req.params.id, { $inc: { views: 1 } });
+    // Anonymous user - hash IP address for privacy
+    const ip = req.ip || req.connection.remoteAddress || 'unknown';
+    viewerId = crypto
+      .createHash('sha256')
+      .update(ip)
+      .digest('hex')
+      .substring(0, 16);
   }
 
-  const vlog = await Vlog.findById(req.params.id, 'views');
+  // Record view with Redis deduplication
+  const result = await VlogService.recordView(req.params.id, viewerId);
+
   res.status(200).json({
     success: true,
     data: {
-      views: vlog.views,
-      hasViewed: true, // Simplified for now
+      views: result.views,
+      hasViewed: true,
+      incremented: result.incremented,
+      ttl: parseInt(process.env.VIEW_TTL_SECONDS, 10) || 300,
     },
   });
 });

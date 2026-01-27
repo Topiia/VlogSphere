@@ -27,7 +27,8 @@ describe('Property 10: Unauthenticated request rejection', () => {
 
     // Connect to test database
     if (mongoose.connection.readyState === 0) {
-      const mongoUri = process.env.MONGO_URI_TEST || 'mongodb://localhost:27017/vlogsphere-test';
+      const mongoUri = process.env.MONGO_URI_TEST
+        || 'mongodb://localhost:27017/vlogsphere-test';
       await mongoose.connect(mongoUri, {
         useNewUrlParser: true,
         useUnifiedTopology: true,
@@ -61,13 +62,19 @@ describe('Property 10: Unauthenticated request rejection', () => {
   const userArbitrary = fc.record({
     username: fc.stringMatching(/^[a-zA-Z0-9_]{3,20}$/),
     email: fc.emailAddress(),
-    password: fc.string({ minLength: 6, maxLength: 20 }).filter((s) => s.trim().length >= 6),
+    password: fc
+      .string({ minLength: 6, maxLength: 20 })
+      .filter((s) => s.trim().length >= 6),
   });
 
   // Arbitrary for generating valid vlog data
   const vlogArbitrary = fc.record({
-    title: fc.string({ minLength: 3, maxLength: 100 }).filter((s) => s.trim().length >= 3),
-    description: fc.string({ minLength: 10, maxLength: 500 }).filter((s) => s.trim().length >= 10),
+    title: fc
+      .string({ minLength: 3, maxLength: 100 })
+      .filter((s) => s.trim().length >= 3),
+    description: fc
+      .string({ minLength: 10, maxLength: 500 })
+      .filter((s) => s.trim().length >= 10),
     category: fc.constantFrom(
       'technology',
       'travel',
@@ -81,13 +88,17 @@ describe('Property 10: Unauthenticated request rejection', () => {
       'education',
     ),
     tags: fc.array(
-      fc.string({ minLength: 1, maxLength: 30 }).filter((s) => s.trim().length >= 1),
+      fc
+        .string({ minLength: 1, maxLength: 30 })
+        .filter((s) => s.trim().length >= 1),
       { maxLength: 10 },
     ),
     images: fc.array(
       fc.record({
         url: fc.webUrl(),
-        publicId: fc.string({ minLength: 10, maxLength: 50 }).filter((s) => s.trim().length >= 10),
+        publicId: fc
+          .string({ minLength: 10, maxLength: 50 })
+          .filter((s) => s.trim().length >= 10),
         caption: fc.string({ maxLength: 100 }),
         order: fc.nat({ max: 9 }),
       }),
@@ -141,7 +152,9 @@ describe('Property 10: Unauthenticated request rejection', () => {
             // Assert 401 Unauthorized
             expect(response.status).toBe(401);
             expect(response.body.success).toBe(false);
-            expect(response.body.error.message).toMatch(/not authorized|unauthorized|no token|invalid token/i);
+            expect(response.body.error.message).toMatch(
+              /not authorized|unauthorized|no token|invalid token/i,
+            );
 
             // Verify vlog was not modified
             const unchangedVlog = await Vlog.findById(vlog._id);
@@ -175,8 +188,9 @@ describe('Property 10: Unauthenticated request rejection', () => {
             const vlog = await createVlog(author._id, vlogData);
 
             // Attempt to delete vlog without authentication or with invalid token
-            const requestBuilder = request(app)
-              .delete(`/api/vlogs/${vlog._id}`);
+            const requestBuilder = request(app).delete(
+              `/api/vlogs/${vlog._id}`,
+            );
 
             // Add authorization header only if token is not null
             if (invalidToken !== null && invalidToken !== '') {
@@ -188,7 +202,9 @@ describe('Property 10: Unauthenticated request rejection', () => {
             // Assert 401 Unauthorized
             expect(response.status).toBe(401);
             expect(response.body.success).toBe(false);
-            expect(response.body.error.message).toMatch(/not authorized|unauthorized|no token|invalid token/i);
+            expect(response.body.error.message).toMatch(
+              /not authorized|unauthorized|no token|invalid token/i,
+            );
 
             // Verify vlog still exists
             const stillExistingVlog = await Vlog.findById(vlog._id);

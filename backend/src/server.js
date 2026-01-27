@@ -96,16 +96,20 @@ app.set('trust proxy', 1);
 app.use(correlationMiddleware);
 
 // Security middleware
-app.use(helmet({
-  contentSecurityPolicy: false, // Will be handled by frontend
-  crossOriginEmbedderPolicy: false,
-}));
+app.use(
+  helmet({
+    contentSecurityPolicy: false, // Will be handled by frontend
+    crossOriginEmbedderPolicy: false,
+  }),
+);
 
 // CORS configuration
 const corsOptions = {
   origin(origin, callback) {
     const allowedOrigins = process.env.CORS_ORIGINS
-      ? process.env.CORS_ORIGINS.split(',').map((o) => o.trim()).filter(Boolean)
+      ? process.env.CORS_ORIGINS.split(',')
+        .map((o) => o.trim())
+        .filter(Boolean)
       : ['http://localhost:3000'];
 
     // Allow requests with no origin (like mobile apps or curl requests)
@@ -159,45 +163,53 @@ if (process.env.NODE_ENV !== 'test') {
 
 // SECURITY: Separate rate limiters for different auth endpoint types
 // 1. Login/Register limiter - Strict (prevent brute force)
-const loginLimiter = process.env.NODE_ENV !== 'test' ? rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // 5 login attempts per window
-  message: {
-    success: false,
-    errorType: 'ratelimit',
-    error: 'Too many login attempts. Please try again in 15 minutes.',
-  },
-  skipSuccessfulRequests: true, // Don't count successful logins
-  standardHeaders: true, // Return rate limit info in RateLimit-* headers
-  handler: (req, res) => {
-    res.status(429).json({
+const loginLimiter = process.env.NODE_ENV !== 'test'
+  ? rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 5, // 5 login attempts per window
+    message: {
       success: false,
       errorType: 'ratelimit',
       error: 'Too many login attempts. Please try again in 15 minutes.',
-      retryAfterSeconds: Math.ceil((req.rateLimit.resetTime - Date.now()) / 1000),
-    });
-  },
-}) : (req, res, next) => next();
+    },
+    skipSuccessfulRequests: true, // Don't count successful logins
+    standardHeaders: true, // Return rate limit info in RateLimit-* headers
+    handler: (req, res) => {
+      res.status(429).json({
+        success: false,
+        errorType: 'ratelimit',
+        error: 'Too many login attempts. Please try again in 15 minutes.',
+        retryAfterSeconds: Math.ceil(
+          (req.rateLimit.resetTime - Date.now()) / 1000,
+        ),
+      });
+    },
+  })
+  : (req, res, next) => next();
 
 // 2. Session check limiter - Lenient (allow normal app usage)
-const sessionLimiter = process.env.NODE_ENV !== 'test' ? rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // 100 session checks per window (allows active browsing)
-  message: {
-    success: false,
-    errorType: 'ratelimit',
-    error: 'Too many requests. Please wait a moment.',
-  },
-  standardHeaders: true,
-  handler: (req, res) => {
-    res.status(429).json({
+const sessionLimiter = process.env.NODE_ENV !== 'test'
+  ? rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // 100 session checks per window (allows active browsing)
+    message: {
       success: false,
       errorType: 'ratelimit',
       error: 'Too many requests. Please wait a moment.',
-      retryAfterSeconds: Math.ceil((req.rateLimit.resetTime - Date.now()) / 1000),
-    });
-  },
-}) : (req, res, next) => next();
+    },
+    standardHeaders: true,
+    handler: (req, res) => {
+      res.status(429).json({
+        success: false,
+        errorType: 'ratelimit',
+        error: 'Too many requests. Please wait a moment.',
+        retryAfterSeconds: Math.ceil(
+          (req.rateLimit.resetTime - Date.now()) / 1000,
+        ),
+      });
+    },
+  })
+  : (req, res, next) => next();
 
 // Body parser middleware
 app.use(express.json({ limit: '10mb' }));
@@ -235,14 +247,19 @@ app.get('/health', (req, res) => {
 // DB Health Check (Safe)
 app.get('/health/db', (req, res) => {
   const states = {
-    0: 'disconnected', 1: 'connected', 2: 'connecting', 3: 'disconnecting',
+    0: 'disconnected',
+    1: 'connected',
+    2: 'connecting',
+    3: 'disconnecting',
   };
   const state = mongoose.connection.readyState;
 
   if (state === 1) {
     res.status(200).json({ status: 'ok', database: 'connected' });
   } else {
-    res.status(503).json({ status: 'error', database: states[state] || 'unknown' });
+    res
+      .status(503)
+      .json({ status: 'error', database: states[state] || 'unknown' });
   }
 });
 

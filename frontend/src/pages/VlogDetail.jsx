@@ -1,18 +1,18 @@
-import { useState } from 'react'
-import { motion } from 'framer-motion'
-import { useParams, useNavigate } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
-import { useAuth } from '../contexts/AuthContext'
-import { vlogAPI } from '../services/api'
-import { useDeleteVlog } from '../hooks/useVlogMutations'
-import { useVlogInteractions } from '../hooks/useVlogInteractions'
-import { useComments } from '../hooks/useComments'
-import { useVlogView } from '../hooks/useVlogView'
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { useParams, useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "../contexts/AuthContext";
+import { vlogAPI } from "../services/api";
+import { useDeleteVlog } from "../hooks/useVlogMutations";
+import { useVlogInteractions } from "../hooks/useVlogInteractions";
+import { useComments } from "../hooks/useComments";
+import { useVlogView } from "../hooks/useVlogView";
 
-import LoadingSpinner from '../components/UI/LoadingSpinner'
-import Button from '../components/UI/Button'
-import DeleteConfirmModal from '../components/UI/DeleteConfirmModal'
-import FollowButton from '../components/UI/FollowButton'
+import LoadingSpinner from "../components/UI/LoadingSpinner";
+import Button from "../components/UI/Button";
+import DeleteConfirmModal from "../components/UI/DeleteConfirmModal";
+import FollowButton from "../components/UI/FollowButton";
 
 import {
   HeartIcon,
@@ -24,35 +24,35 @@ import {
   PencilIcon,
   TrashIcon,
   EllipsisVerticalIcon,
-  HandThumbDownIcon
-} from '@heroicons/react/24/outline'
+  HandThumbDownIcon,
+} from "@heroicons/react/24/outline";
 import {
   HeartIcon as HeartIconSolid,
   BookmarkIcon as BookmarkIconSolid,
-  HandThumbDownIcon as HandThumbDownIconSolid
-} from '@heroicons/react/24/solid'
+  HandThumbDownIcon as HandThumbDownIconSolid,
+} from "@heroicons/react/24/solid";
 
 const VlogDetail = () => {
-  const { id } = useParams()
-  const navigate = useNavigate()
-  const { user, isAuthenticated } = useAuth()
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
 
-  const [showDeleteModal, setShowDeleteModal] = useState(false)
-  const [showOptionsMenu, setShowOptionsMenu] = useState(false)
-  const [commentText, setCommentText] = useState('')
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showOptionsMenu, setShowOptionsMenu] = useState(false);
+  const [commentText, setCommentText] = useState("");
 
   // Fetch vlog details
   const { data: vlog, isLoading } = useQuery({
-    queryKey: ['vlog', id],
+    queryKey: ["vlog", id],
     queryFn: () => vlogAPI.getVlog(id),
-    select: (response) => response.data.data
-  })
+    select: (response) => response.data.data,
+  });
 
   // Record view automatically
-  useVlogView(id)
+  useVlogView(id);
 
   // Delete mutation with optimistic updates
-  const deleteMutation = useDeleteVlog(id)
+  const deleteMutation = useDeleteVlog(id);
 
   // Interaction hooks
   const {
@@ -63,94 +63,94 @@ const VlogDetail = () => {
     isLiking,
     isDisliking,
     isSharing,
-    isBookmarking
-  } = useVlogInteractions()
+    isBookmarking,
+  } = useVlogInteractions();
 
   // Comment hooks
-  const { addComment, deleteComment, isAdding, isDeleting } = useComments()
+  const { addComment, deleteComment, isAdding, isDeleting } = useComments();
 
   const handleDelete = () => {
     deleteMutation.mutate(undefined, {
       onError: () => {
-        setShowDeleteModal(false)
-      }
-    })
-  }
+        setShowDeleteModal(false);
+      },
+    });
+  };
 
   const handleEdit = () => {
-    navigate(`/vlog/${id}/edit`)
-  }
+    navigate(`/vlog/${id}/edit`);
+  };
 
   const handleLike = () => {
     // Hook will handle authentication check and show toast
-    toggleLike(id)
-  }
+    toggleLike(id);
+  };
 
   const handleDislike = () => {
     // Hook will handle authentication check and show toast
-    toggleDislike(id)
-  }
+    toggleDislike(id);
+  };
 
   const handleShare = () => {
     if (vlog) {
       // Hook will handle authentication check and show toast
-      shareVlog(id, vlog)
+      shareVlog(id, vlog);
     }
-  }
+  };
 
   const handleBookmark = () => {
     if (vlog) {
       // Hook will handle authentication check and show toast
-      toggleBookmark(id, vlog.isBookmarked)
+      toggleBookmark(id, vlog.isBookmarked);
     }
-  }
+  };
 
   const handleCommentSubmit = () => {
     if (!isAuthenticated) {
       // Show toast notification for unauthenticated users
-      return
+      return;
     }
 
     if (commentText.trim()) {
-      addComment(id, commentText)
-      setCommentText('') // Clear form after successful post
+      addComment(id, commentText);
+      setCommentText(""); // Clear form after successful post
     }
-  }
+  };
 
   const handleCommentDelete = (commentId) => {
-    deleteComment(id, commentId)
-  }
+    deleteComment(id, commentId);
+  };
 
   const canDeleteComment = (comment) => {
-    if (!user) return false
+    if (!user) return false;
     // User can delete their own comment or if they're the vlog owner
-    return comment.user?._id === user.id || isOwner
-  }
+    return comment.user?._id === user.id || isOwner;
+  };
 
   const formatDate = (date) => {
-    return new Date(date).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    })
-  }
+    return new Date(date).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
 
   const formatNumber = (num) => {
     if (num >= 1000000) {
-      return (num / 1000000).toFixed(1) + 'M'
+      return (num / 1000000).toFixed(1) + "M";
     }
     if (num >= 1000) {
-      return (num / 1000).toFixed(1) + 'K'
+      return (num / 1000).toFixed(1) + "K";
     }
-    return num?.toString() || '0'
-  }
+    return num?.toString() || "0";
+  };
 
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <LoadingSpinner size="lg" />
       </div>
-    )
+    );
   }
 
   if (!vlog) {
@@ -165,10 +165,10 @@ const VlogDetail = () => {
           </p>
         </div>
       </div>
-    )
+    );
   }
 
-  const isOwner = user && vlog.author && user.id === vlog.author._id
+  const isOwner = user && vlog.author && user.id === vlog.author._id;
 
   return (
     <div className="w-full">
@@ -221,27 +221,31 @@ const VlogDetail = () => {
                       >
                         <button
                           onClick={() => {
-                            handleEdit()
-                            setShowOptionsMenu(false)
+                            handleEdit();
+                            setShowOptionsMenu(false);
                           }}
                           className="w-full px-5 py-3.5 text-left flex items-center space-x-3 hover:bg-white/10 transition-all duration-200 group"
                         >
                           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform">
                             <PencilIcon className="w-4 h-4 text-white" />
                           </div>
-                          <span className="text-[var(--theme-text)] font-medium">Edit Vlog</span>
+                          <span className="text-[var(--theme-text)] font-medium">
+                            Edit Vlog
+                          </span>
                         </button>
                         <button
                           onClick={() => {
-                            setShowDeleteModal(true)
-                            setShowOptionsMenu(false)
+                            setShowDeleteModal(true);
+                            setShowOptionsMenu(false);
                           }}
                           className="w-full px-5 py-3.5 text-left flex items-center space-x-3 hover:bg-white/10 transition-all duration-200 border-t border-white/10 group"
                         >
                           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center group-hover:scale-110 transition-transform">
                             <TrashIcon className="w-4 h-4 text-white" />
                           </div>
-                          <span className="text-red-400 font-medium">Delete Vlog</span>
+                          <span className="text-red-400 font-medium">
+                            Delete Vlog
+                          </span>
                         </button>
                       </motion.div>
                     </>
@@ -254,27 +258,50 @@ const VlogDetail = () => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 animate={isBookmarking ? { scale: [1, 1.05, 1] } : {}}
-                transition={isBookmarking ? { repeat: Infinity, duration: 0.6 } : {}}
-                title={!isAuthenticated ? 'Login to interact' : vlog?.isBookmarked ? 'Remove bookmark' : 'Bookmark'}
+                transition={
+                  isBookmarking ? { repeat: Infinity, duration: 0.6 } : {}
+                }
+                title={
+                  !isAuthenticated
+                    ? "Login to interact"
+                    : vlog?.isBookmarked
+                      ? "Remove bookmark"
+                      : "Bookmark"
+                }
               >
                 <Button
                   variant="ghost"
                   size="sm"
-                  leftIcon={vlog?.isBookmarked ? <BookmarkIconSolid className="w-5 h-5" /> : <BookmarkIcon className="w-5 h-5" />}
+                  leftIcon={
+                    vlog?.isBookmarked ? (
+                      <BookmarkIconSolid className="w-5 h-5" />
+                    ) : (
+                      <BookmarkIcon className="w-5 h-5" />
+                    )
+                  }
                   onClick={handleBookmark}
                   disabled={isBookmarking}
-                  className={`backdrop-blur-md bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300 ${vlog?.isBookmarked ? 'bg-gradient-to-r from-[var(--theme-accent)]/20 to-[var(--theme-secondary)]/20 border-[var(--theme-accent)]/30 text-[var(--theme-accent)]' : ''
-                    }`}
+                  className={`backdrop-blur-md bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300 ${
+                    vlog?.isBookmarked
+                      ? "bg-gradient-to-r from-[var(--theme-accent)]/20 to-[var(--theme-secondary)]/20 border-[var(--theme-accent)]/30 text-[var(--theme-accent)]"
+                      : ""
+                  }`}
                 >
-                  {isBookmarking ? 'Saving...' : vlog?.isBookmarked ? 'Saved' : 'Save'}
+                  {isBookmarking
+                    ? "Saving..."
+                    : vlog?.isBookmarked
+                      ? "Saved"
+                      : "Save"}
                 </Button>
               </motion.div>
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 animate={isSharing ? { scale: [1, 1.05, 1] } : {}}
-                transition={isSharing ? { repeat: Infinity, duration: 0.6 } : {}}
-                title={!isAuthenticated ? 'Login to interact' : 'Share'}
+                transition={
+                  isSharing ? { repeat: Infinity, duration: 0.6 } : {}
+                }
+                title={!isAuthenticated ? "Login to interact" : "Share"}
               >
                 <Button
                   variant="ghost"
@@ -284,7 +311,7 @@ const VlogDetail = () => {
                   disabled={isSharing}
                   className="backdrop-blur-md bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300"
                 >
-                  {isSharing ? 'Sharing...' : 'Share'}
+                  {isSharing ? "Sharing..." : "Share"}
                 </Button>
               </motion.div>
               {!isOwner && (
@@ -323,10 +350,10 @@ const VlogDetail = () => {
               </div>
               <div>
                 <h3 className="font-semibold text-[var(--theme-text)] text-base sm:text-lg">
-                  {vlog.author?.username || 'Unknown'}
+                  {vlog.author?.username || "Unknown"}
                 </h3>
                 <p className="text-sm text-[var(--theme-text-secondary)]">
-                  {vlog.author?.bio || 'Content Creator'}
+                  {vlog.author?.bio || "Content Creator"}
                 </p>
               </div>
             </div>
@@ -495,42 +522,84 @@ const VlogDetail = () => {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     animate={isLiking ? { scale: [1, 1.05, 1] } : {}}
-                    transition={isLiking ? { repeat: Infinity, duration: 0.6 } : {}}
-                    title={!isAuthenticated ? 'Login to interact' : vlog.likes?.includes(user?.id) ? 'Unlike' : 'Like'}
+                    transition={
+                      isLiking ? { repeat: Infinity, duration: 0.6 } : {}
+                    }
+                    title={
+                      !isAuthenticated
+                        ? "Login to interact"
+                        : vlog.likes?.includes(user?.id)
+                          ? "Unlike"
+                          : "Like"
+                    }
                   >
                     <Button
-                      variant={vlog.likes?.includes(user?.id) ? 'primary' : 'ghost'}
+                      variant={
+                        vlog.likes?.includes(user?.id) ? "primary" : "ghost"
+                      }
                       size="sm"
-                      leftIcon={vlog.likes?.includes(user?.id) ? <HeartIconSolid className="w-5 h-5" /> : <HeartIcon className="w-5 h-5" />}
+                      leftIcon={
+                        vlog.likes?.includes(user?.id) ? (
+                          <HeartIconSolid className="w-5 h-5" />
+                        ) : (
+                          <HeartIcon className="w-5 h-5" />
+                        )
+                      }
                       onClick={handleLike}
                       disabled={isLiking}
-                      className={vlog.likes?.includes(user?.id)
-                        ? 'bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 shadow-lg shadow-red-500/30 border-0 transition-all duration-300'
-                        : 'backdrop-blur-md bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300'
+                      className={
+                        vlog.likes?.includes(user?.id)
+                          ? "bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 shadow-lg shadow-red-500/30 border-0 transition-all duration-300"
+                          : "backdrop-blur-md bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300"
                       }
                     >
-                      {isLiking ? 'Loading...' : vlog.likes?.includes(user?.id) ? 'Liked' : 'Like'}
+                      {isLiking
+                        ? "Loading..."
+                        : vlog.likes?.includes(user?.id)
+                          ? "Liked"
+                          : "Like"}
                     </Button>
                   </motion.div>
                   <motion.div
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     animate={isDisliking ? { scale: [1, 1.05, 1] } : {}}
-                    transition={isDisliking ? { repeat: Infinity, duration: 0.6 } : {}}
-                    title={!isAuthenticated ? 'Login to interact' : vlog.dislikes?.includes(user?.id) ? 'Remove dislike' : 'Dislike'}
+                    transition={
+                      isDisliking ? { repeat: Infinity, duration: 0.6 } : {}
+                    }
+                    title={
+                      !isAuthenticated
+                        ? "Login to interact"
+                        : vlog.dislikes?.includes(user?.id)
+                          ? "Remove dislike"
+                          : "Dislike"
+                    }
                   >
                     <Button
-                      variant={vlog.dislikes?.includes(user?.id) ? 'primary' : 'ghost'}
+                      variant={
+                        vlog.dislikes?.includes(user?.id) ? "primary" : "ghost"
+                      }
                       size="sm"
-                      leftIcon={vlog.dislikes?.includes(user?.id) ? <HandThumbDownIconSolid className="w-5 h-5" /> : <HandThumbDownIcon className="w-5 h-5" />}
+                      leftIcon={
+                        vlog.dislikes?.includes(user?.id) ? (
+                          <HandThumbDownIconSolid className="w-5 h-5" />
+                        ) : (
+                          <HandThumbDownIcon className="w-5 h-5" />
+                        )
+                      }
                       onClick={handleDislike}
                       disabled={isDisliking}
-                      className={vlog.dislikes?.includes(user?.id)
-                        ? 'bg-gradient-to-r from-[var(--theme-accent)] to-[var(--theme-secondary)] hover:opacity-90 shadow-lg border-0 transition-all duration-300'
-                        : 'backdrop-blur-md bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300'
+                      className={
+                        vlog.dislikes?.includes(user?.id)
+                          ? "bg-gradient-to-r from-[var(--theme-accent)] to-[var(--theme-secondary)] hover:opacity-90 shadow-lg border-0 transition-all duration-300"
+                          : "backdrop-blur-md bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300"
                       }
                     >
-                      {isDisliking ? 'Loading...' : vlog.dislikes?.includes(user?.id) ? 'Disliked' : 'Dislike'}
+                      {isDisliking
+                        ? "Loading..."
+                        : vlog.dislikes?.includes(user?.id)
+                          ? "Disliked"
+                          : "Dislike"}
                     </Button>
                   </motion.div>
                 </div>
@@ -582,7 +651,7 @@ const VlogDetail = () => {
                           onClick={handleCommentSubmit}
                           disabled={isAdding || !commentText.trim()}
                         >
-                          {isAdding ? 'Posting...' : 'Post Comment'}
+                          {isAdding ? "Posting..." : "Post Comment"}
                         </Button>
                       </div>
                     </div>
@@ -597,7 +666,9 @@ const VlogDetail = () => {
                     size="sm"
                     variant="primary"
                     className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
-                    onClick={() => navigate('/login', { state: { from: `/vlog/${id}` } })}
+                    onClick={() =>
+                      navigate("/login", { state: { from: `/vlog/${id}` } })
+                    }
                   >
                     Log In
                   </Button>
@@ -638,7 +709,7 @@ const VlogDetail = () => {
                               disabled={isDeleting}
                               className="text-red-400 hover:text-red-300 text-sm transition-colors disabled:opacity-50"
                             >
-                              {isDeleting ? 'Deleting...' : 'Delete'}
+                              {isDeleting ? "Deleting..." : "Delete"}
                             </button>
                           )}
                         </div>
@@ -740,7 +811,7 @@ const VlogDetail = () => {
         isLoading={deleteMutation.isPending}
       />
     </div>
-  )
-}
+  );
+};
 
-export default VlogDetail
+export default VlogDetail;

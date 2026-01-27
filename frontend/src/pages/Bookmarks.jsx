@@ -1,43 +1,43 @@
-import { useState } from 'react'
-import { motion } from 'framer-motion'
-import { Link } from 'react-router-dom'
-import VlogCard from '../components/Vlog/VlogCard'
-import LoadingSpinner from '../components/UI/LoadingSpinner'
-import Button from '../components/UI/Button'
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
+import VlogCard from "../components/Vlog/VlogCard";
+import LoadingSpinner from "../components/UI/LoadingSpinner";
+import Button from "../components/UI/Button";
 import {
   BookmarkIcon,
   ChevronLeftIcon,
-  ChevronRightIcon
-} from '@heroicons/react/24/outline'
-import { useBookmarks } from '../hooks/useBookmarks'
+  ChevronRightIcon,
+} from "@heroicons/react/24/outline";
+import { useBookmarks } from "../hooks/useBookmarks";
 
 const Bookmarks = () => {
-  const [currentPage, setCurrentPage] = useState(1)
-  const limit = 20
+  const [currentPage, setCurrentPage] = useState(1);
+  const limit = 20;
 
   // Fetch bookmarked vlogs using the custom hook
-  const { 
-    bookmarks, 
+  const {
+    bookmarks,
     pagination,
-    isLoading, 
+    isLoading,
     error,
     hasNextPage,
-    hasPreviousPage
-  } = useBookmarks({ page: currentPage, limit })
+    hasPreviousPage,
+  } = useBookmarks({ page: currentPage, limit });
 
   const handleNextPage = () => {
     if (hasNextPage) {
-      setCurrentPage(prev => prev + 1)
-      window.scrollTo({ top: 0, behavior: 'smooth' })
+      setCurrentPage((prev) => prev + 1);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
-  }
+  };
 
   const handlePreviousPage = () => {
     if (hasPreviousPage) {
-      setCurrentPage(prev => prev - 1)
-      window.scrollTo({ top: 0, behavior: 'smooth' })
+      setCurrentPage((prev) => prev - 1);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
-  }
+  };
 
   return (
     <div className="min-h-screen">
@@ -86,9 +86,7 @@ const Bookmarks = () => {
                 Start bookmarking vlogs to save them for later viewing
               </p>
               <Link to="/explore">
-                <Button variant="primary">
-                  Explore Vlogs
-                </Button>
+                <Button variant="primary">Explore Vlogs</Button>
               </Link>
             </motion.div>
           </div>
@@ -148,13 +146,14 @@ const Bookmarks = () => {
               transition={{ delay: 0.4 }}
               className="mt-4 text-center text-[var(--theme-text-secondary)]"
             >
-              Showing {bookmarks.length} of {pagination.total} bookmark{pagination.total !== 1 ? 's' : ''}
+              Showing {bookmarks.length} of {pagination.total} bookmark
+              {pagination.total !== 1 ? "s" : ""}
             </motion.div>
           </>
         )}
       </motion.div>
     </div>
-  )
-}
+  );
+};
 
-export default Bookmarks
+export default Bookmarks;

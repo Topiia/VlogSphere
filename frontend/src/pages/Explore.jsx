@@ -1,51 +1,72 @@
-import { motion } from 'framer-motion'
-import { useState } from 'react'
-import { useInfiniteQuery } from '@tanstack/react-query'
-import { vlogAPI } from '../services/api'
-import VlogCard from '../components/Vlog/VlogCard'
-import LoadingSpinner from '../components/UI/LoadingSpinner'
-import Button from '../components/UI/Button'
+import { motion } from "framer-motion";
+import { useState } from "react";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { vlogAPI } from "../services/api";
+import VlogCard from "../components/Vlog/VlogCard";
+import LoadingSpinner from "../components/UI/LoadingSpinner";
+import Button from "../components/UI/Button";
 
 const Explore = () => {
-  const [searchQuery, setSearchQuery] = useState('')
-  const [selectedCategory, setSelectedCategory] = useState('all')
-  const [sortBy, setSortBy] = useState('newest')
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [sortBy, setSortBy] = useState("newest");
 
   const categories = [
-    'all', 'technology', 'travel', 'lifestyle', 'food', 'fashion',
-    'fitness', 'music', 'art', 'business', 'education',
-    'entertainment', 'gaming', 'sports', 'health', 'science',
-    'photography', 'diy', 'other'
-  ]
+    "all",
+    "technology",
+    "travel",
+    "lifestyle",
+    "food",
+    "fashion",
+    "fitness",
+    "music",
+    "art",
+    "business",
+    "education",
+    "entertainment",
+    "gaming",
+    "sports",
+    "health",
+    "science",
+    "photography",
+    "diy",
+    "other",
+  ];
 
   const sortOptions = [
-    { value: 'newest', label: 'Newest' },
-    { value: 'popular', label: 'Most Popular' },
-    { value: 'liked', label: 'Most Liked' },
-    { value: 'alphabetical', label: 'Alphabetical' }
-  ]
+    { value: "newest", label: "Newest" },
+    { value: "popular", label: "Most Popular" },
+    { value: "liked", label: "Most Liked" },
+    { value: "alphabetical", label: "Alphabetical" },
+  ];
 
   // Fetch vlogs based on filters
-  const { data: vlogsData, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
-    queryKey: ['exploreVlogs', selectedCategory, sortBy, searchQuery],
-    queryFn: ({ pageParam = 1 }) => 
+  const {
+    data: vlogsData,
+    isLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
+    queryKey: ["exploreVlogs", selectedCategory, sortBy, searchQuery],
+    queryFn: ({ pageParam = 1 }) =>
       vlogAPI.getVlogs({
         page: pageParam,
         limit: 12,
-        category: selectedCategory !== 'all' ? selectedCategory : undefined,
+        category: selectedCategory !== "all" ? selectedCategory : undefined,
         sort: sortBy,
-        search: searchQuery || undefined
+        search: searchQuery || undefined,
       }),
     getNextPageParam: (lastPage) => {
       if (lastPage.data.currentPage < lastPage.data.totalPages) {
-        return lastPage.data.currentPage + 1
+        return lastPage.data.currentPage + 1;
       }
-      return undefined
+      return undefined;
     },
-    initialPageParam: 1
-  })
+    initialPageParam: 1,
+  });
 
-  const allVlogs = vlogsData?.pages?.flatMap(page => page.data.data) || []
+  const allVlogs = vlogsData?.pages?.flatMap((page) => page.data.data) || [];
 
   return (
     <div className="min-h-screen">
@@ -93,8 +114,8 @@ const Explore = () => {
                 onClick={() => setSelectedCategory(category)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                   selectedCategory === category
-                    ? 'bg-[var(--theme-accent)] text-white'
-                    : 'glass-hover text-[var(--theme-text-secondary)] hover:text-[var(--theme-text)]'
+                    ? "bg-[var(--theme-accent)] text-white"
+                    : "glass-hover text-[var(--theme-text-secondary)] hover:text-[var(--theme-text)]"
                 }`}
               >
                 {category.charAt(0).toUpperCase() + category.slice(1)}
@@ -115,8 +136,8 @@ const Explore = () => {
                 onClick={() => setSortBy(option.value)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                   sortBy === option.value
-                    ? 'bg-[var(--theme-secondary)] text-white'
-                    : 'glass-hover text-[var(--theme-text-secondary)] hover:text-[var(--theme-text)]'
+                    ? "bg-[var(--theme-secondary)] text-white"
+                    : "glass-hover text-[var(--theme-text-secondary)] hover:text-[var(--theme-text)]"
                 }`}
               >
                 {option.label}
@@ -135,7 +156,7 @@ const Explore = () => {
       >
         <p className="text-[var(--theme-text-secondary)]">
           Showing {allVlogs.length} vlogs
-          {selectedCategory !== 'all' && ` in ${selectedCategory}`}
+          {selectedCategory !== "all" && ` in ${selectedCategory}`}
           {searchQuery && ` for "${searchQuery}"`}
         </p>
       </motion.div>
@@ -172,8 +193,18 @@ const Explore = () => {
           className="text-center py-20"
         >
           <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-[var(--glass-white)] flex items-center justify-center">
-            <svg className="w-12 h-12 text-[var(--theme-text-secondary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            <svg
+              className="w-12 h-12 text-[var(--theme-text-secondary)]"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
             </svg>
           </div>
           <h3 className="text-xl font-semibold text-[var(--theme-text)] mb-2">
@@ -185,9 +216,9 @@ const Explore = () => {
           <Button
             variant="outline"
             onClick={() => {
-              setSearchQuery('')
-              setSelectedCategory('all')
-              setSortBy('newest')
+              setSearchQuery("");
+              setSelectedCategory("all");
+              setSortBy("newest");
             }}
           >
             Clear Filters
@@ -209,7 +240,7 @@ const Explore = () => {
         </div>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default Explore
+export default Explore;

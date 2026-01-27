@@ -1,15 +1,15 @@
-import { motion } from 'framer-motion'
-import { Link } from 'react-router-dom'
-import { useAuth } from '../../contexts/AuthContext'
-import Button from '../UI/Button'
-import { AnimatePresence } from 'framer-motion';
+import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
+import Button from "../UI/Button";
+import { AnimatePresence } from "framer-motion";
 const MobileMenu = ({ isOpen, onClose, navigation }) => {
-  const { isAuthenticated, user, logout } = useAuth()
+  const { isAuthenticated, user, logout } = useAuth();
 
   const menuVariants = {
     hidden: {
-      x: '100%',
-      opacity: 0
+      x: "100%",
+      opacity: 0,
     },
     visible: {
       x: 0,
@@ -17,19 +17,19 @@ const MobileMenu = ({ isOpen, onClose, navigation }) => {
       transition: {
         type: "spring",
         stiffness: 300,
-        damping: 30
-      }
+        damping: 30,
+      },
     },
     exit: {
-      x: '100%',
+      x: "100%",
       opacity: 0,
       transition: {
         type: "spring",
         stiffness: 300,
-        damping: 30
-      }
-    }
-  }
+        damping: 30,
+      },
+    },
+  };
 
   return (
     <AnimatePresence>
@@ -56,13 +56,25 @@ const MobileMenu = ({ isOpen, onClose, navigation }) => {
               {/* Header */}
               <div className="p-6 border-b border-white/10">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-xl font-bold text-[var(--theme-text)]">Menu</h2>
+                  <h2 className="text-xl font-bold text-[var(--theme-text)]">
+                    Menu
+                  </h2>
                   <button
                     onClick={onClose}
                     className="p-2 rounded-lg glass-hover"
                   >
-                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    <svg
+                      className="w-6 h-6"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
                     </svg>
                   </button>
                 </div>
@@ -104,17 +116,21 @@ const MobileMenu = ({ isOpen, onClose, navigation }) => {
                           )}
                         </div>
                         <div>
-                          <p className="font-medium text-[var(--theme-text)]">{user?.username}</p>
-                          <p className="text-sm text-[var(--theme-text-secondary)]">{user?.email}</p>
+                          <p className="font-medium text-[var(--theme-text)]">
+                            {user?.username}
+                          </p>
+                          <p className="text-sm text-[var(--theme-text-secondary)]">
+                            {user?.email}
+                          </p>
                         </div>
                       </div>
-                      
+
                       <Button
                         variant="outline"
                         fullWidth
                         onClick={() => {
-                          logout()
-                          onClose()
+                          logout();
+                          onClose();
                         }}
                       >
                         Logout
@@ -141,7 +157,7 @@ const MobileMenu = ({ isOpen, onClose, navigation }) => {
         </>
       )}
     </AnimatePresence>
-  )
-}
+  );
+};
 
-export default MobileMenu
+export default MobileMenu;

@@ -14,6 +14,7 @@ Before you begin, ensure you have the following installed:
 - **Git** (for cloning the repository)
 
 ### Optional Tools
+
 - **Docker** & **Docker Compose** (for containerized deployment)
 - **PM2** (for process management in production)
 
@@ -43,6 +44,7 @@ nano .env  # or use your preferred editor
 ```
 
 **Required Environment Variables:**
+
 - `MONGODB_URI` - Your MongoDB connection string
 - `JWT_SECRET` - A secure random string for JWT signing
 - `JWT_REFRESH_SECRET` - Another secure random string for refresh tokens
@@ -67,11 +69,13 @@ nano .env  # or use your preferred editor
 ```
 
 **Required Environment Variables:**
+
 - `VITE_API_URL` - Your backend API URL (e.g., http://localhost:5000/api)
 
 ### 4. Database Setup
 
 #### Option A: Local MongoDB
+
 ```bash
 # Start MongoDB service
 sudo systemctl start mongod
@@ -83,6 +87,7 @@ exit
 ```
 
 #### Option B: MongoDB Atlas
+
 1. Create a free cluster at [MongoDB Atlas](https://www.mongodb.com/atlas)
 2. Create a database user
 3. Get your connection string
@@ -102,30 +107,35 @@ This will create sample users and vlogs for testing.
 ### Development Mode
 
 #### Backend
+
 ```bash
 cd backend
 npm run dev
 ```
 
 #### Frontend
+
 ```bash
 cd frontend
 npm run dev
 ```
 
 The application will be available at:
+
 - Frontend: http://localhost:3000
 - Backend API: http://localhost:5000
 
 ### Production Mode
 
 #### Backend
+
 ```bash
 cd backend
 npm start
 ```
 
 #### Frontend
+
 ```bash
 cd frontend
 npm run build
@@ -137,12 +147,14 @@ npm run preview  # or serve the dist folder with a web server
 ### Using Docker Compose
 
 1. **Configure Environment Variables**
+
    ```bash
    # Edit docker-compose.yml with your environment variables
    nano docker-compose.yml
    ```
 
 2. **Build and Run**
+
    ```bash
    docker-compose up -d
    ```
@@ -182,34 +194,36 @@ chmod +x deploy.sh
 ### Manual Production Setup
 
 1. **Server Preparation**
+
    ```bash
    # Update system
    sudo apt update && sudo apt upgrade -y
-   
+
    # Install Node.js
    curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
    sudo apt-get install -y nodejs
-   
+
    # Install PM2
    sudo npm install -g pm2
    ```
 
 2. **Application Setup**
+
    ```bash
    # Clone repository
    git clone <your-repository-url>
    cd vlogsphere
-   
+
    # Setup backend
    cd backend
    npm install
    npm run build
-   
+
    # Start with PM2
    pm2 start src/server.js --name vlogsphere-backend
    pm2 startup
    pm2 save
-   
+
    # Setup frontend
    cd ../frontend
    npm install
@@ -217,25 +231,27 @@ chmod +x deploy.sh
    ```
 
 3. **Web Server Configuration**
+
    ```bash
    # Install NGINX
    sudo apt install nginx
-   
+
    # Configure NGINX
    sudo nano /etc/nginx/sites-available/vlogsphere
    ```
 
    **NGINX Configuration:**
+
    ```nginx
    server {
        listen 80;
        server_name your-domain.com;
-       
+
        location / {
            root /path/to/vlogsphere/frontend/dist;
            try_files $uri $uri/ /index.html;
        }
-       
+
        location /api {
            proxy_pass http://localhost:5000;
            proxy_http_version 1.1;
@@ -253,17 +269,20 @@ chmod +x deploy.sh
 ## 🔐 Security Considerations
 
 ### Environment Security
+
 - Never commit `.env` files to version control
 - Use strong, unique passwords and secrets
 - Rotate secrets regularly in production
 - Use HTTPS in production
 
 ### Database Security
+
 - Use connection strings with authentication
 - Implement database backup strategies
 - Monitor database access and performance
 
 ### Application Security
+
 - Keep dependencies updated
 - Use security headers
 - Implement rate limiting
@@ -272,6 +291,7 @@ chmod +x deploy.sh
 ## 📊 Monitoring & Maintenance
 
 ### Logs
+
 ```bash
 # Backend logs
 pm2 logs vlogsphere-backend
@@ -281,11 +301,13 @@ sudo journalctl -u vlogsphere-backend
 ```
 
 ### Performance Monitoring
+
 - Use PM2 monitoring: `pm2 monit`
 - Monitor MongoDB performance
 - Track application metrics
 
 ### Updates
+
 ```bash
 # Update dependencies
 npm update
@@ -299,10 +321,11 @@ sudo apt update && sudo apt upgrade
 ### Common Issues
 
 1. **Port Already in Use**
+
    ```bash
    # Find process using port
    lsof -i :5000
-   
+
    # Kill process
    kill -9 <PID>
    ```
@@ -332,16 +355,19 @@ sudo apt update && sudo apt upgrade
 ## 📈 Scaling
 
 ### Horizontal Scaling
+
 - Use load balancers
 - Deploy multiple instances
 - Use container orchestration (Kubernetes)
 
 ### Vertical Scaling
+
 - Increase server resources
 - Optimize database queries
 - Use caching strategies
 
 ### Database Scaling
+
 - Implement database sharding
 - Use read replicas
 - Optimize indexes

@@ -32,7 +32,8 @@ describe('Refresh Token Security Tests', () => {
 
     // Connect to test database
     if (mongoose.connection.readyState === 0) {
-      const mongoUri = process.env.MONGO_URI_TEST || 'mongodb://localhost:27017/vlogsphere-test';
+      const mongoUri = process.env.MONGO_URI_TEST
+        || 'mongodb://localhost:27017/vlogsphere-test';
       await mongoose.connect(mongoUri, {
         useNewUrlParser: true,
         useUnifiedTopology: true,
@@ -226,7 +227,10 @@ describe('Refresh Token Security Tests', () => {
     const user2RefreshToken = user2Res.body.refreshToken;
 
     // Decode user2's token to get tokenFamily
-    const decoded = jwt.verify(user2RefreshToken, process.env.JWT_REFRESH_SECRET);
+    const decoded = jwt.verify(
+      user2RefreshToken,
+      process.env.JWT_REFRESH_SECRET,
+    );
 
     // Manually change user2's tokenFamily in database
     const user2 = await User.findOne({ email: 'test2@example.com' });
@@ -267,9 +271,7 @@ describe('Refresh Token Security Tests', () => {
       password: 'password123',
     };
 
-    await request(app)
-      .post('/api/auth/register')
-      .send(userData);
+    await request(app).post('/api/auth/register').send(userData);
 
     const loginRes = await request(app)
       .post('/api/auth/login')

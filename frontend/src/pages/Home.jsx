@@ -1,28 +1,28 @@
-import { motion } from 'framer-motion'
-import { Link } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
-import { vlogAPI } from '../services/api'
-import VlogCard from '../components/Vlog/VlogCard'
-import LoadingSpinner from '../components/UI/LoadingSpinner'
-import Button from '../components/UI/Button'
-import HeroSection from '../components/Home/HeroSection'
-import FeatureShowcase from '../components/Home/FeatureShowcase'
-import StatsSection from '../components/Home/StatsSection'
+import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { vlogAPI } from "../services/api";
+import VlogCard from "../components/Vlog/VlogCard";
+import LoadingSpinner from "../components/UI/LoadingSpinner";
+import Button from "../components/UI/Button";
+import HeroSection from "../components/Home/HeroSection";
+import FeatureShowcase from "../components/Home/FeatureShowcase";
+import StatsSection from "../components/Home/StatsSection";
 
 const Home = () => {
   // Fetch featured vlogs
   const { data: featuredVlogs, isLoading: loadingFeatured } = useQuery({
-    queryKey: ['featuredVlogs'],
-    queryFn: () => vlogAPI.getVlogs({ limit: 6, sort: 'popular' }),
-    select: (response) => response.data.data
-  })
+    queryKey: ["featuredVlogs"],
+    queryFn: () => vlogAPI.getVlogs({ limit: 6, sort: "popular" }),
+    select: (response) => response.data.data,
+  });
 
   // Fetch latest vlogs
   const { data: latestVlogs, isLoading: loadingLatest } = useQuery({
-    queryKey: ['latestVlogs'],
+    queryKey: ["latestVlogs"],
     queryFn: () => vlogAPI.getVlogs({ limit: 8 }),
-    select: (response) => response.data.data
-  })
+    select: (response) => response.data.data,
+  });
 
   return (
     <div className="min-h-screen">
@@ -43,14 +43,18 @@ const Home = () => {
               Featured Content
             </h2>
             <p className="text-xl text-[var(--theme-text-secondary)] max-w-2xl mx-auto">
-              Discover the most popular and trending vlogs from our community of creators
+              Discover the most popular and trending vlogs from our community of
+              creators
             </p>
           </motion.div>
 
           {loadingFeatured ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="glass-card p-4 rounded-xl animate-pulse">
+                <div
+                  key={i}
+                  className="glass-card p-4 rounded-xl animate-pulse"
+                >
                   <div className="h-48 bg-gray-600 rounded-lg mb-4"></div>
                   <div className="h-4 bg-gray-600 rounded w-3/4 mb-2"></div>
                   <div className="h-3 bg-gray-600 rounded w-1/2"></div>
@@ -107,7 +111,10 @@ const Home = () => {
           {loadingLatest ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="glass-card p-4 rounded-xl animate-pulse">
+                <div
+                  key={i}
+                  className="glass-card p-4 rounded-xl animate-pulse"
+                >
                   <div className="h-32 bg-gray-600 rounded-lg mb-4"></div>
                   <div className="h-4 bg-gray-600 rounded w-3/4 mb-2"></div>
                   <div className="h-3 bg-gray-600 rounded w-1/2"></div>
@@ -149,8 +156,9 @@ const Home = () => {
               Ready to Share Your Story?
             </h2>
             <p className="text-xl text-[var(--theme-text-secondary)] mb-8 max-w-2xl mx-auto">
-              Join thousands of creators who are already sharing their passion with the world. 
-              Start your vlogging journey today with our AI-powered platform.
+              Join thousands of creators who are already sharing their passion
+              with the world. Start your vlogging journey today with our
+              AI-powered platform.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link to="/register">
@@ -168,7 +176,7 @@ const Home = () => {
         </div>
       </section>
     </div>
-  )
-}
+  );
+};
 
-export default Home
+export default Home;

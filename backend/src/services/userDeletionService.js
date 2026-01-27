@@ -47,10 +47,10 @@ exports.deleteUser = async (userId, options = {}) => {
   } else {
     // Mock session for testing on standalone instances
     session = {
-      startTransaction: () => { },
-      commitTransaction: async () => { },
-      abortTransaction: async () => { },
-      endSession: () => { },
+      startTransaction: () => {},
+      commitTransaction: async () => {},
+      abortTransaction: async () => {},
+      endSession: () => {},
     };
   }
 

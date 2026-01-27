@@ -1,90 +1,116 @@
-import { useState } from 'react'
-import { motion } from 'framer-motion'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Link } from 'react-router-dom'
-import toast from 'react-hot-toast'
-import VlogCard from '../components/Vlog/VlogCard'
-import LoadingSpinner from '../components/UI/LoadingSpinner'
-import Button from '../components/UI/Button'
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Link } from "react-router-dom";
+import toast from "react-hot-toast";
+import VlogCard from "../components/Vlog/VlogCard";
+import LoadingSpinner from "../components/UI/LoadingSpinner";
+import Button from "../components/UI/Button";
 import {
   HeartIcon,
   MagnifyingGlassIcon,
   FunnelIcon,
-  ArrowsUpDownIcon
-} from '@heroicons/react/24/outline'
-import { vlogAPI, userAPI } from '../services/api'
+  ArrowsUpDownIcon,
+} from "@heroicons/react/24/outline";
+import { vlogAPI, userAPI } from "../services/api";
 
 const Likes = () => {
-  const [searchQuery, setSearchQuery] = useState('')
-  const [sortBy, setSortBy] = useState('date')
-  const [categoryFilter, setCategoryFilter] = useState('all')
-  const queryClient = useQueryClient()
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortBy, setSortBy] = useState("date");
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const queryClient = useQueryClient();
 
   // Fetch liked vlogs
-  const { data: likes, isLoading, error } = useQuery({
-    queryKey: ['likedVlogs', sortBy, categoryFilter],
+  const {
+    data: likes,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["likedVlogs", sortBy, categoryFilter],
     queryFn: async () => {
       const response = await userAPI.getLikedVlogs({
         sort: sortBy,
-        category: categoryFilter !== 'all' ? categoryFilter : undefined
-      })
-      return response.data
-    }
-  })
+        category: categoryFilter !== "all" ? categoryFilter : undefined,
+      });
+      return response.data;
+    },
+  });
 
   // Unlike mutation
   const unlikeMutation = useMutation({
     mutationFn: async (vlogId) => {
       // Use the dislikeVlog API endpoint to unlike
-      return await vlogAPI.dislikeVlog(vlogId)
+      return await vlogAPI.dislikeVlog(vlogId);
     },
     onMutate: async (vlogId) => {
       // Cancel outgoing refetches
-      await queryClient.cancelQueries(['likedVlogs'])
+      await queryClient.cancelQueries(["likedVlogs"]);
 
       // Snapshot previous value
-      const previousLikes = queryClient.getQueryData(['likedVlogs', sortBy, categoryFilter])
+      const previousLikes = queryClient.getQueryData([
+        "likedVlogs",
+        sortBy,
+        categoryFilter,
+      ]);
 
       // Optimistically update - remove the vlog from the likes list
-      queryClient.setQueryData(['likedVlogs', sortBy, categoryFilter], (old) => {
-        if (!old?.data) return old
-        return {
-          ...old,
-          data: old.data.filter((vlog) => vlog._id !== vlogId)
-        }
-      })
+      queryClient.setQueryData(
+        ["likedVlogs", sortBy, categoryFilter],
+        (old) => {
+          if (!old?.data) return old;
+          return {
+            ...old,
+            data: old.data.filter((vlog) => vlog._id !== vlogId),
+          };
+        },
+      );
 
-      return { previousLikes }
+      return { previousLikes };
     },
     onError: (_err, _vlogId, context) => {
       // Rollback on error
-      queryClient.setQueryData(['likedVlogs', sortBy, categoryFilter], context.previousLikes)
-      toast.error('Failed to unlike vlog')
+      queryClient.setQueryData(
+        ["likedVlogs", sortBy, categoryFilter],
+        context.previousLikes,
+      );
+      toast.error("Failed to unlike vlog");
     },
     onSuccess: () => {
-      toast.success('Vlog unliked')
+      toast.success("Vlog unliked");
     },
     onSettled: () => {
       // Invalidate and refetch
-      queryClient.invalidateQueries(['likedVlogs'])
-    }
-  })
+      queryClient.invalidateQueries(["likedVlogs"]);
+    },
+  });
 
   const handleUnlike = (vlogId) => {
-    unlikeMutation.mutate(vlogId)
-  }
+    unlikeMutation.mutate(vlogId);
+  };
 
   // Filter likes by search query
-  const filteredLikes = likes?.data?.filter((vlog) => {
-    if (!searchQuery) return true
-    return (
-      vlog.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      vlog.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      vlog.tags?.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
-    )
-  }) || []
+  const filteredLikes =
+    likes?.data?.filter((vlog) => {
+      if (!searchQuery) return true;
+      return (
+        vlog.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        vlog.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        vlog.tags?.some((tag) =>
+          tag.toLowerCase().includes(searchQuery.toLowerCase()),
+        )
+      );
+    }) || [];
 
-  const categories = ['all', 'tech', 'lifestyle', 'travel', 'food', 'gaming', 'education', 'entertainment']
+  const categories = [
+    "all",
+    "tech",
+    "lifestyle",
+    "travel",
+    "food",
+    "gaming",
+    "education",
+    "entertainment",
+  ];
 
   return (
     <div className="min-h-screen">
@@ -182,18 +208,16 @@ const Likes = () => {
                 <HeartIcon className="w-12 h-12 text-[var(--theme-text-secondary)]" />
               </div>
               <h2 className="text-2xl font-bold text-[var(--theme-text)] mb-3">
-                {searchQuery ? 'No liked vlogs found' : 'No liked vlogs yet'}
+                {searchQuery ? "No liked vlogs found" : "No liked vlogs yet"}
               </h2>
               <p className="text-[var(--theme-text-secondary)] mb-6 max-w-md mx-auto">
                 {searchQuery
-                  ? 'Try adjusting your search or filters'
-                  : 'Start liking vlogs to build your collection of favorites'}
+                  ? "Try adjusting your search or filters"
+                  : "Start liking vlogs to build your collection of favorites"}
               </p>
               {!searchQuery && (
                 <Link to="/trending">
-                  <Button variant="primary">
-                    Discover Trending
-                  </Button>
+                  <Button variant="primary">Discover Trending</Button>
                 </Link>
               )}
             </motion.div>
@@ -216,7 +240,7 @@ const Likes = () => {
                 >
                   <HeartIcon className="w-4 h-4" />
                 </button>
-                
+
                 <VlogCard vlog={vlog} compact />
               </motion.div>
             ))}
@@ -232,11 +256,12 @@ const Likes = () => {
           transition={{ delay: 0.4 }}
           className="mt-8 text-center text-[var(--theme-text-secondary)]"
         >
-          Showing {filteredLikes.length} liked vlog{filteredLikes.length !== 1 ? 's' : ''}
+          Showing {filteredLikes.length} liked vlog
+          {filteredLikes.length !== 1 ? "s" : ""}
         </motion.div>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default Likes
+export default Likes;

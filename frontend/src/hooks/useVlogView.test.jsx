@@ -1,40 +1,38 @@
-import { renderHook, waitFor } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useVlogView } from './useVlogView';
-import { vlogAPI } from '../services/api';
-import { useAuth } from '../contexts/AuthContext';
+import { renderHook, waitFor } from "@testing-library/react";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useVlogView } from "./useVlogView";
+import { vlogAPI } from "../services/api";
+import { useAuth } from "../contexts/AuthContext";
 
 // Mock dependencies
-vi.mock('../services/api');
-vi.mock('../contexts/AuthContext');
+vi.mock("../services/api");
+vi.mock("../contexts/AuthContext");
 
 const createWrapper = () => {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: { retry: false },
-      mutations: { retry: false }
-    }
+      mutations: { retry: false },
+    },
   });
 
   return ({ children }) => (
-    <QueryClientProvider client={queryClient}>
-      {children}
-    </QueryClientProvider>
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
 };
 
-describe('useVlogView Hook', () => {
+describe("useVlogView Hook", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     sessionStorage.clear();
 
     useAuth.mockReturnValue({
-      isAuthenticated: true
+      isAuthenticated: true,
     });
 
     vlogAPI.recordView = vi.fn().mockResolvedValue({
-      data: { success: true }
+      data: { success: true },
     });
   });
 
@@ -42,11 +40,11 @@ describe('useVlogView Hook', () => {
     sessionStorage.clear();
   });
 
-  it('should call recordView on first mount', async () => {
-    const vlogId = 'vlog123';
+  it("should call recordView on first mount", async () => {
+    const vlogId = "vlog123";
 
     renderHook(() => useVlogView(vlogId), {
-      wrapper: createWrapper()
+      wrapper: createWrapper(),
     });
 
     await waitFor(() => {
@@ -54,12 +52,12 @@ describe('useVlogView Hook', () => {
     });
   });
 
-  it('should NOT call recordView again if sessionStorage already has vlogId', async () => {
-    const vlogId = 'vlog123';
-    sessionStorage.setItem(`view_recorded_${vlogId}`, 'true');
+  it("should NOT call recordView again if sessionStorage already has vlogId", async () => {
+    const vlogId = "vlog123";
+    sessionStorage.setItem(`view_recorded_${vlogId}`, "true");
 
     renderHook(() => useVlogView(vlogId), {
-      wrapper: createWrapper()
+      wrapper: createWrapper(),
     });
 
     await waitFor(() => {
@@ -67,15 +65,15 @@ describe('useVlogView Hook', () => {
     });
   });
 
-  it('should NOT call recordView when user is not logged in', async () => {
+  it("should NOT call recordView when user is not logged in", async () => {
     useAuth.mockReturnValue({
-      isAuthenticated: false
+      isAuthenticated: false,
     });
 
-    const vlogId = 'vlog123';
+    const vlogId = "vlog123";
 
     renderHook(() => useVlogView(vlogId), {
-      wrapper: createWrapper()
+      wrapper: createWrapper(),
     });
 
     await waitFor(() => {
@@ -83,43 +81,43 @@ describe('useVlogView Hook', () => {
     });
   });
 
-  it('should set sessionStorage after successful view recording', async () => {
-    const vlogId = 'vlog123';
+  it("should set sessionStorage after successful view recording", async () => {
+    const vlogId = "vlog123";
 
     renderHook(() => useVlogView(vlogId), {
-      wrapper: createWrapper()
+      wrapper: createWrapper(),
     });
 
     await waitFor(() => {
-      expect(sessionStorage.getItem(`view_recorded_${vlogId}`)).toBe('true');
+      expect(sessionStorage.getItem(`view_recorded_${vlogId}`)).toBe("true");
     });
   });
 
-  it('should handle errors silently without throwing', async () => {
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-    vlogAPI.recordView = vi.fn().mockRejectedValue(new Error('Network error'));
+  it("should handle errors silently without throwing", async () => {
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    vlogAPI.recordView = vi.fn().mockRejectedValue(new Error("Network error"));
 
-    const vlogId = 'vlog123';
+    const vlogId = "vlog123";
 
     expect(() => {
       renderHook(() => useVlogView(vlogId), {
-        wrapper: createWrapper()
+        wrapper: createWrapper(),
       });
     }).not.toThrow();
 
     await waitFor(() => {
       expect(consoleSpy).toHaveBeenCalledWith(
-        'Failed to record view:',
-        expect.any(Error)
+        "Failed to record view:",
+        expect.any(Error),
       );
     });
 
     consoleSpy.mockRestore();
   });
 
-  it('should not call recordView if vlogId is null', async () => {
+  it("should not call recordView if vlogId is null", async () => {
     renderHook(() => useVlogView(null), {
-      wrapper: createWrapper()
+      wrapper: createWrapper(),
     });
 
     await waitFor(() => {

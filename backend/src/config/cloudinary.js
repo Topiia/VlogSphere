@@ -18,7 +18,9 @@ if (process.env.CLOUDINARY_URL) {
 const config = cloudinary.config();
 if (!config.cloud_name || !config.api_key || !config.api_secret) {
   console.error('❌ Cloudinary configuration is incomplete!');
-  console.error('Please set CLOUDINARY_URL or individual CLOUDINARY_* environment variables');
+  console.error(
+    'Please set CLOUDINARY_URL or individual CLOUDINARY_* environment variables',
+  );
 }
 
 module.exports = cloudinary;

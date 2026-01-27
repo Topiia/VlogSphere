@@ -1,36 +1,36 @@
-import { motion } from 'framer-motion'
+import { motion } from "framer-motion";
 
-const LoadingSpinner = ({ size = 'md', className = '', text = '' }) => {
+const LoadingSpinner = ({ size = "md", className = "", text = "" }) => {
   const sizes = {
-    xs: 'w-4 h-4',
-    sm: 'w-6 h-6',
-    md: 'w-8 h-8',
-    lg: 'w-12 h-12',
-    xl: 'w-16 h-16'
-  }
+    xs: "w-4 h-4",
+    sm: "w-6 h-6",
+    md: "w-8 h-8",
+    lg: "w-12 h-12",
+    xl: "w-16 h-16",
+  };
 
   const containerVariants = {
     hidden: { opacity: 0 },
-    visible: { 
+    visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.1
-      }
-    }
-  }
+        staggerChildren: 0.1,
+      },
+    },
+  };
 
   const dotVariants = {
     hidden: { scale: 0, opacity: 0 },
-    visible: { 
-      scale: 1, 
+    visible: {
+      scale: 1,
       opacity: 1,
       transition: {
         type: "spring",
         stiffness: 200,
-        damping: 15
-      }
-    }
-  }
+        damping: 15,
+      },
+    },
+  };
 
   return (
     <motion.div
@@ -47,25 +47,27 @@ const LoadingSpinner = ({ size = 'md', className = '', text = '' }) => {
           transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
           className={`absolute inset-0 ${sizes[size]} border-2 border-transparent border-t-[var(--theme-accent)] rounded-full`}
         />
-        
+
         {/* Inner Ring */}
         <motion.div
           animate={{ rotate: -360 }}
           transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
           className={`absolute inset-2 ${sizes[size]} border-2 border-transparent border-b-[var(--theme-secondary)] rounded-full`}
         />
-        
+
         {/* Center Dot */}
-        <div className={`absolute inset-0 flex items-center justify-center ${sizes[size]}`}>
+        <div
+          className={`absolute inset-0 flex items-center justify-center ${sizes[size]}`}
+        >
           <motion.div
-            animate={{ 
+            animate={{
               scale: [1, 1.2, 1],
-              opacity: [1, 0.6, 1]
+              opacity: [1, 0.6, 1],
             }}
-            transition={{ 
-              duration: 1.5, 
+            transition={{
+              duration: 1.5,
               repeat: Infinity,
-              ease: "easeInOut"
+              ease: "easeInOut",
             }}
             className="w-2 h-2 bg-[var(--theme-accent)] rounded-full shadow-lg shadow-[var(--theme-accent)]/50"
           />
@@ -75,16 +77,16 @@ const LoadingSpinner = ({ size = 'md', className = '', text = '' }) => {
         {[0, 120, 240].map((rotation, index) => (
           <motion.div
             key={index}
-            animate={{ 
+            animate={{
               rotate: rotation,
               scale: [1, 1.5, 1],
-              opacity: [0.6, 1, 0.6]
+              opacity: [0.6, 1, 0.6],
             }}
-            transition={{ 
+            transition={{
               duration: 3,
               repeat: Infinity,
               ease: "easeInOut",
-              delay: index * 0.2
+              delay: index * 0.2,
             }}
             className="absolute inset-0"
             style={{ transform: `rotate(${rotation}deg)` }}
@@ -106,22 +108,19 @@ const LoadingSpinner = ({ size = 'md', className = '', text = '' }) => {
 
       {/* Animated Dots */}
       {!text && (
-        <motion.div
-          variants={dotVariants}
-          className="mt-4 flex space-x-1"
-        >
+        <motion.div variants={dotVariants} className="mt-4 flex space-x-1">
           {[0, 1, 2].map((index) => (
             <motion.div
               key={index}
               animate={{
                 scale: [1, 1.5, 1],
-                opacity: [0.6, 1, 0.6]
+                opacity: [0.6, 1, 0.6],
               }}
               transition={{
                 duration: 1,
                 repeat: Infinity,
                 ease: "easeInOut",
-                delay: index * 0.2
+                delay: index * 0.2,
               }}
               className="w-2 h-2 bg-[var(--theme-accent)] rounded-full"
             />
@@ -129,11 +128,11 @@ const LoadingSpinner = ({ size = 'md', className = '', text = '' }) => {
         </motion.div>
       )}
     </motion.div>
-  )
-}
+  );
+};
 
 // Skeleton Loading Component
-export const SkeletonLoader = ({ className = '', count = 1 }) => {
+export const SkeletonLoader = ({ className = "", count = 1 }) => {
   return (
     <div className={`space-y-4 ${className}`}>
       {Array.from({ length: count }).map((_, index) => (
@@ -160,8 +159,8 @@ export const SkeletonLoader = ({ className = '', count = 1 }) => {
         </motion.div>
       ))}
     </div>
-  )
-}
+  );
+};
 
 // Page Loading Component
 export const PageLoader = () => {
@@ -169,7 +168,7 @@ export const PageLoader = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
       <LoadingSpinner size="xl" text="Loading VLOGSPHERE..." />
     </div>
-  )
-}
+  );
+};
 
-export default LoadingSpinner
+export default LoadingSpinner;

@@ -9,7 +9,10 @@ exports.protect = asyncHandler(async (req, res, next) => {
   let token;
 
   // Check for token in Authorization header
-  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+  if (
+    req.headers.authorization
+    && req.headers.authorization.startsWith('Bearer')
+  ) {
     [, token] = req.headers.authorization.split(' ');
   } else if (req.cookies.token) {
     // Check for token in cookies
@@ -45,7 +48,12 @@ exports.protect = asyncHandler(async (req, res, next) => {
       }
     } else if (!user.isActive) {
       // Production: reject inactive users
-      return next(new ErrorResponse('Account has been deactivated. Please contact support.', 403));
+      return next(
+        new ErrorResponse(
+          'Account has been deactivated. Please contact support.',
+          403,
+        ),
+      );
     }
 
     req.user = user;
@@ -58,7 +66,12 @@ exports.protect = asyncHandler(async (req, res, next) => {
 // Grant access to specific roles
 exports.authorize = (...roles) => (req, res, next) => {
   if (!roles.includes(req.user.role)) {
-    return next(new ErrorResponse(`User role ${req.user.role} is not authorized to access this route`, 403));
+    return next(
+      new ErrorResponse(
+        `User role ${req.user.role} is not authorized to access this route`,
+        403,
+      ),
+    );
   }
   next();
 };
@@ -68,7 +81,10 @@ exports.optionalAuth = asyncHandler(async (req, res, next) => {
   let token;
 
   // Check for token in Authorization header
-  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+  if (
+    req.headers.authorization
+    && req.headers.authorization.startsWith('Bearer')
+  ) {
     [, token] = req.headers.authorization.split(' ');
   } else if (req.cookies.token) {
     // Check for token in cookies
@@ -120,19 +136,31 @@ exports.refreshToken = asyncHandler(async (req, res, next) => {
 
     // SECURITY: Check if session has been revoked (compromise or logout)
     if (user.revokedAt) {
-      console.warn(`[SECURITY] Attempted use of revoked token - User: ${user.username}, TokenFamily: ${tokenFamily}`);
-      return next(new ErrorResponse('Session has been revoked. Please log in again.', 401));
+      console.warn(
+        `[SECURITY] Attempted use of revoked token - User: ${user.username}, TokenFamily: ${tokenFamily}`,
+      );
+      return next(
+        new ErrorResponse(
+          'Session has been revoked. Please log in again.',
+          401,
+        ),
+      );
     }
 
     // SECURITY: Verify token family matches (prevents cross-session token use)
     if (user.tokenFamily !== tokenFamily) {
-      console.warn(`[SECURITY] Token family mismatch - User: ${user.username}, Expected: ${user.tokenFamily}, Got: ${tokenFamily}`);
+      console.warn(
+        `[SECURITY] Token family mismatch - User: ${user.username}, Expected: ${user.tokenFamily}, Got: ${tokenFamily}`,
+      );
       return next(new ErrorResponse('Invalid refresh token', 401));
     }
 
     // SECURITY: Hash incoming token and compare with stored hash using bcrypt
     // Constant-time comparison prevents timing attacks
-    const isValidToken = await bcrypt.compare(refreshToken, user.refreshTokenHash);
+    const isValidToken = await bcrypt.compare(
+      refreshToken,
+      user.refreshTokenHash,
+    );
 
     if (!isValidToken) {
       console.warn(`[SECURITY] Token hash mismatch - User: ${user.username}`);
@@ -143,19 +171,30 @@ exports.refreshToken = asyncHandler(async (req, res, next) => {
     // If stored version > presented version, token is old (already used)
     // This indicates compromise - revoke all sessions immediately
     if (user.tokenVersion > tokenVersion) {
-      console.error(`[SECURITY BREACH] Token reuse detected - User: ${user.username}, Stored: ${user.tokenVersion}, Presented: ${tokenVersion}`);
-      console.error(`[SECURITY BREACH] Revoking all sessions for user: ${user.username}`);
+      console.error(
+        `[SECURITY BREACH] Token reuse detected - User: ${user.username}, Stored: ${user.tokenVersion}, Presented: ${tokenVersion}`,
+      );
+      console.error(
+        `[SECURITY BREACH] Revoking all sessions for user: ${user.username}`,
+      );
 
       // Revoke all active sessions
       user.revokeAllSessions();
       await user.save();
 
-      return next(new ErrorResponse('Token reuse detected. All sessions have been revoked for security. Please log in again.', 401));
+      return next(
+        new ErrorResponse(
+          'Token reuse detected. All sessions have been revoked for security. Please log in again.',
+          401,
+        ),
+      );
     }
 
     // SECURITY: Enforce single-use - version must match exactly
     if (user.tokenVersion !== tokenVersion) {
-      console.warn(`[SECURITY] Token version mismatch - User: ${user.username}, Expected: ${user.tokenVersion}, Got: ${tokenVersion}`);
+      console.warn(
+        `[SECURITY] Token version mismatch - User: ${user.username}, Expected: ${user.tokenVersion}, Got: ${tokenVersion}`,
+      );
       return next(new ErrorResponse('Invalid refresh token', 401));
     }
 
@@ -187,7 +226,9 @@ exports.refreshToken = asyncHandler(async (req, res, next) => {
     user.tokenVersion = newTokenVersion;
     await user.save();
 
-    console.log(`[AUTH] Token refresh successful - User: ${user.username}, New version: ${newTokenVersion}`);
+    console.log(
+      `[AUTH] Token refresh successful - User: ${user.username}, New version: ${newTokenVersion}`,
+    );
 
     res.status(200).json({
       success: true,
@@ -211,7 +252,12 @@ exports.refreshToken = asyncHandler(async (req, res, next) => {
       return next(new ErrorResponse('Invalid refresh token', 401));
     }
     if (error.name === 'TokenExpiredError') {
-      return next(new ErrorResponse('Refresh token has expired. Please log in again.', 401));
+      return next(
+        new ErrorResponse(
+          'Refresh token has expired. Please log in again.',
+          401,
+        ),
+      );
     }
     // Other errors
     console.error('[AUTH] Refresh token error:', error);

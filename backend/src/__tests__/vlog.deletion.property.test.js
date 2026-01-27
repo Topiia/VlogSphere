@@ -28,7 +28,8 @@ describe('Property 6: Deletion removes vlog', () => {
 
     // Connect to test database
     if (mongoose.connection.readyState === 0) {
-      const mongoUri = process.env.MONGO_URI_TEST || 'mongodb://localhost:27017/vlogsphere-test';
+      const mongoUri = process.env.MONGO_URI_TEST
+        || 'mongodb://localhost:27017/vlogsphere-test';
       await mongoose.connect(mongoUri, {
         useNewUrlParser: true,
         useUnifiedTopology: true,
@@ -52,9 +53,13 @@ describe('Property 6: Deletion removes vlog', () => {
   // Helper function to create a user and get JWT token
   const createUserWithToken = async (userData) => {
     const user = await User.create(userData);
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET || 'test-secret', {
-      expiresIn: '1h',
-    });
+    const token = jwt.sign(
+      { id: user._id },
+      process.env.JWT_SECRET || 'test-secret',
+      {
+        expiresIn: '1h',
+      },
+    );
     return { user, token };
   };
 
@@ -72,13 +77,19 @@ describe('Property 6: Deletion removes vlog', () => {
       const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
       return emailRegex.test(email);
     }),
-    password: fc.string({ minLength: 6, maxLength: 20 }).filter((s) => s.trim().length >= 6),
+    password: fc
+      .string({ minLength: 6, maxLength: 20 })
+      .filter((s) => s.trim().length >= 6),
   });
 
   // Arbitrary for generating valid vlog data
   const vlogArbitrary = fc.record({
-    title: fc.string({ minLength: 3, maxLength: 100 }).filter((s) => s.trim().length >= 3),
-    description: fc.string({ minLength: 10, maxLength: 500 }).filter((s) => s.trim().length >= 10),
+    title: fc
+      .string({ minLength: 3, maxLength: 100 })
+      .filter((s) => s.trim().length >= 3),
+    description: fc
+      .string({ minLength: 10, maxLength: 500 })
+      .filter((s) => s.trim().length >= 10),
     category: fc.constantFrom(
       'technology',
       'travel',
@@ -92,13 +103,17 @@ describe('Property 6: Deletion removes vlog', () => {
       'education',
     ),
     tags: fc.array(
-      fc.string({ minLength: 1, maxLength: 30 }).filter((s) => s.trim().length >= 1),
+      fc
+        .string({ minLength: 1, maxLength: 30 })
+        .filter((s) => s.trim().length >= 1),
       { maxLength: 10 },
     ),
     images: fc.array(
       fc.record({
         url: fc.webUrl(),
-        publicId: fc.string({ minLength: 10, maxLength: 50 }).filter((s) => s.trim().length >= 10),
+        publicId: fc
+          .string({ minLength: 10, maxLength: 50 })
+          .filter((s) => s.trim().length >= 10),
         caption: fc.string({ maxLength: 100 }),
         order: fc.nat({ max: 9 }),
       }),
@@ -134,19 +149,24 @@ describe('Property 6: Deletion removes vlog', () => {
             // Assert successful deletion (200 OK)
             expect(deleteResponse.status).toBe(200);
             expect(deleteResponse.body.success).toBe(true);
-            expect(deleteResponse.body.message).toMatch(/deleted successfully/i);
+            expect(deleteResponse.body.message).toMatch(
+              /deleted successfully/i,
+            );
 
             // Verify vlog no longer exists in database
             const vlogAfterDeletion = await Vlog.findById(vlog._id);
             expect(vlogAfterDeletion).toBeNull();
 
             // Verify querying for the vlog returns 404
-            const getResponse = await request(app)
-              .get(`/api/vlogs/${vlog._id}`);
+            const getResponse = await request(app).get(
+              `/api/vlogs/${vlog._id}`,
+            );
 
             expect(getResponse.status).toBe(404);
             expect(getResponse.body.success).toBe(false);
-            expect(getResponse.body.error.message || getResponse.body.error).toMatch(/not found/i);
+            expect(
+              getResponse.body.error.message || getResponse.body.error,
+            ).toMatch(/not found/i);
           } finally {
             // Clean up after each property test run
             await User.deleteMany({});

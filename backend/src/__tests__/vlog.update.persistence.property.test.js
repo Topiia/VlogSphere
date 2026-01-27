@@ -28,7 +28,8 @@ describe('Property 4: Update persistence and navigation', () => {
 
     // Connect to test database
     if (mongoose.connection.readyState === 0) {
-      const mongoUri = process.env.MONGO_URI_TEST || 'mongodb://localhost:27017/vlogsphere-test';
+      const mongoUri = process.env.MONGO_URI_TEST
+        || 'mongodb://localhost:27017/vlogsphere-test';
       await mongoose.connect(mongoUri, {
         useNewUrlParser: true,
         useUnifiedTopology: true,
@@ -52,9 +53,13 @@ describe('Property 4: Update persistence and navigation', () => {
   // Helper function to create a user and get JWT token
   const createUserWithToken = async (userData) => {
     const user = await User.create(userData);
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET || 'test-secret', {
-      expiresIn: '1h',
-    });
+    const token = jwt.sign(
+      { id: user._id },
+      process.env.JWT_SECRET || 'test-secret',
+      {
+        expiresIn: '1h',
+      },
+    );
     return { user, token };
   };
 
@@ -72,13 +77,19 @@ describe('Property 4: Update persistence and navigation', () => {
       const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
       return emailRegex.test(email);
     }),
-    password: fc.string({ minLength: 6, maxLength: 20 }).filter((s) => s.trim().length >= 6),
+    password: fc
+      .string({ minLength: 6, maxLength: 20 })
+      .filter((s) => s.trim().length >= 6),
   });
 
   // Arbitrary for generating valid vlog data
   const vlogArbitrary = fc.record({
-    title: fc.string({ minLength: 3, maxLength: 100 }).filter((s) => s.trim().length >= 3),
-    description: fc.string({ minLength: 10, maxLength: 500 }).filter((s) => s.trim().length >= 10),
+    title: fc
+      .string({ minLength: 3, maxLength: 100 })
+      .filter((s) => s.trim().length >= 3),
+    description: fc
+      .string({ minLength: 10, maxLength: 500 })
+      .filter((s) => s.trim().length >= 10),
     category: fc.constantFrom(
       'technology',
       'travel',
@@ -92,13 +103,17 @@ describe('Property 4: Update persistence and navigation', () => {
       'education',
     ),
     tags: fc.array(
-      fc.string({ minLength: 1, maxLength: 30 }).filter((s) => s.trim().length >= 1),
+      fc
+        .string({ minLength: 1, maxLength: 30 })
+        .filter((s) => s.trim().length >= 1),
       { maxLength: 10 },
     ),
     images: fc.array(
       fc.record({
         url: fc.webUrl(),
-        publicId: fc.string({ minLength: 10, maxLength: 50 }).filter((s) => s.trim().length >= 10),
+        publicId: fc
+          .string({ minLength: 10, maxLength: 50 })
+          .filter((s) => s.trim().length >= 10),
         caption: fc.string({ maxLength: 100 }),
         order: fc.nat({ max: 9 }),
       }),
@@ -108,8 +123,12 @@ describe('Property 4: Update persistence and navigation', () => {
 
   // Arbitrary for generating valid update data
   const updateDataArbitrary = fc.record({
-    title: fc.string({ minLength: 3, maxLength: 100 }).filter((s) => s.trim().length >= 3),
-    description: fc.string({ minLength: 10, maxLength: 500 }).filter((s) => s.trim().length >= 10),
+    title: fc
+      .string({ minLength: 3, maxLength: 100 })
+      .filter((s) => s.trim().length >= 3),
+    description: fc
+      .string({ minLength: 10, maxLength: 500 })
+      .filter((s) => s.trim().length >= 10),
     category: fc.constantFrom(
       'technology',
       'travel',
@@ -123,7 +142,9 @@ describe('Property 4: Update persistence and navigation', () => {
       'education',
     ),
     tags: fc.array(
-      fc.string({ minLength: 1, maxLength: 30 }).filter((s) => s.trim().length >= 1),
+      fc
+        .string({ minLength: 1, maxLength: 30 })
+        .filter((s) => s.trim().length >= 1),
       { maxLength: 10 },
     ),
   });
@@ -178,18 +199,24 @@ describe('Property 4: Update persistence and navigation', () => {
             });
 
             // Verify images were preserved
-            expect(updatedVlog.images.length).toBe(originalVlogData.images.length);
+            expect(updatedVlog.images.length).toBe(
+              originalVlogData.images.length,
+            );
 
             // Verify author remains unchanged
             expect(updatedVlog.author.toString()).toBe(author._id.toString());
 
             // Verify updatedAt timestamp was updated
-            expect(updatedVlog.updatedAt.getTime()).toBeGreaterThan(originalVlog.updatedAt.getTime());
+            expect(updatedVlog.updatedAt.getTime()).toBeGreaterThan(
+              originalVlog.updatedAt.getTime(),
+            );
 
             // Verify response contains updated data
             // Note: title and description are trimmed by the Vlog model
             expect(response.body.data.title).toBe(updateData.title.trim());
-            expect(response.body.data.description).toBe(updateData.description.trim());
+            expect(response.body.data.description).toBe(
+              updateData.description.trim(),
+            );
             expect(response.body.data.category).toBe(updateData.category);
           } finally {
             // Clean up after each property test run

@@ -1,83 +1,83 @@
-import { motion } from 'framer-motion'
-import { useEffect, useState } from 'react'
+import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
 
 const StatsSection = () => {
   const [stats, setStats] = useState({
     users: 0,
     vlogs: 0,
     views: 0,
-    uptime: 0
-  })
+    uptime: 0,
+  });
 
   useEffect(() => {
     // Animate numbers on mount
-    const duration = 2000
-    const steps = 60
-    const interval = duration / steps
+    const duration = 2000;
+    const steps = 60;
+    const interval = duration / steps;
 
     const targetStats = {
       users: 12500,
       vlogs: 48500,
       views: 2400000,
-      uptime: 99.9
-    }
+      uptime: 99.9,
+    };
 
-    let currentStep = 0
+    let currentStep = 0;
     const timer = setInterval(() => {
-      currentStep++
-      const progress = currentStep / steps
-      
+      currentStep++;
+      const progress = currentStep / steps;
+
       setStats({
         users: Math.floor(targetStats.users * progress),
         vlogs: Math.floor(targetStats.vlogs * progress),
         views: Math.floor(targetStats.views * progress),
-        uptime: Math.min(targetStats.uptime, 99.9 * progress)
-      })
+        uptime: Math.min(targetStats.uptime, 99.9 * progress),
+      });
 
       if (currentStep >= steps) {
-        clearInterval(timer)
+        clearInterval(timer);
       }
-    }, interval)
+    }, interval);
 
-    return () => clearInterval(timer)
-  }, [])
+    return () => clearInterval(timer);
+  }, []);
 
   const statItems = [
     {
-      label: 'Active Users',
+      label: "Active Users",
       value: stats.users.toLocaleString(),
-      icon: '👥',
-      color: 'from-blue-500 to-purple-500'
+      icon: "👥",
+      color: "from-blue-500 to-purple-500",
     },
     {
-      label: 'Vlogs Created',
+      label: "Vlogs Created",
       value: stats.vlogs.toLocaleString(),
-      icon: '📹',
-      color: 'from-green-500 to-blue-500'
+      icon: "📹",
+      color: "from-green-500 to-blue-500",
     },
     {
-      label: 'Total Views',
+      label: "Total Views",
       value: `${(stats.views / 1000000).toFixed(1)}M`,
-      icon: '👁️',
-      color: 'from-orange-500 to-red-500'
+      icon: "👁️",
+      color: "from-orange-500 to-red-500",
     },
     {
-      label: 'Uptime',
+      label: "Uptime",
       value: `${stats.uptime.toFixed(1)}%`,
-      icon: '⚡',
-      color: 'from-purple-500 to-pink-500'
-    }
-  ]
+      icon: "⚡",
+      color: "from-purple-500 to-pink-500",
+    },
+  ];
 
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.1
-      }
-    }
-  }
+        staggerChildren: 0.1,
+      },
+    },
+  };
 
   const itemVariants = {
     hidden: { opacity: 0, scale: 0.8, y: 20 },
@@ -88,10 +88,10 @@ const StatsSection = () => {
       transition: {
         type: "spring",
         stiffness: 100,
-        damping: 15
-      }
-    }
-  }
+        damping: 15,
+      },
+    },
+  };
 
   return (
     <section className="py-20">
@@ -107,7 +107,8 @@ const StatsSection = () => {
             Platform Statistics
           </h2>
           <p className="text-xl text-[var(--theme-text-secondary)] max-w-2xl mx-auto">
-            Join thousands of creators who trust VLOGSPHERE for their visual storytelling
+            Join thousands of creators who trust VLOGSPHERE for their visual
+            storytelling
           </p>
         </motion.div>
 
@@ -122,16 +123,18 @@ const StatsSection = () => {
             <motion.div
               key={index}
               variants={itemVariants}
-              whileHover={{ 
+              whileHover={{
                 scale: 1.05,
-                transition: { type: "spring", stiffness: 300 }
+                transition: { type: "spring", stiffness: 300 },
               }}
               className="glass-card p-8 rounded-2xl text-center group"
             >
-              <div className={`w-16 h-16 mx-auto mb-6 rounded-2xl bg-gradient-to-r ${stat.color} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
+              <div
+                className={`w-16 h-16 mx-auto mb-6 rounded-2xl bg-gradient-to-r ${stat.color} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}
+              >
                 <span className="text-2xl">{stat.icon}</span>
               </div>
-              
+
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -140,11 +143,11 @@ const StatsSection = () => {
               >
                 {stat.value}
               </motion.div>
-              
+
               <p className="text-[var(--theme-text-secondary)] font-medium">
                 {stat.label}
               </p>
-              
+
               <div className="mt-4">
                 <div className="w-full h-1 bg-gradient-to-r from-transparent via-[var(--theme-accent)] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               </div>
@@ -163,7 +166,7 @@ const StatsSection = () => {
           <h3 className="text-2xl font-bold text-[var(--theme-text)] mb-8 text-center">
             Performance Metrics
           </h3>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="text-center">
               <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-r from-green-500 to-emerald-500 flex items-center justify-center">
@@ -176,7 +179,7 @@ const StatsSection = () => {
                 Optimized performance with CDN delivery and efficient caching
               </p>
             </div>
-            
+
             <div className="text-center">
               <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 flex items-center justify-center">
                 <span className="text-2xl font-bold text-white">🔒</span>
@@ -185,10 +188,11 @@ const StatsSection = () => {
                 Secure & Private
               </h4>
               <p className="text-[var(--theme-text-secondary)]">
-                Enterprise-grade security with encrypted data and secure authentication
+                Enterprise-grade security with encrypted data and secure
+                authentication
               </p>
             </div>
-            
+
             <div className="text-center">
               <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
                 <span className="text-2xl font-bold text-white">📱</span>
@@ -204,7 +208,7 @@ const StatsSection = () => {
         </motion.div>
       </div>
     </section>
-  )
-}
+  );
+};
 
-export default StatsSection
+export default StatsSection;

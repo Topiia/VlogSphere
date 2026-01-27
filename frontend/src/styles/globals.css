@@ -15,20 +15,20 @@
   --noir-velvet-bg: linear-gradient(135deg, #232526 0%, #414345 100%);
 
   /* Deep Space */
-  --deep-space-primary: #0D1452;
-  --deep-space-secondary: #004E92;
+  --deep-space-primary: #0d1452;
+  --deep-space-secondary: #004e92;
   --deep-space-accent: #1a94ff;
   --deep-space-text: #f0f4ff;
   --deep-space-text-secondary: #e6f0ff;
-  --deep-space-bg: linear-gradient(135deg, #0D1452 0%, #004E92 100%);
+  --deep-space-bg: linear-gradient(135deg, #0d1452 0%, #004e92 100%);
 
   /* Crimson Night */
-  --crimson-night-primary: #3A1C71;
-  --crimson-night-secondary: #D76D77;
+  --crimson-night-primary: #3a1c71;
+  --crimson-night-secondary: #d76d77;
   --crimson-night-accent: #ef4444;
   --crimson-night-text: #fef2f2;
   --crimson-night-text-secondary: #fee2e2;
-  --crimson-night-bg: linear-gradient(135deg, #3A1C71 0%, #D76D77 100%);
+  --crimson-night-bg: linear-gradient(135deg, #3a1c71 0%, #d76d77 100%);
 
   /* Glass */
   --glass-white: rgba(255, 255, 255, 0.1);
@@ -86,12 +86,16 @@
   }
 
   /* Scrollbar */
-  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
   ::-webkit-scrollbar-thumb {
     background-color: var(--theme-accent);
     border-radius: 9999px;
   }
-  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
 }
 
 /* ---------------------------------------------------------
@@ -175,14 +179,18 @@
   }
 
   /* Glow */
-  .glow { box-shadow: 0 0 20px rgba(255, 255, 255, 0.3); }
+  .glow {
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+  }
 
   .hover-lift {
-    transition: transform .3s, box-shadow .3s;
+    transition:
+      transform 0.3s,
+      box-shadow 0.3s;
   }
   .hover-lift:hover {
     transform: scale(1.05);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
   }
 
   /* Floating Animation */
@@ -193,13 +201,19 @@
 
 /* Floating effect keyframes */
 @keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-20px); }
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
 }
 
 /* Aurora Background Animations - GPU Optimized */
 @keyframes aurora-float-1 {
-  0%, 100% {
+  0%,
+  100% {
     transform: translate3d(0, 0, 0) scale(1);
   }
   25% {
@@ -214,7 +228,8 @@
 }
 
 @keyframes aurora-float-2 {
-  0%, 100% {
+  0%,
+  100% {
     transform: translate3d(0, 0, 0) scale(1);
   }
   25% {
@@ -229,7 +244,8 @@
 }
 
 @keyframes aurora-float-3 {
-  0%, 100% {
+  0%,
+  100% {
     transform: translate3d(0, 0, 0) scale(1);
   }
   25% {
@@ -244,7 +260,8 @@
 }
 
 @keyframes aurora-float-4 {
-  0%, 100% {
+  0%,
+  100% {
     transform: translate3d(-50%, -50%, 0) scale(1) rotate(0deg);
   }
   33% {
@@ -261,15 +278,19 @@
 }
 
 /* Prevent horizontal scroll */
-html, body {
+html,
+body {
   max-width: 100%;
   overflow-x: hidden;
 }
 
-
 /* Follow Button Active State */
 .active-follow-indicator {
-  background: linear-gradient(135deg, var(--theme-accent), var(--theme-secondary)) !important;
+  background: linear-gradient(
+    135deg,
+    var(--theme-accent),
+    var(--theme-secondary)
+  ) !important;
   border: 1px solid rgba(255, 255, 255, 0.2);
   box-shadow: 0 4px 12px rgba(var(--theme-accent-rgb), 0.3);
 }

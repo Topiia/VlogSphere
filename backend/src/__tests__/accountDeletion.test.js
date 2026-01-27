@@ -67,10 +67,10 @@ describe('userDeletionService.deleteUser() - Unit Tests', () => {
     ];
 
     // Mock logger methods
-    logger.info.mockImplementation(() => { });
-    logger.debug.mockImplementation(() => { });
-    logger.warn.mockImplementation(() => { });
-    logger.error.mockImplementation(() => { });
+    logger.info.mockImplementation(() => {});
+    logger.debug.mockImplementation(() => {});
+    logger.warn.mockImplementation(() => {});
+    logger.error.mockImplementation(() => {});
 
     // Mock Redis
     redis.delPattern.mockResolvedValue(3);
@@ -202,7 +202,9 @@ describe('userDeletionService.deleteUser() - Unit Tests', () => {
       expect(redis.delPattern).toHaveBeenCalledWith(`user:${mockUser._id}:*`);
       expect(redis.delPattern).toHaveBeenCalledWith(`session:${mockUser._id}`);
       expect(redis.delPattern).toHaveBeenCalledWith(`socket:${mockUser._id}`);
-      expect(redis.delPattern).toHaveBeenCalledWith(`cache:vlogs:author:${mockUser._id}`);
+      expect(redis.delPattern).toHaveBeenCalledWith(
+        `cache:vlogs:author:${mockUser._id}`,
+      );
 
       // Verify Redis cleanup happens after commit
       const commitCallOrder = mockSession.commitTransaction.mock.invocationCallOrder[0];
@@ -230,10 +232,11 @@ describe('userDeletionService.deleteUser() - Unit Tests', () => {
       await userDeletionService.deleteUser(mockUser._id);
 
       // Assert
-      expect(queueAssetCleanup).toHaveBeenCalledWith(
-        mockUser._id,
-        ['vlog/image1', 'vlog/image2', 'vlog/image3'],
-      );
+      expect(queueAssetCleanup).toHaveBeenCalledWith(mockUser._id, [
+        'vlog/image1',
+        'vlog/image2',
+        'vlog/image3',
+      ]);
     });
   });
 

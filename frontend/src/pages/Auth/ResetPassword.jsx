@@ -1,83 +1,90 @@
-import { useState, useEffect } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
-import { motion } from 'framer-motion'
-import { useForm } from 'react-hook-form'
-import { authAPI } from '../../services/api'
-import Button from '../../components/UI/Button'
-import Logo from '../../components/UI/Logo'
+import { useState, useEffect } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { motion } from "framer-motion";
+import { useForm } from "react-hook-form";
+import { authAPI } from "../../services/api";
+import Button from "../../components/UI/Button";
+import Logo from "../../components/UI/Logo";
 import {
   EyeIcon,
   EyeSlashIcon,
   LockClosedIcon,
-  CheckIcon
-} from '@heroicons/react/24/outline'
-import toast from 'react-hot-toast'
+  CheckIcon,
+} from "@heroicons/react/24/outline";
+import toast from "react-hot-toast";
 
 const ResetPassword = () => {
-  const navigate = useNavigate()
-  const { token } = useParams()
-  const [loading, setLoading] = useState(false)
-  const [showPassword, setShowPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [tokenError, setTokenError] = useState(false)
-  const [success, setSuccess] = useState(false)
+  const navigate = useNavigate();
+  const { token } = useParams();
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [tokenError, setTokenError] = useState(false);
+  const [success, setSuccess] = useState(false);
 
   const {
     register,
     handleSubmit,
     watch,
-    formState: { errors }
+    formState: { errors },
   } = useForm({
     defaultValues: {
-      password: '',
-      confirmPassword: ''
-    }
-  })
+      password: "",
+      confirmPassword: "",
+    },
+  });
 
-  const password = watch('password')
+  const password = watch("password");
 
   // Password requirements for validation
   const passwordRequirements = [
-    { text: 'At least 6 characters', test: (pwd) => pwd.length >= 6 },
-    { text: 'Contains uppercase letter', test: (pwd) => /[A-Z]/.test(pwd) },
-    { text: 'Contains lowercase letter', test: (pwd) => /[a-z]/.test(pwd) },
-    { text: 'Contains a number', test: (pwd) => /\d/.test(pwd) }
-  ]
+    { text: "At least 6 characters", test: (pwd) => pwd.length >= 6 },
+    { text: "Contains uppercase letter", test: (pwd) => /[A-Z]/.test(pwd) },
+    { text: "Contains lowercase letter", test: (pwd) => /[a-z]/.test(pwd) },
+    { text: "Contains a number", test: (pwd) => /\d/.test(pwd) },
+  ];
 
   // Check if all password requirements are met
   const isPasswordValid = (pwd) => {
-    return passwordRequirements.every(req => req.test(pwd))
-  }
+    return passwordRequirements.every((req) => req.test(pwd));
+  };
 
   const onSubmit = async (data) => {
-    setLoading(true)
-    setTokenError(false)
-    
+    setLoading(true);
+    setTokenError(false);
+
     try {
-      await authAPI.resetPassword(token, data.password)
-      setSuccess(true)
-      toast.success('Password reset successful! Redirecting to login...')
-      
+      await authAPI.resetPassword(token, data.password);
+      setSuccess(true);
+      toast.success("Password reset successful! Redirecting to login...");
+
       // Redirect to login after 2 seconds
       setTimeout(() => {
-        navigate('/login', { replace: true })
-      }, 2000)
+        navigate("/login", { replace: true });
+      }, 2000);
     } catch (error) {
-      const message = error.response?.data?.error?.message || error.message || 'Failed to reset password'
-      
+      const message =
+        error.response?.data?.error?.message ||
+        error.message ||
+        "Failed to reset password";
+
       // Check if it's a token error
-      if (error.response?.status === 400 || message.toLowerCase().includes('token') || message.toLowerCase().includes('expired')) {
-        setTokenError(true)
+      if (
+        error.response?.status === 400 ||
+        message.toLowerCase().includes("token") ||
+        message.toLowerCase().includes("expired")
+      ) {
+        setTokenError(true);
         // Clear sensitive form data
-        document.getElementById('password').value = ''
-        document.getElementById('confirmPassword').value = ''
+        document.getElementById("password").value = "";
+        document.getElementById("confirmPassword").value = "";
       }
-      
-      toast.error(message)
+
+      toast.error(message);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const containerVariants = {
     hidden: { opacity: 0, scale: 0.9 },
@@ -87,17 +94,17 @@ const ResetPassword = () => {
       transition: {
         type: "spring",
         stiffness: 100,
-        damping: 15
-      }
-    }
-  }
+        damping: 15,
+      },
+    },
+  };
 
   // Focus password input on mount
   useEffect(() => {
     if (!success) {
-      document.getElementById('password')?.focus()
+      document.getElementById("password")?.focus();
     }
-  }, [success])
+  }, [success]);
 
   return (
     <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
@@ -119,13 +126,12 @@ const ResetPassword = () => {
             <Logo size="lg" />
           </div>
           <h2 className="text-3xl font-bold gradient-text mb-2">
-            {success ? 'Password Reset!' : 'Reset Your Password'}
+            {success ? "Password Reset!" : "Reset Your Password"}
           </h2>
           <p className="text-[var(--theme-text-secondary)]">
-            {success 
+            {success
               ? "Your password has been successfully reset"
-              : "Enter your new password below"
-            }
+              : "Enter your new password below"}
           </p>
         </div>
 
@@ -140,7 +146,8 @@ const ResetPassword = () => {
                   className="p-4 bg-red-500/10 border border-red-500/20 rounded-lg"
                 >
                   <p className="text-sm text-red-400 mb-2">
-                    Invalid or expired reset token. Please request a new password reset email.
+                    Invalid or expired reset token. Please request a new
+                    password reset email.
                   </p>
                   <Link
                     to="/forgot-password"
@@ -153,7 +160,10 @@ const ResetPassword = () => {
 
               {/* Password Field */}
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-[var(--theme-text)] mb-2">
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-[var(--theme-text)] mb-2"
+                >
                   New Password
                 </label>
                 <div className="relative">
@@ -161,14 +171,15 @@ const ResetPassword = () => {
                     <LockClosedIcon className="h-5 w-5 text-[var(--theme-text-secondary)]" />
                   </div>
                   <input
-                    {...register('password', {
-                      required: 'Password is required',
+                    {...register("password", {
+                      required: "Password is required",
                       validate: {
-                        strength: (value) => 
-                          isPasswordValid(value) || 'Password must meet all requirements'
-                      }
+                        strength: (value) =>
+                          isPasswordValid(value) ||
+                          "Password must meet all requirements",
+                      },
                     })}
-                    type={showPassword ? 'text' : 'password'}
+                    type={showPassword ? "text" : "password"}
                     id="password"
                     className="glass-input pl-11 pr-11"
                     placeholder="Enter your new password"
@@ -192,7 +203,7 @@ const ResetPassword = () => {
                 {password && (
                   <motion.div
                     initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
+                    animate={{ opacity: 1, height: "auto" }}
                     className="mt-3 space-y-1"
                   >
                     {passwordRequirements.map((req, index) => (
@@ -200,13 +211,15 @@ const ResetPassword = () => {
                         key={index}
                         className={`flex items-center space-x-2 text-xs ${
                           req.test(password)
-                            ? 'text-green-400'
-                            : 'text-[var(--theme-text-secondary)]'
+                            ? "text-green-400"
+                            : "text-[var(--theme-text-secondary)]"
                         }`}
                       >
-                        <CheckIcon className={`w-3 h-3 ${
-                          req.test(password) ? 'opacity-100' : 'opacity-0'
-                        }`} />
+                        <CheckIcon
+                          className={`w-3 h-3 ${
+                            req.test(password) ? "opacity-100" : "opacity-0"
+                          }`}
+                        />
                         <span>{req.text}</span>
                       </div>
                     ))}
@@ -226,7 +239,10 @@ const ResetPassword = () => {
 
               {/* Confirm Password Field */}
               <div>
-                <label htmlFor="confirmPassword" className="block text-sm font-medium text-[var(--theme-text)] mb-2">
+                <label
+                  htmlFor="confirmPassword"
+                  className="block text-sm font-medium text-[var(--theme-text)] mb-2"
+                >
                   Confirm New Password
                 </label>
                 <div className="relative">
@@ -234,12 +250,12 @@ const ResetPassword = () => {
                     <LockClosedIcon className="h-5 w-5 text-[var(--theme-text-secondary)]" />
                   </div>
                   <input
-                    {...register('confirmPassword', {
-                      required: 'Please confirm your password',
+                    {...register("confirmPassword", {
+                      required: "Please confirm your password",
                       validate: (value) =>
-                        value === password || 'Passwords do not match'
+                        value === password || "Passwords do not match",
                     })}
-                    type={showConfirmPassword ? 'text' : 'password'}
+                    type={showConfirmPassword ? "text" : "password"}
                     id="confirmPassword"
                     className="glass-input pl-11 pr-11"
                     placeholder="Confirm your new password"
@@ -278,7 +294,7 @@ const ResetPassword = () => {
                   loading={loading}
                   className="mt-4"
                 >
-                  {loading ? 'Resetting Password...' : 'Reset Password'}
+                  {loading ? "Resetting Password..." : "Reset Password"}
                 </Button>
               </div>
             </div>
@@ -287,8 +303,18 @@ const ResetPassword = () => {
           <div className="glass-card p-8 rounded-2xl">
             <div className="text-center space-y-4">
               <div className="mx-auto w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center">
-                <svg className="w-8 h-8 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                <svg
+                  className="w-8 h-8 text-green-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
                 </svg>
               </div>
               <p className="text-[var(--theme-text)]">
@@ -315,15 +341,25 @@ const ResetPassword = () => {
             to="/login"
             className="text-[var(--theme-accent)] hover:text-[var(--theme-accent)]/80 font-medium transition-colors inline-flex items-center space-x-2"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M10 19l-7-7m0 0l7-7m-7 7h18"
+              />
             </svg>
             <span>Back to Login</span>
           </Link>
         </div>
       </motion.div>
     </div>
-  )
-}
+  );
+};
 
-export default ResetPassword
+export default ResetPassword;

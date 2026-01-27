@@ -1,12 +1,12 @@
-import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
-import { useState, useEffect } from 'react'
-import { useAuth } from '../../contexts/AuthContext'
-import SearchBar from '../Search/SearchBar'
-import ThemeSelector from '../Theme/ThemeSelector'
-import UserMenu from '../Auth/UserMenu'
-import MobileMenu from './MobileMenu'
-import Logo from '../UI/Logo'
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
+import { useAuth } from "../../contexts/AuthContext";
+import SearchBar from "../Search/SearchBar";
+import ThemeSelector from "../Theme/ThemeSelector";
+import UserMenu from "../Auth/UserMenu";
+import MobileMenu from "./MobileMenu";
+import Logo from "../UI/Logo";
 import {
   Bars3Icon,
   XMarkIcon,
@@ -17,38 +17,38 @@ import {
   UserIcon,
   BookmarkIcon,
   HeartIcon,
-  Cog6ToothIcon
-} from '@heroicons/react/24/outline'
+  Cog6ToothIcon,
+} from "@heroicons/react/24/outline";
 
 const Header = ({ onToggleSidebar }) => {
-  const location = useLocation()
-  const navigate = useNavigate()
-  const { isAuthenticated, user } = useAuth()
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [scrolled, setScrolled] = useState(false)
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { isAuthenticated, user } = useAuth();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 20)
-    }
+      setScrolled(window.scrollY > 20);
+    };
 
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const navigation = [
-    { name: 'Home', href: '/', icon: HomeIcon },
-    { name: 'Explore', href: '/explore', icon: MapIcon },
-    { name: 'Trending', href: '/trending', icon: FireIcon },
-  ]
+    { name: "Home", href: "/", icon: HomeIcon },
+    { name: "Explore", href: "/explore", icon: MapIcon },
+    { name: "Trending", href: "/trending", icon: FireIcon },
+  ];
 
   if (isAuthenticated) {
     navigation.push(
-      { name: 'Dashboard', href: '/dashboard', icon: UserIcon },
-      { name: 'Bookmarks', href: '/bookmarks', icon: BookmarkIcon },
-      { name: 'Liked', href: '/liked', icon: HeartIcon },
-      { name: 'Settings', href: '/settings', icon: Cog6ToothIcon }
-    )
+      { name: "Dashboard", href: "/dashboard", icon: UserIcon },
+      { name: "Bookmarks", href: "/bookmarks", icon: BookmarkIcon },
+      { name: "Liked", href: "/liked", icon: HeartIcon },
+      { name: "Settings", href: "/settings", icon: Cog6ToothIcon },
+    );
   }
 
   return (
@@ -57,7 +57,9 @@ const Header = ({ onToggleSidebar }) => {
         initial={{ y: -100 }}
         animate={{ y: 0 }}
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          scrolled ? 'glass shadow-lg backdrop-blur-xl' : 'glass backdrop-blur-md'
+          scrolled
+            ? "glass shadow-lg backdrop-blur-xl"
+            : "glass backdrop-blur-md"
         }`}
       >
         <div className="max-w-full px-4 lg:px-6">
@@ -73,8 +75,11 @@ const Header = ({ onToggleSidebar }) => {
                   <Bars3Icon className="w-6 h-6 text-[var(--theme-text)]" />
                 </button>
               )}
-              
-              <Link to="/" className="flex items-center space-x-2 flex-shrink-0">
+
+              <Link
+                to="/"
+                className="flex items-center space-x-2 flex-shrink-0"
+              >
                 <Logo size="sm" />
                 <span className="hidden sm:block text-xl font-bold gradient-text whitespace-nowrap">
                   VLOGSPHERE
@@ -90,21 +95,25 @@ const Header = ({ onToggleSidebar }) => {
                   to={item.href}
                   className={`relative px-3 py-2 rounded-lg transition-all duration-200 whitespace-nowrap ${
                     location.pathname === item.href
-                      ? 'text-[var(--theme-accent)] bg-[var(--glass-white)]'
-                      : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text)] hover:bg-[var(--glass-white)]'
+                      ? "text-[var(--theme-accent)] bg-[var(--glass-white)]"
+                      : "text-[var(--theme-text-secondary)] hover:text-[var(--theme-text)] hover:bg-[var(--glass-white)]"
                   }`}
                 >
                   <span className="flex items-center space-x-2">
                     <item.icon className="w-5 h-5" />
                     <span>{item.name}</span>
                   </span>
-                  
+
                   {location.pathname === item.href && (
                     <motion.div
                       layoutId="navbar-indicator"
                       className="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--theme-accent)] rounded-full"
                       initial={false}
-                      transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                      transition={{
+                        type: "spring",
+                        stiffness: 500,
+                        damping: 30,
+                      }}
                     />
                   )}
                 </Link>
@@ -123,7 +132,7 @@ const Header = ({ onToggleSidebar }) => {
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={() => navigate('/create')}
+                  onClick={() => navigate("/create")}
                   className="hidden md:flex items-center space-x-2 px-3 lg:px-4 py-2 bg-[var(--theme-accent)] text-white rounded-lg hover:shadow-lg transition-all duration-200"
                   aria-label="Create new vlog"
                 >
@@ -175,13 +184,13 @@ const Header = ({ onToggleSidebar }) => {
       </motion.header>
 
       {/* Mobile Menu */}
-      <MobileMenu 
-        isOpen={mobileMenuOpen} 
+      <MobileMenu
+        isOpen={mobileMenuOpen}
         onClose={() => setMobileMenuOpen(false)}
         navigation={navigation}
       />
     </>
-  )
-}
+  );
+};
 
-export default Header
+export default Header;

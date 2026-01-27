@@ -43,7 +43,9 @@ try {
   logger.warn('Bull queue unavailable - emails will be sent synchronously', {
     error: error.message,
   });
-  console.warn('[WARN] Bull email queue unavailable - emails will be sent synchronously');
+  console.warn(
+    '[WARN] Bull email queue unavailable - emails will be sent synchronously',
+  );
 }
 
 // Process email jobs (only if queue is available)
@@ -188,43 +190,50 @@ exports.queueEmail = async (emailData, priority = 5) => {
 /**
  * Queue verification email
  */
-exports.queueVerificationEmail = async (email, verificationUrl) => exports.queueEmail({
-  to: email,
-  subject: 'Email Verification - VlogSphere',
-  html: `
+exports.queueVerificationEmail = async (email, verificationUrl) => exports.queueEmail(
+  {
+    to: email,
+    subject: 'Email Verification - VlogSphere',
+    html: `
       <h2>Welcome to VlogSphere!</h2>
       <p>Please verify your email address by clicking the link below:</p>
       <a href="${verificationUrl}">${verificationUrl}</a>
       <p>This link will expire in 24 hours.</p>
     `,
-  text: `Welcome to VlogSphere! Please verify your email: ${verificationUrl}`,
-  critical: true,
-}, 10);
+    text: `Welcome to VlogSphere! Please verify your email: ${verificationUrl}`,
+    critical: true,
+  },
+  10,
+);
 
 /**
  * Queue password reset email
  */
-exports.queuePasswordResetEmail = async (email, resetUrl) => exports.queueEmail({
-  to: email,
-  subject: 'Password Reset - VlogSphere',
-  html: `
+exports.queuePasswordResetEmail = async (email, resetUrl) => exports.queueEmail(
+  {
+    to: email,
+    subject: 'Password Reset - VlogSphere',
+    html: `
       <h2>Password Reset Request</h2>
       <p>You requested a password reset. Click the link below to reset your password:</p>
       <a href="${resetUrl}">${resetUrl}</a>
       <p>This link will expire in 10 minutes.</p>
       <p>If you didn't request this, please ignore this email.</p>
     `,
-  text: `Password reset link: ${resetUrl} (expires in 10 minutes)`,
-  critical: true,
-}, 10);
+    text: `Password reset link: ${resetUrl} (expires in 10 minutes)`,
+    critical: true,
+  },
+  10,
+);
 
 /**
  * Queue welcome email
  */
-exports.queueWelcomeEmail = async (email, username) => exports.queueEmail({
-  to: email,
-  subject: 'Welcome to VlogSphere!',
-  html: `
+exports.queueWelcomeEmail = async (email, username) => exports.queueEmail(
+  {
+    to: email,
+    subject: 'Welcome to VlogSphere!',
+    html: `
       <h2>Welcome ${username}!</h2>
       <p>Thank you for joining VlogSphere. Start creating and sharing your vlogs today!</p>
       <p>Get started by:</p>
@@ -234,8 +243,10 @@ exports.queueWelcomeEmail = async (email, username) => exports.queueEmail({
         <li>Following other creators</li>
       </ul>
     `,
-  text: `Welcome ${username}! Thank you for joining VlogSphere.`,
-}, 5);
+    text: `Welcome ${username}! Thank you for joining VlogSphere.`,
+  },
+  5,
+);
 
 /**
  * Get queue statistics

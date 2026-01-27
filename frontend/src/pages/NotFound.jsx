@@ -1,7 +1,7 @@
-import { Link } from 'react-router-dom'
-import { motion } from 'framer-motion'
-import Button from '../components/UI/Button'
-import Logo from '../components/UI/Logo'
+import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
+import Button from "../components/UI/Button";
+import Logo from "../components/UI/Logo";
 
 const NotFound = () => {
   return (
@@ -12,7 +12,7 @@ const NotFound = () => {
         transition={{
           type: "spring",
           stiffness: 100,
-          damping: 15
+          damping: 15,
         }}
         className="text-center max-w-lg mx-auto"
       >
@@ -48,8 +48,8 @@ const NotFound = () => {
           transition={{ delay: 0.4 }}
           className="text-[var(--theme-text-secondary)] text-lg mb-8"
         >
-          The page you're looking for doesn't exist or has been moved.
-          Let's get you back on track.
+          The page you're looking for doesn't exist or has been moved. Let's get
+          you back on track.
         </motion.p>
 
         {/* Action Buttons */}
@@ -60,21 +60,13 @@ const NotFound = () => {
           className="flex flex-col sm:flex-row gap-4 justify-center"
         >
           <Link to="/">
-            <Button
-              size="lg"
-              variant="primary"
-              className="w-full sm:w-auto"
-            >
+            <Button size="lg" variant="primary" className="w-full sm:w-auto">
               Go Home
             </Button>
           </Link>
-          
+
           <Link to="/explore">
-            <Button
-              size="lg"
-              variant="outline"
-              className="w-full sm:w-auto"
-            >
+            <Button size="lg" variant="outline" className="w-full sm:w-auto">
               Explore Content
             </Button>
           </Link>
@@ -88,8 +80,14 @@ const NotFound = () => {
           className="mt-12 flex justify-center space-x-2"
         >
           <div className="w-2 h-2 bg-[var(--theme-accent)] rounded-full animate-bounce"></div>
-          <div className="w-2 h-2 bg-[var(--theme-secondary)] rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-          <div className="w-2 h-2 bg-[var(--theme-accent)] rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+          <div
+            className="w-2 h-2 bg-[var(--theme-secondary)] rounded-full animate-bounce"
+            style={{ animationDelay: "0.1s" }}
+          ></div>
+          <div
+            className="w-2 h-2 bg-[var(--theme-accent)] rounded-full animate-bounce"
+            style={{ animationDelay: "0.2s" }}
+          ></div>
         </motion.div>
 
         {/* Error Code */}
@@ -105,7 +103,7 @@ const NotFound = () => {
         </motion.div>
       </motion.div>
     </div>
-  )
-}
+  );
+};
 
-export default NotFound
+export default NotFound;

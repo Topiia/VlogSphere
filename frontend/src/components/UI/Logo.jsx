@@ -1,12 +1,12 @@
-import { motion } from 'framer-motion'
+import { motion } from "framer-motion";
 
-const Logo = ({ size = 'md', className = '' }) => {
+const Logo = ({ size = "md", className = "" }) => {
   const sizes = {
-    sm: 'w-8 h-8',
-    md: 'w-10 h-10',
-    lg: 'w-12 h-12',
-    xl: 'w-16 h-16'
-  }
+    sm: "w-8 h-8",
+    md: "w-10 h-10",
+    lg: "w-12 h-12",
+    xl: "w-16 h-16",
+  };
 
   return (
     <motion.div
@@ -27,14 +27,14 @@ const Logo = ({ size = 'md', className = '' }) => {
             <stop offset="100%" stopColor="var(--theme-secondary)" />
           </linearGradient>
           <filter id="glow">
-            <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-            <feMerge> 
-              <feMergeNode in="coloredBlur"/>
-              <feMergeNode in="SourceGraphic"/> 
+            <feGaussianBlur stdDeviation="3" result="coloredBlur" />
+            <feMerge>
+              <feMergeNode in="coloredBlur" />
+              <feMergeNode in="SourceGraphic" />
             </feMerge>
           </filter>
         </defs>
-        
+
         <circle
           cx="50"
           cy="50"
@@ -43,14 +43,14 @@ const Logo = ({ size = 'md', className = '' }) => {
           strokeWidth="4"
           filter="url(#glow)"
         />
-        
+
         {/* Inner Play Button Shape */}
         <path
           d="M35 25 L35 75 L75 50 Z"
           fill="url(#logoGradient)"
           opacity="0.8"
         />
-        
+
         {/* Decorative Elements */}
         <circle
           cx="25"
@@ -66,7 +66,7 @@ const Logo = ({ size = 'md', className = '' }) => {
           fill="var(--theme-secondary)"
           opacity="0.6"
         />
-        
+
         {/* Circuit-like Pattern */}
         <path
           d="M20 50 Q50 20 80 50 Q50 80 20 50"
@@ -77,7 +77,7 @@ const Logo = ({ size = 'md', className = '' }) => {
         />
       </svg>
     </motion.div>
-  )
-}
+  );
+};
 
-export default Logo
+export default Logo;

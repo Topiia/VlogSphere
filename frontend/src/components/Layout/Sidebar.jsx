@@ -1,7 +1,7 @@
-import { Link, useLocation } from 'react-router-dom'
-import { motion } from 'framer-motion'
-import { useAuth } from '../../contexts/AuthContext'
-import Logo from '../UI/Logo'
+import { Link, useLocation } from "react-router-dom";
+import { motion } from "framer-motion";
+import { useAuth } from "../../contexts/AuthContext";
+import Logo from "../UI/Logo";
 import {
   HomeIcon,
   MapIcon,
@@ -11,23 +11,23 @@ import {
   BookmarkIcon,
   HeartIcon,
   Cog6ToothIcon,
-  ArrowRightOnRectangleIcon
-} from '@heroicons/react/24/outline'
+  ArrowRightOnRectangleIcon,
+} from "@heroicons/react/24/outline";
 
 const Sidebar = ({ isOpen, onClose }) => {
-  const location = useLocation()
-  const { user, logout } = useAuth()
+  const location = useLocation();
+  const { user, logout } = useAuth();
 
   const menuItems = [
-    { name: 'Home', href: '/', icon: HomeIcon },
-    { name: 'Explore', href: '/explore', icon: MapIcon },
-    { name: 'Trending', href: '/trending', icon: FireIcon },
-    { name: 'Create Vlog', href: '/create', icon: PlusIcon },
-    { name: 'My Profile', href: `/profile/${user?.username}`, icon: UserIcon },
-    { name: 'Bookmarks', href: '/bookmarks', icon: BookmarkIcon },
-    { name: 'Liked', href: '/liked', icon: HeartIcon },
-    { name: 'Settings', href: '/settings', icon: Cog6ToothIcon },
-  ]
+    { name: "Home", href: "/", icon: HomeIcon },
+    { name: "Explore", href: "/explore", icon: MapIcon },
+    { name: "Trending", href: "/trending", icon: FireIcon },
+    { name: "Create Vlog", href: "/create", icon: PlusIcon },
+    { name: "My Profile", href: `/profile/${user?.username}`, icon: UserIcon },
+    { name: "Bookmarks", href: "/bookmarks", icon: BookmarkIcon },
+    { name: "Liked", href: "/liked", icon: HeartIcon },
+    { name: "Settings", href: "/settings", icon: Cog6ToothIcon },
+  ];
 
   return (
     <>
@@ -49,7 +49,7 @@ const Sidebar = ({ isOpen, onClose }) => {
           glass-card border-r border-white/10 z-40 lg:z-10
           transition-transform duration-300 ease-in-out
           overflow-y-auto overflow-x-hidden lg:self-start
-          ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+          ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
         `}
       >
         <div className="flex flex-col h-full lg:h-auto lg:min-h-[calc(100vh-4rem)] pt-16 lg:pt-0">
@@ -58,8 +58,12 @@ const Sidebar = ({ isOpen, onClose }) => {
             <div className="flex items-center space-x-3">
               <Logo size="md" />
               <div>
-                <h2 className="text-lg font-bold text-[var(--theme-text)]">VLOGSPHERE</h2>
-                <p className="text-sm text-[var(--theme-text-secondary)]">Create & Share</p>
+                <h2 className="text-lg font-bold text-[var(--theme-text)]">
+                  VLOGSPHERE
+                </h2>
+                <p className="text-sm text-[var(--theme-text-secondary)]">
+                  Create & Share
+                </p>
               </div>
             </div>
           </div>
@@ -70,8 +74,8 @@ const Sidebar = ({ isOpen, onClose }) => {
               <div className="flex items-center space-x-3">
                 <div className="w-12 h-12 rounded-full bg-gradient-to-r from-[var(--theme-accent)] to-[var(--theme-secondary)] flex items-center justify-center">
                   {user.avatar ? (
-                    <img 
-                      src={user.avatar} 
+                    <img
+                      src={user.avatar}
                       alt={user.username}
                       className="w-full h-full rounded-full object-cover"
                     />
@@ -82,7 +86,9 @@ const Sidebar = ({ isOpen, onClose }) => {
                   )}
                 </div>
                 <div>
-                  <h3 className="font-semibold text-[var(--theme-text)]">{user.username}</h3>
+                  <h3 className="font-semibold text-[var(--theme-text)]">
+                    {user.username}
+                  </h3>
                   <p className="text-sm text-[var(--theme-text-secondary)]">
                     {user.followerCount || 0} followers
                   </p>
@@ -101,8 +107,8 @@ const Sidebar = ({ isOpen, onClose }) => {
                     onClick={onClose}
                     className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ${
                       location.pathname === item.href
-                        ? 'bg-[var(--theme-accent)] text-white shadow-lg'
-                        : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text)] hover:bg-[var(--glass-white)]'
+                        ? "bg-[var(--theme-accent)] text-white shadow-lg"
+                        : "text-[var(--theme-text-secondary)] hover:text-[var(--theme-text)] hover:bg-[var(--glass-white)]"
                     }`}
                   >
                     <item.icon className="w-5 h-5" />
@@ -117,8 +123,8 @@ const Sidebar = ({ isOpen, onClose }) => {
           <div className="p-4 border-t border-white/10">
             <button
               onClick={() => {
-                logout()
-                onClose()
+                logout();
+                onClose();
               }}
               className="flex items-center space-x-3 w-full px-4 py-3 rounded-lg text-red-400 hover:bg-red-400/10 hover:text-red-300 transition-all duration-200"
             >
@@ -129,7 +135,7 @@ const Sidebar = ({ isOpen, onClose }) => {
         </div>
       </aside>
     </>
-  )
-}
+  );
+};
 
-export default Sidebar
+export default Sidebar;

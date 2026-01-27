@@ -57,7 +57,9 @@ exports.registerValidation = [
     .isLength({ min: 6, max: 128 })
     .withMessage('Password must be between 6 and 128 characters')
     .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
-    .withMessage('Password must contain at least one lowercase letter, one uppercase letter, and one number'),
+    .withMessage(
+      'Password must contain at least one lowercase letter, one uppercase letter, and one number',
+    ),
 ];
 
 // Login validation
@@ -68,9 +70,7 @@ exports.loginValidation = [
     .withMessage('Must be a valid email address')
     .normalizeEmail(),
 
-  body('password')
-    .notEmpty()
-    .withMessage('Password is required'),
+  body('password').notEmpty().withMessage('Password is required'),
 ];
 
 // Vlog creation/update validation
@@ -90,7 +90,19 @@ exports.vlogValidation = [
   body('category')
     .optional()
     .trim()
-    .isIn(['technology', 'travel', 'lifestyle', 'food', 'fashion', 'fitness', 'music', 'art', 'business', 'education', 'other'])
+    .isIn([
+      'technology',
+      'travel',
+      'lifestyle',
+      'food',
+      'fashion',
+      'fitness',
+      'music',
+      'art',
+      'business',
+      'education',
+      'other',
+    ])
     .withMessage('Invalid category'),
 
   body('tags')
@@ -176,7 +188,9 @@ exports.updatePasswordValidation = [
     .isLength({ min: 6, max: 128 })
     .withMessage('New password must be between 6 and 128 characters')
     .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
-    .withMessage('New password must contain at least one lowercase letter, one uppercase letter, and one number'),
+    .withMessage(
+      'New password must contain at least one lowercase letter, one uppercase letter, and one number',
+    ),
 ];
 
 // Password reset request validation
@@ -198,14 +212,14 @@ exports.resetPasswordValidation = [
     .isLength({ min: 6, max: 128 })
     .withMessage('Password must be between 6 and 128 characters')
     .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
-    .withMessage('Password must contain at least one lowercase letter, one uppercase letter, and one number'),
+    .withMessage(
+      'Password must contain at least one lowercase letter, one uppercase letter, and one number',
+    ),
 ];
 
 // MongoDB ObjectId validation
 exports.objectIdValidation = (paramName = 'id') => [
-  param(paramName)
-    .isMongoId()
-    .withMessage('Invalid ID format'),
+  param(paramName).isMongoId().withMessage('Invalid ID format'),
 ];
 
 // Pagination validation
@@ -225,7 +239,16 @@ exports.paginationValidation = [
   query('sort')
     .optional()
     .trim()
-    .isIn(['createdAt', '-createdAt', 'views', '-views', 'likes', '-likes', 'title', '-title'])
+    .isIn([
+      'createdAt',
+      '-createdAt',
+      'views',
+      '-views',
+      'likes',
+      '-likes',
+      'title',
+      '-title',
+    ])
     .withMessage('Invalid sort parameter'),
 ];
 

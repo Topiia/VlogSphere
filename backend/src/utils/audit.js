@@ -74,7 +74,14 @@ exports.logVlogCreate = async (userId, vlogId, ipAddress, userAgent) => exports.
  * Log vlog update with before/after data
  */
 // eslint-disable-next-line max-len
-exports.logVlogUpdate = async (userId, vlogId, beforeData, afterData, ipAddress, userAgent) => exports.logAudit({
+exports.logVlogUpdate = async (
+  userId,
+  vlogId,
+  beforeData,
+  afterData,
+  ipAddress,
+  userAgent,
+) => exports.logAudit({
   userId,
   action: 'VLOG_UPDATE',
   resourceType: 'Vlog',
@@ -90,7 +97,13 @@ exports.logVlogUpdate = async (userId, vlogId, beforeData, afterData, ipAddress,
 /**
  * Log vlog deletion (CRITICAL - preserve for recovery)
  */
-exports.logVlogDelete = async (userId, vlogId, vlogData, ipAddress, userAgent) => exports.logAudit({
+exports.logVlogDelete = async (
+  userId,
+  vlogId,
+  vlogData,
+  ipAddress,
+  userAgent,
+) => exports.logAudit({
   userId,
   action: 'VLOG_DELETE',
   resourceType: 'Vlog',
@@ -180,7 +193,13 @@ exports.logPasswordChange = async (userId, ipAddress, userAgent) => exports.logA
  * Log comment deletion
  */
 // eslint-disable-next-line max-len
-exports.logCommentDelete = async (userId, commentId, commentData, ipAddress, userAgent) => exports.logAudit({
+exports.logCommentDelete = async (
+  userId,
+  commentId,
+  commentData,
+  ipAddress,
+  userAgent,
+) => exports.logAudit({
   userId,
   action: 'COMMENT_DELETE',
   resourceType: 'Comment',
@@ -196,7 +215,13 @@ exports.logCommentDelete = async (userId, commentId, commentData, ipAddress, use
  * Log security event (token reuse, suspicious activity, etc.)
  */
 // eslint-disable-next-line max-len
-exports.logSecurityEvent = async (userId, action, details, ipAddress, userAgent) => exports.logAudit({
+exports.logSecurityEvent = async (
+  userId,
+  action,
+  details,
+  ipAddress,
+  userAgent,
+) => exports.logAudit({
   userId,
   action,
   resourceType: 'Session',
@@ -213,10 +238,7 @@ exports.logSecurityEvent = async (userId, action, details, ipAddress, userAgent)
  * @param {number} limit - Max results
  * @returns {Promise<Array>} - Audit log entries
  */
-exports.getUserAuditLogs = async (userId, limit = 100) => AuditLog.find({ userId })
-  .sort({ timestamp: -1 })
-  .limit(limit)
-  .lean();
+exports.getUserAuditLogs = async (userId, limit = 100) => AuditLog.find({ userId }).sort({ timestamp: -1 }).limit(limit).lean();
 
 /**
  * Query audit logs for a resource

@@ -3,32 +3,215 @@ const { stopwords } = require('natural');
 
 // Common vlogging-related tags
 const COMMON_TAGS = [
-  'vlog', 'daily', 'life', 'adventure', 'travel', 'food', 'tech',
-  'lifestyle', 'fitness', 'music', 'art', 'photography', 'diy',
-  'tutorial', 'review', 'challenge', 'comedy', 'gaming', 'sports',
-  'health', 'education', 'business', 'entertainment', 'fashion',
-  'beauty', 'cooking', 'nature', 'city', 'culture', 'experience',
+  'vlog',
+  'daily',
+  'life',
+  'adventure',
+  'travel',
+  'food',
+  'tech',
+  'lifestyle',
+  'fitness',
+  'music',
+  'art',
+  'photography',
+  'diy',
+  'tutorial',
+  'review',
+  'challenge',
+  'comedy',
+  'gaming',
+  'sports',
+  'health',
+  'education',
+  'business',
+  'entertainment',
+  'fashion',
+  'beauty',
+  'cooking',
+  'nature',
+  'city',
+  'culture',
+  'experience',
 ];
 
 // Category-specific tags
 const CATEGORY_TAGS = {
-  technology: ['tech', 'gadget', 'software', 'hardware', 'innovation', 'digital', 'AI', 'coding', 'programming'],
-  travel: ['travel', 'adventure', 'explore', 'journey', 'destination', 'culture', 'vacation', 'trip', 'wanderlust'],
-  lifestyle: ['lifestyle', 'daily', 'routine', 'habits', 'wellness', 'mindfulness', 'productivity', 'selfcare'],
-  food: ['food', 'cooking', 'recipe', 'kitchen', 'culinary', 'delicious', 'meal', 'restaurant', 'taste'],
-  fashion: ['fashion', 'style', 'outfit', 'clothing', 'trend', 'design', 'wardrobe', 'accessories'],
-  fitness: ['fitness', 'workout', 'exercise', 'health', 'gym', 'training', 'strength', 'cardio', 'yoga'],
-  music: ['music', 'song', 'melody', 'performance', 'concert', 'instrument', 'band', 'artist', 'rhythm'],
-  art: ['art', 'creative', 'painting', 'drawing', 'design', 'artist', 'gallery', 'masterpiece', 'inspiration'],
-  business: ['business', 'entrepreneur', 'startup', 'marketing', 'success', 'leadership', 'strategy', 'growth'],
-  education: ['education', 'learning', 'tutorial', 'knowledge', 'study', 'lesson', 'teaching', 'skill'],
-  entertainment: ['entertainment', 'fun', 'show', 'performance', 'comedy', 'drama', 'movie', 'celebrity'],
-  gaming: ['gaming', 'game', 'playthrough', 'stream', 'esports', 'console', 'pc', 'multiplayer'],
-  sports: ['sports', 'athlete', 'competition', 'training', 'game', 'championship', 'fitness', 'exercise'],
-  health: ['health', 'wellness', 'medical', 'nutrition', 'mentalhealth', 'selfcare', 'healing', 'recovery'],
-  science: ['science', 'research', 'discovery', 'experiment', 'laboratory', 'technology', 'innovation'],
-  photography: ['photography', 'photo', 'camera', 'shoot', 'portrait', 'landscape', 'editing', 'visual'],
-  diy: ['diy', 'craft', 'handmade', 'project', 'creative', 'build', 'make', 'tutorial'],
+  technology: [
+    'tech',
+    'gadget',
+    'software',
+    'hardware',
+    'innovation',
+    'digital',
+    'AI',
+    'coding',
+    'programming',
+  ],
+  travel: [
+    'travel',
+    'adventure',
+    'explore',
+    'journey',
+    'destination',
+    'culture',
+    'vacation',
+    'trip',
+    'wanderlust',
+  ],
+  lifestyle: [
+    'lifestyle',
+    'daily',
+    'routine',
+    'habits',
+    'wellness',
+    'mindfulness',
+    'productivity',
+    'selfcare',
+  ],
+  food: [
+    'food',
+    'cooking',
+    'recipe',
+    'kitchen',
+    'culinary',
+    'delicious',
+    'meal',
+    'restaurant',
+    'taste',
+  ],
+  fashion: [
+    'fashion',
+    'style',
+    'outfit',
+    'clothing',
+    'trend',
+    'design',
+    'wardrobe',
+    'accessories',
+  ],
+  fitness: [
+    'fitness',
+    'workout',
+    'exercise',
+    'health',
+    'gym',
+    'training',
+    'strength',
+    'cardio',
+    'yoga',
+  ],
+  music: [
+    'music',
+    'song',
+    'melody',
+    'performance',
+    'concert',
+    'instrument',
+    'band',
+    'artist',
+    'rhythm',
+  ],
+  art: [
+    'art',
+    'creative',
+    'painting',
+    'drawing',
+    'design',
+    'artist',
+    'gallery',
+    'masterpiece',
+    'inspiration',
+  ],
+  business: [
+    'business',
+    'entrepreneur',
+    'startup',
+    'marketing',
+    'success',
+    'leadership',
+    'strategy',
+    'growth',
+  ],
+  education: [
+    'education',
+    'learning',
+    'tutorial',
+    'knowledge',
+    'study',
+    'lesson',
+    'teaching',
+    'skill',
+  ],
+  entertainment: [
+    'entertainment',
+    'fun',
+    'show',
+    'performance',
+    'comedy',
+    'drama',
+    'movie',
+    'celebrity',
+  ],
+  gaming: [
+    'gaming',
+    'game',
+    'playthrough',
+    'stream',
+    'esports',
+    'console',
+    'pc',
+    'multiplayer',
+  ],
+  sports: [
+    'sports',
+    'athlete',
+    'competition',
+    'training',
+    'game',
+    'championship',
+    'fitness',
+    'exercise',
+  ],
+  health: [
+    'health',
+    'wellness',
+    'medical',
+    'nutrition',
+    'mentalhealth',
+    'selfcare',
+    'healing',
+    'recovery',
+  ],
+  science: [
+    'science',
+    'research',
+    'discovery',
+    'experiment',
+    'laboratory',
+    'technology',
+    'innovation',
+  ],
+  photography: [
+    'photography',
+    'photo',
+    'camera',
+    'shoot',
+    'portrait',
+    'landscape',
+    'editing',
+    'visual',
+  ],
+  diy: [
+    'diy',
+    'craft',
+    'handmade',
+    'project',
+    'creative',
+    'build',
+    'make',
+    'tutorial',
+  ],
   other: ['vlog', 'video', 'content', 'creator', 'youtube', 'social', 'media'],
 };
 
@@ -46,7 +229,8 @@ exports.generateTags = async (description, category = 'other', maxTags = 8) => {
     }
 
     // Convert to lowercase and clean the text
-    const cleanText = description.toLowerCase()
+    const cleanText = description
+      .toLowerCase()
       .replace(/[^\w\s]/g, ' ') // Remove punctuation
       .replace(/\s+/g, ' ') // Normalize whitespace
       .trim();
@@ -56,9 +240,10 @@ exports.generateTags = async (description, category = 'other', maxTags = 8) => {
     const tokens = tokenizer.tokenize(cleanText);
 
     // Remove stopwords and short words
-    const filteredTokens = tokens.filter((token) => token.length > 2
-      && !stopwords.includes(token)
-      && !/^[\d]+$/.test(token), // Remove pure numbers
+    const filteredTokens = tokens.filter(
+      (token) => token.length > 2
+        && !stopwords.includes(token)
+        && !/^[\d]+$/.test(token), // Remove pure numbers
     );
 
     // Count word frequency
@@ -77,13 +262,20 @@ exports.generateTags = async (description, category = 'other', maxTags = 8) => {
     const categorySpecificTags = CATEGORY_TAGS[category] || CATEGORY_TAGS.other;
 
     // Filter relevant category tags based on content
-    const relevantCategoryTags = categorySpecificTags.filter((tag) => cleanText.includes(tag) || sortedWords.some((word) => tag.includes(word)));
+    const relevantCategoryTags = categorySpecificTags.filter(
+      (tag) => cleanText.includes(tag)
+        || sortedWords.some((word) => tag.includes(word)),
+    );
 
     // Combine and deduplicate tags
     const allPotentialTags = [
       ...relevantCategoryTags,
-      ...sortedWords.filter((word) => !relevantCategoryTags.includes(word)
-        && COMMON_TAGS.some((commonTag) => word.includes(commonTag) || commonTag.includes(word))),
+      ...sortedWords.filter(
+        (word) => !relevantCategoryTags.includes(word)
+          && COMMON_TAGS.some(
+            (commonTag) => word.includes(commonTag) || commonTag.includes(word),
+          ),
+      ),
       ...COMMON_TAGS.filter((tag) => cleanText.includes(tag)),
     ];
 
@@ -107,7 +299,7 @@ exports.generateTags = async (description, category = 'other', maxTags = 8) => {
  */
 exports.suggestCategories = async (description, tags = []) => {
   try {
-    const cleanText = (`${description} ${tags.join(' ')}`).toLowerCase();
+    const cleanText = `${description} ${tags.join(' ')}`.toLowerCase();
     const categoryScores = {};
 
     // Score each category based on keyword matches
@@ -154,7 +346,8 @@ exports.analyzeSentiment = async (description) => {
 
     if (sentimentScore > 0.1) {
       return 'positive';
-    } if (sentimentScore < -0.1) {
+    }
+    if (sentimentScore < -0.1) {
       return 'negative';
     }
     return 'neutral';
@@ -173,11 +366,14 @@ exports.analyzeSentiment = async (description) => {
 exports.extractKeyPhrases = async (description, maxPhrases = 5) => {
   try {
     // Simple N-gram extraction (bigrams and trigrams)
-    const sentences = description.split(/[.!?]+/).filter((s) => s.trim().length > 0);
+    const sentences = description
+      .split(/[.!?]+/)
+      .filter((s) => s.trim().length > 0);
     const phrases = [];
 
     sentences.forEach((sentence) => {
-      const words = sentence.toLowerCase()
+      const words = sentence
+        .toLowerCase()
         .replace(/[^\w\s]/g, '')
         .split(/\s+/)
         .filter((word) => word.length > 2 && !stopwords.includes(word));

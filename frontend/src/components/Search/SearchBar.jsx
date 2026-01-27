@@ -1,21 +1,21 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
-import { MagnifyingGlassIcon } from '@heroicons/react/24/outline'
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 
 const SearchBar = () => {
-  const [query, setQuery] = useState('')
-  const [isFocused, setIsFocused] = useState(false)
-  const navigate = useNavigate()
+  const [query, setQuery] = useState("");
+  const [isFocused, setIsFocused] = useState(false);
+  const navigate = useNavigate();
 
   const handleSearch = (e) => {
-    e.preventDefault()
+    e.preventDefault();
     if (query.trim()) {
-      navigate(`/explore?search=${encodeURIComponent(query.trim())}`)
-      setQuery('')
-      setIsFocused(false)
+      navigate(`/explore?search=${encodeURIComponent(query.trim())}`);
+      setQuery("");
+      setIsFocused(false);
     }
-  }
+  };
 
   return (
     <motion.form
@@ -29,7 +29,7 @@ const SearchBar = () => {
         <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
           <MagnifyingGlassIcon className="h-5 w-5 text-[var(--theme-text-secondary)]" />
         </div>
-        
+
         <input
           type="text"
           value={query}
@@ -38,10 +38,10 @@ const SearchBar = () => {
           onBlur={() => setIsFocused(false)}
           placeholder="Search vlogs..."
           className={`block w-full pl-10 pr-3 py-2 glass-input transition-all duration-200 ${
-            isFocused ? 'ring-2 ring-[var(--theme-accent)]' : ''
+            isFocused ? "ring-2 ring-[var(--theme-accent)]" : ""
           }`}
         />
-        
+
         {/* Search suggestions could be added here */}
         {isFocused && query && (
           <motion.div
@@ -61,7 +61,7 @@ const SearchBar = () => {
         )}
       </div>
     </motion.form>
-  )
-}
+  );
+};
 
-export default SearchBar
+export default SearchBar;

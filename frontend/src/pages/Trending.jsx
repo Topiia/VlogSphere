@@ -1,24 +1,29 @@
-import { motion } from 'framer-motion'
-import { useQuery } from '@tanstack/react-query'
-import { vlogAPI } from '../services/api'
-import VlogCard from '../components/Vlog/VlogCard'
+import { motion } from "framer-motion";
+import { useQuery } from "@tanstack/react-query";
+import { vlogAPI } from "../services/api";
+import VlogCard from "../components/Vlog/VlogCard";
 
-import { FireIcon, TrophyIcon, ArrowTrendingUpIcon, UserIcon } from '@heroicons/react/24/outline'
+import {
+  FireIcon,
+  TrophyIcon,
+  ArrowTrendingUpIcon,
+  UserIcon,
+} from "@heroicons/react/24/outline";
 
 const Trending = () => {
   // Fetch trending vlogs
   const { data: trendingVlogs, isLoading } = useQuery({
-    queryKey: ['trendingVlogs'],
+    queryKey: ["trendingVlogs"],
     queryFn: () => vlogAPI.getTrending({ limit: 20 }),
-    select: (response) => response.data
-  })
+    select: (response) => response.data,
+  });
 
   const timeFrames = [
-    { label: 'Today', value: 'today', active: true },
-    { label: 'This Week', value: 'week', active: false },
-    { label: 'This Month', value: 'month', active: false },
-    { label: 'All Time', value: 'all', active: false }
-  ]
+    { label: "Today", value: "today", active: true },
+    { label: "This Week", value: "week", active: false },
+    { label: "This Month", value: "month", active: false },
+    { label: "All Time", value: "all", active: false },
+  ];
 
   return (
     <div className="min-h-screen">
@@ -47,10 +52,11 @@ const Trending = () => {
           {timeFrames.map((frame) => (
             <button
               key={frame.value}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${frame.active
-                  ? 'bg-[var(--theme-accent)] text-white'
-                  : 'glass-hover text-[var(--theme-text-secondary)] hover:text-[var(--theme-text)]'
-                }`}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                frame.active
+                  ? "bg-[var(--theme-accent)] text-white"
+                  : "glass-hover text-[var(--theme-text-secondary)] hover:text-[var(--theme-text)]"
+              }`}
             >
               {frame.label}
             </button>
@@ -153,10 +159,10 @@ const Trending = () => {
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           {[
-            { label: 'Total Views Today', value: '2.4M', icon: FireIcon },
-            { label: 'New Vlogs', value: '1.2K', icon: ArrowTrendingUpIcon },
-            { label: 'Active Creators', value: '8.5K', icon: UserIcon },
-            { label: 'Engagement Rate', value: '94%', icon: TrophyIcon }
+            { label: "Total Views Today", value: "2.4M", icon: FireIcon },
+            { label: "New Vlogs", value: "1.2K", icon: ArrowTrendingUpIcon },
+            { label: "Active Creators", value: "8.5K", icon: UserIcon },
+            { label: "Engagement Rate", value: "94%", icon: TrophyIcon },
           ].map((stat, index) => (
             <motion.div
               key={stat.label}
@@ -179,7 +185,7 @@ const Trending = () => {
         </div>
       </motion.div>
     </div>
-  )
-}
+  );
+};
 
-export default Trending
+export default Trending;

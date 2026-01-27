@@ -6,8 +6,9 @@ jest.mock('../models/Vlog');
 jest.mock('../models/User');
 
 describe('VlogDetail Follow Status', () => {
-  let req; let res; let
-    next;
+  let req;
+  let res;
+  let next;
 
   beforeEach(() => {
     req = {

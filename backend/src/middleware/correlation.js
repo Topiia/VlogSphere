@@ -64,12 +64,10 @@ exports.correlationMiddleware = (req, res, next) => {
  * Extract client IP address from request
  * Handles proxied requests (X-Forwarded-For)
  */
-exports.getClientIP = (req) => (
-  req.headers['x-forwarded-for']?.split(',')[0]?.trim()
+exports.getClientIP = (req) => req.headers['x-forwarded-for']?.split(',')[0]?.trim()
   || req.headers['x-real-ip']
   || req.connection?.remoteAddress
   || req.socket?.remoteAddress
-  || 'unknown'
-);
+  || 'unknown';
 
 module.exports = exports;

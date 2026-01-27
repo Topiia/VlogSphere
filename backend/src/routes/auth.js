@@ -34,18 +34,51 @@ router.setLimiters = (loginLim, sessionLim) => {
 
 // Routes with appropriate rate limiting
 // Strict limiting (prevent brute force)
-router.post('/register', (req, res, next) => loginLimiter(req, res, next), registerValidation, register);
-router.post('/login', (req, res, next) => loginLimiter(req, res, next), loginValidation, login);
-router.post('/forgotpassword', (req, res, next) => loginLimiter(req, res, next), forgotPasswordValidation, forgotPassword);
+router.post(
+  '/register',
+  (req, res, next) => loginLimiter(req, res, next),
+  registerValidation,
+  register,
+);
+router.post(
+  '/login',
+  (req, res, next) => loginLimiter(req, res, next),
+  loginValidation,
+  login,
+);
+router.post(
+  '/forgotpassword',
+  (req, res, next) => loginLimiter(req, res, next),
+  forgotPasswordValidation,
+  forgotPassword,
+);
 
 // Lenient limiting (allow normal usage)
-router.get('/me', (req, res, next) => sessionLimiter(req, res, next), protect, getMe);
-router.post('/refresh', (req, res, next) => sessionLimiter(req, res, next), refreshToken);
+router.get(
+  '/me',
+  (req, res, next) => sessionLimiter(req, res, next),
+  protect,
+  getMe,
+);
+router.post(
+  '/refresh',
+  (req, res, next) => sessionLimiter(req, res, next),
+  refreshToken,
+);
 
 // No rate limiting (protected by auth middleware)
 router.put('/updatedetails', protect, updateProfileValidation, updateDetails);
-router.put('/updatepassword', protect, updatePasswordValidation, updatePassword);
-router.put('/resetpassword/:resettoken', resetPasswordValidation, resetPassword);
+router.put(
+  '/updatepassword',
+  protect,
+  updatePasswordValidation,
+  updatePassword,
+);
+router.put(
+  '/resetpassword/:resettoken',
+  resetPasswordValidation,
+  resetPassword,
+);
 router.get('/verify/:token', verifyEmail);
 router.post('/logout', protect, logout);
 

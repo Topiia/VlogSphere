@@ -30,10 +30,7 @@ const generateCacheKey = (req) => {
  * @param {function} keyGenerator - Custom key generator function
  * @returns {function} - Express middleware
  */
-exports.cacheMiddleware = (
-  ttl = 300,
-  keyGenerator = generateCacheKey,
-) => async (req, res, next) => {
+exports.cacheMiddleware = (ttl = 300, keyGenerator = generateCacheKey) => async (req, res, next) => {
   // Only cache GET requests
   if (req.method !== 'GET') {
     return next();

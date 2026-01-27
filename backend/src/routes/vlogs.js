@@ -20,6 +20,7 @@ const {
 const { protect, optionalAuth } = require('../middleware/auth');
 const { uploadMultiple } = require('../middleware/upload');
 const { cacheMiddleware } = require('../middleware/cache');
+const { viewCountLimiter } = require('../middleware/rateLimit');
 
 // Validation rules
 const createVlogValidation = [
@@ -31,19 +32,33 @@ const createVlogValidation = [
     .withMessage('Description must be between 10 and 2000 characters'),
   body('category')
     .isIn([
-      'technology', 'travel', 'lifestyle', 'food', 'fashion',
-      'fitness', 'music', 'art', 'business', 'education',
-      'entertainment', 'gaming', 'sports', 'health', 'science',
-      'photography', 'diy', 'other',
+      'technology',
+      'travel',
+      'lifestyle',
+      'food',
+      'fashion',
+      'fitness',
+      'music',
+      'art',
+      'business',
+      'education',
+      'entertainment',
+      'gaming',
+      'sports',
+      'health',
+      'science',
+      'photography',
+      'diy',
+      'other',
     ])
     .withMessage('Please select a valid category'),
   body('tags')
     .optional()
     .isArray()
     .withMessage('Tags must be an array')
-    .custom((tags) => tags.every((tag) => typeof tag === 'string'
-      && tag.length >= 2
-      && tag.length <= 30))
+    .custom((tags) => tags.every(
+      (tag) => typeof tag === 'string' && tag.length >= 2 && tag.length <= 30,
+    ))
     .withMessage('Each tag must be a string between 2 and 30 characters'),
   body('content')
     .optional()
@@ -67,10 +82,24 @@ const updateVlogValidation = [
   body('category')
     .optional()
     .isIn([
-      'technology', 'travel', 'lifestyle', 'food', 'fashion',
-      'fitness', 'music', 'art', 'business', 'education',
-      'entertainment', 'gaming', 'sports', 'health', 'science',
-      'photography', 'diy', 'other',
+      'technology',
+      'travel',
+      'lifestyle',
+      'food',
+      'fashion',
+      'fitness',
+      'music',
+      'art',
+      'business',
+      'education',
+      'entertainment',
+      'gaming',
+      'sports',
+      'health',
+      'science',
+      'photography',
+      'diy',
+      'other',
     ])
     .withMessage('Please select a valid category'),
   body('tags')
@@ -81,9 +110,9 @@ const updateVlogValidation = [
       if (tags.length > 10) {
         throw new Error('Cannot have more than 10 tags');
       }
-      return tags.every((tag) => typeof tag === 'string'
-        && tag.length >= 2
-        && tag.length <= 30);
+      return tags.every(
+        (tag) => typeof tag === 'string' && tag.length >= 2 && tag.length <= 30,
+      );
     })
     .withMessage('Each tag must be a string between 2 and 30 characters'),
   body('images')
@@ -124,13 +153,25 @@ router.get('/trending', cacheMiddleware(600), getTrendingVlogs); // Cache for 10
 router.get('/user/:userId', cacheMiddleware(300), getUserVlogs); // Cache for 5 minutes
 router.get('/', optionalAuth, cacheMiddleware(180), getVlogs); // Cache for 3 minutes
 router.get('/:id', optionalAuth, cacheMiddleware(300), getVlog); // Cache for 5 minutes
-router.post('/', protect, uploadMultiple('images', 10), createVlogValidation, createVlog);
-router.put('/:id', protect, uploadMultiple('images', 10), updateVlogValidation, updateVlog);
+router.post(
+  '/',
+  protect,
+  uploadMultiple('images', 10),
+  createVlogValidation,
+  createVlog,
+);
+router.put(
+  '/:id',
+  protect,
+  uploadMultiple('images', 10),
+  updateVlogValidation,
+  updateVlog,
+);
 router.delete('/:id', protect, deleteVlog);
 router.put('/:id/like', protect, toggleLike);
 router.put('/:id/dislike', protect, toggleDislike);
 router.put('/:id/share', protect, incrementShare);
-router.put('/:id/view', protect, recordView);
+router.put('/:id/view', protect, viewCountLimiter, recordView);
 router.post('/:id/comments', protect, commentValidation, addComment);
 router.delete('/:id/comments/:commentId', protect, deleteComment);
 

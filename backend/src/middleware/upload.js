@@ -13,7 +13,9 @@ const fileFilter = (req, file, cb) => {
   const mimeOK = allowed.test(file.mimetype);
 
   if (extOK && mimeOK) return cb(null, true);
-  return cb(new Error('Only image formats allowed: jpeg, jpg, png, gif, webp, avif'));
+  return cb(
+    new Error('Only image formats allowed: jpeg, jpg, png, gif, webp, avif'),
+  );
 };
 
 /* -------------------- Cloudinary Storage -------------------- */
@@ -28,7 +30,7 @@ const cloudStorage = new CloudinaryStorage({
       { flags: 'lossy' },
     ],
     resource_type: 'image',
-    public_id: `${Date.now()}_${Math.round(Math.random() * 1E9)}_${file.originalname.split('.')[0].replace(/[^a-zA-Z0-9]/g, '')}`,
+    public_id: `${Date.now()}_${Math.round(Math.random() * 1e9)}_${file.originalname.split('.')[0].replace(/[^a-zA-Z0-9]/g, '')}`,
   }),
 });
 
@@ -79,7 +81,10 @@ const cleanupCloudinaryUploads = async (publicIds) => {
   // Log any cleanup failures (don't throw - cleanup is best-effort)
   results.forEach((result, index) => {
     if (result.status === 'rejected') {
-      console.error(`Failed to cleanup Cloudinary file: ${publicIds[index]}`, result.reason);
+      console.error(
+        `Failed to cleanup Cloudinary file: ${publicIds[index]}`,
+        result.reason,
+      );
     }
   });
 };
@@ -97,7 +102,9 @@ const attachCleanupListener = (req, res) => {
     if (res.statusCode >= 400 && req.cloudinaryUploads.length > 0) {
       // Cleanup asynchronously (don't block response)
       setImmediate(async () => {
-        console.log(`Cleaning up ${req.cloudinaryUploads.length} orphaned Cloudinary files due to failed request`);
+        console.log(
+          `Cleaning up ${req.cloudinaryUploads.length} orphaned Cloudinary files due to failed request`,
+        );
         await cleanupCloudinaryUploads(req.cloudinaryUploads);
       });
     }
@@ -136,7 +143,9 @@ exports.uploadMultiple = (field = 'images', max = 10) => (req, res, next) => {
         if (uploadedIds.length > 0) {
           // Cleanup asynchronously
           setImmediate(async () => {
-            console.log(`Cleaning up ${uploadedIds.length} Cloudinary files due to upload error`);
+            console.log(
+              `Cleaning up ${uploadedIds.length} Cloudinary files due to upload error`,
+            );
             await cleanupCloudinaryUploads(uploadedIds);
           });
         }

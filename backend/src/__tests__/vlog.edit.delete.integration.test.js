@@ -29,10 +29,10 @@ const app = require('../server');
  */
 
 describe('Vlog Edit & Delete Integration Tests', () => {
-  let authorUser; let
-    authorToken;
-  let otherUser; let
-    otherToken;
+  let authorUser;
+  let authorToken;
+  let otherUser;
+  let otherToken;
   let testVlog;
 
   beforeAll(async () => {
@@ -42,7 +42,8 @@ describe('Vlog Edit & Delete Integration Tests', () => {
 
     // Connect to test database
     if (mongoose.connection.readyState === 0) {
-      const mongoUri = process.env.MONGO_URI_TEST || 'mongodb://localhost:27017/vlogsphere-test';
+      const mongoUri = process.env.MONGO_URI_TEST
+        || 'mongodb://localhost:27017/vlogsphere-test';
       await mongoose.connect(mongoUri, {
         useNewUrlParser: true,
         useUnifiedTopology: true,
@@ -129,7 +130,9 @@ describe('Vlog Edit & Delete Integration Tests', () => {
       expect(response.body.data.description).toBe(updateData.description);
       expect(response.body.data.category).toBe(updateData.category);
       // Tags may include AI-generated tags, so check that our tags are included
-      expect(response.body.data.tags).toEqual(expect.arrayContaining(updateData.tags));
+      expect(response.body.data.tags).toEqual(
+        expect.arrayContaining(updateData.tags),
+      );
 
       // Verify database was updated
       const updatedVlog = await Vlog.findById(testVlog._id);
@@ -215,7 +218,9 @@ describe('Vlog Edit & Delete Integration Tests', () => {
 
       expect(response.status).toBe(400);
       expect(response.body.success).toBe(false);
-      expect(response.body.error.message || response.body.error).toMatch(/more than 10 images/i);
+      expect(response.body.error.message || response.body.error).toMatch(
+        /more than 10 images/i,
+      );
     });
 
     test('should enforce minimum image requirement (at least 1)', async () => {
@@ -234,7 +239,9 @@ describe('Vlog Edit & Delete Integration Tests', () => {
 
       expect(response.status).toBe(400);
       expect(response.body.success).toBe(false);
-      expect(response.body.error.message || response.body.error).toMatch(/at least one image/i);
+      expect(response.body.error.message || response.body.error).toMatch(
+        /at least one image/i,
+      );
     });
   });
 
@@ -269,12 +276,13 @@ describe('Vlog Edit & Delete Integration Tests', () => {
         .set('Authorization', `Bearer ${authorToken}`);
 
       // Try to get the deleted vlog
-      const response = await request(app)
-        .get(`/api/vlogs/${testVlog._id}`);
+      const response = await request(app).get(`/api/vlogs/${testVlog._id}`);
 
       expect(response.status).toBe(404);
       expect(response.body.success).toBe(false);
-      expect(response.body.error.message || response.body.error).toMatch(/not found/i);
+      expect(response.body.error.message || response.body.error).toMatch(
+        /not found/i,
+      );
     });
 
     test('should continue deletion even if image cleanup fails', async () => {
@@ -332,7 +340,9 @@ describe('Vlog Edit & Delete Integration Tests', () => {
 
       expect(response.status).toBe(403);
       expect(response.body.success).toBe(false);
-      expect(response.body.error.message || response.body.error).toMatch(/not authorized/i);
+      expect(response.body.error.message || response.body.error).toMatch(
+        /not authorized/i,
+      );
 
       // Verify vlog was not updated
       const unchangedVlog = await Vlog.findById(testVlog._id);
@@ -372,7 +382,9 @@ describe('Vlog Edit & Delete Integration Tests', () => {
 
       expect(response.status).toBe(403);
       expect(response.body.success).toBe(false);
-      expect(response.body.error.message || response.body.error).toMatch(/not authorized/i);
+      expect(response.body.error.message || response.body.error).toMatch(
+        /not authorized/i,
+      );
 
       // Verify vlog still exists
       const stillExistsVlog = await Vlog.findById(testVlog._id);
@@ -380,8 +392,7 @@ describe('Vlog Edit & Delete Integration Tests', () => {
     });
 
     test('should prevent unauthenticated user from deleting (401)', async () => {
-      const response = await request(app)
-        .delete(`/api/vlogs/${testVlog._id}`);
+      const response = await request(app).delete(`/api/vlogs/${testVlog._id}`);
 
       expect(response.status).toBe(401);
       expect(response.body.success).toBe(false);
@@ -410,7 +421,9 @@ describe('Vlog Edit & Delete Integration Tests', () => {
 
       expect(response.status).toBe(404);
       expect(response.body.success).toBe(false);
-      expect(response.body.error.message || response.body.error).toMatch(/not found/i);
+      expect(response.body.error.message || response.body.error).toMatch(
+        /not found/i,
+      );
     });
 
     test('should return 404 when deleting non-existent vlog', async () => {
@@ -422,7 +435,9 @@ describe('Vlog Edit & Delete Integration Tests', () => {
 
       expect(response.status).toBe(404);
       expect(response.body.success).toBe(false);
-      expect(response.body.error.message || response.body.error).toMatch(/not found/i);
+      expect(response.body.error.message || response.body.error).toMatch(
+        /not found/i,
+      );
     });
 
     test('should handle invalid vlog ID format gracefully', async () => {
@@ -515,7 +530,8 @@ describe('Vlog Edit & Delete Integration Tests', () => {
     test('should persist all updated fields correctly', async () => {
       const updateData = {
         title: 'Completely New Title',
-        description: 'A completely new description that is long enough to pass validation',
+        description:
+          'A completely new description that is long enough to pass validation',
         category: 'travel',
         tags: ['new', 'tags', 'here'],
         images: [
@@ -582,7 +598,9 @@ describe('Vlog Edit & Delete Integration Tests', () => {
         .send(updateData);
 
       const updatedVlog = await Vlog.findById(testVlog._id);
-      expect(updatedVlog.updatedAt.getTime()).toBeGreaterThan(originalUpdatedAt.getTime());
+      expect(updatedVlog.updatedAt.getTime()).toBeGreaterThan(
+        originalUpdatedAt.getTime(),
+      );
     });
   });
 });

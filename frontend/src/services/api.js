@@ -1,114 +1,125 @@
-import axios from 'axios'
-import toast from 'react-hot-toast'
+import axios from "axios";
+import toast from "react-hot-toast";
 
 // PRODUCTION SAFETY: Validate API URL configuration using Vite's built-in env
 const getApiBaseURL = () => {
-  const apiUrl = import.meta.env.VITE_API_URL
+  const apiUrl = import.meta.env.VITE_API_URL;
 
   // CRITICAL: In production builds, API URL MUST be explicitly set
   // Vite sets import.meta.env.PROD = true in production builds
   if (import.meta.env.PROD && !apiUrl) {
-    const errorMsg = '❌ CRITICAL: VITE_API_URL is not configured for production build!'
-    console.error(errorMsg)
-    console.error('Set VITE_API_URL in Vercel environment variables')
-    console.error('Expected: https://vlogsphere-backend.onrender.com/api')
-    throw new Error('API URL not configured for production')
+    const errorMsg =
+      "❌ CRITICAL: VITE_API_URL is not configured for production build!";
+    console.error(errorMsg);
+    console.error("Set VITE_API_URL in Vercel environment variables");
+    console.error("Expected: https://vlogsphere-backend.onrender.com/api");
+    throw new Error("API URL not configured for production");
   }
 
   // In development, provide helpful fallback with warning
   // Vite sets import.meta.env.DEV = true in development
   if (import.meta.env.DEV && !apiUrl) {
-    console.warn('⚠️ VITE_API_URL not set in .env file')
-    console.warn('Falling back to: http://localhost:5000/api')
-    console.warn('Create .env with: VITE_API_URL=http://localhost:5000/api')
-    return 'http://localhost:5000/api'
+    console.warn("⚠️ VITE_API_URL not set in .env file");
+    console.warn("Falling back to: http://localhost:5000/api");
+    console.warn("Create .env with: VITE_API_URL=http://localhost:5000/api");
+    return "http://localhost:5000/api";
   }
 
   // Validate URL format (must start with http/https or be relative)
-  if (!apiUrl.startsWith('http://') && !apiUrl.startsWith('https://') && !apiUrl.startsWith('/')) {
-    console.error(`❌ Invalid API URL format: ${apiUrl}`)
-    console.error('URL must start with http://, https://, or /')
-    throw new Error('Invalid API URL format')
+  if (
+    !apiUrl.startsWith("http://") &&
+    !apiUrl.startsWith("https://") &&
+    !apiUrl.startsWith("/")
+  ) {
+    console.error(`❌ Invalid API URL format: ${apiUrl}`);
+    console.error("URL must start with http://, https://, or /");
+    throw new Error("Invalid API URL format");
   }
 
   // Log the final API URL (helps with debugging production issues)
-  const envType = import.meta.env.PROD ? 'PRODUCTION' : 'DEVELOPMENT'
-  console.log(`🔗 [${envType}] API Base URL: ${apiUrl}`)
+  const envType = import.meta.env.PROD ? "PRODUCTION" : "DEVELOPMENT";
+  console.log(`🔗 [${envType}] API Base URL: ${apiUrl}`);
 
-  return apiUrl
-}
+  return apiUrl;
+};
 
 // Create axios instance with validated base URL
 const api = axios.create({
   baseURL: getApiBaseURL(),
   timeout: 10000,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
   // PRODUCTION FIX: Enable credentials (cookies) for cross-origin requests
   // Required for Vercel (frontend) → Render (backend) authentication
   // Browser will include cookies in requests and accept Set-Cookie headers
   withCredentials: true,
-})
+});
 
 // Auth API methods
 // COOKIE-ONLY AUTH: No Authorization header management needed
 // Cookies are sent automatically by browser with withCredentials: true
 export const authAPI = {
   // Auth endpoints
-  login: (credentials) => api.post('/auth/login', credentials),
-  register: (userData) => api.post('/auth/register', userData),
-  logout: () => api.post('/auth/logout'),
-  getMe: () => api.get('/auth/me'),
-  updateDetails: (userData) => api.put('/auth/updatedetails', userData),
-  updatePassword: (passwordData) => api.put('/auth/updatepassword', passwordData),
-  forgotPassword: (email) => api.post('/auth/forgotpassword', { email }),
-  resetPassword: (token, password) => api.put(`/auth/resetpassword/${token}`, { password }),
+  login: (credentials) => api.post("/auth/login", credentials),
+  register: (userData) => api.post("/auth/register", userData),
+  logout: () => api.post("/auth/logout"),
+  getMe: () => api.get("/auth/me"),
+  updateDetails: (userData) => api.put("/auth/updatedetails", userData),
+  updatePassword: (passwordData) =>
+    api.put("/auth/updatepassword", passwordData),
+  forgotPassword: (email) => api.post("/auth/forgotpassword", { email }),
+  resetPassword: (token, password) =>
+    api.put(`/auth/resetpassword/${token}`, { password }),
   // COOKIE-ONLY AUTH: No body needed, refreshToken cookie sent automatically
-  refreshToken: () => api.post('/auth/refresh'),
+  refreshToken: () => api.post("/auth/refresh"),
   verifyEmail: (token) => api.get(`/auth/verify/${token}`),
-}
+};
 
 // Vlog API methods
 export const vlogAPI = {
-  getVlogs: (params = {}) => api.get('/vlogs', { params }),
+  getVlogs: (params = {}) => api.get("/vlogs", { params }),
   getVlog: (id) => api.get(`/vlogs/${id}`),
-  createVlog: (vlogData) => api.post('/vlogs', vlogData),
+  createVlog: (vlogData) => api.post("/vlogs", vlogData),
   updateVlog: (id, vlogData) => api.put(`/vlogs/${id}`, vlogData),
   deleteVlog: (id) => api.delete(`/vlogs/${id}`),
   likeVlog: (id) => api.put(`/vlogs/${id}/like`),
   dislikeVlog: (id) => api.put(`/vlogs/${id}/dislike`),
-  addComment: (id, comment) => api.post(`/vlogs/${id}/comments`, { text: comment }),
-  deleteComment: (id, commentId) => api.delete(`/vlogs/${id}/comments/${commentId}`),
+  addComment: (id, comment) =>
+    api.post(`/vlogs/${id}/comments`, { text: comment }),
+  deleteComment: (id, commentId) =>
+    api.delete(`/vlogs/${id}/comments/${commentId}`),
   shareVlog: (id) => api.put(`/vlogs/${id}/share`),
   recordView: (id) => api.put(`/vlogs/${id}/view`),
-  getTrending: (params = {}) => api.get('/vlogs/trending', { params }),
-  getUserVlogs: (userId, params = {}) => api.get(`/vlogs/user/${userId}`, { params }),
-  searchVlogs: (query, params = {}) => api.get('/vlogs/search', { params: { ...params, q: query } }),
-}
+  getTrending: (params = {}) => api.get("/vlogs/trending", { params }),
+  getUserVlogs: (userId, params = {}) =>
+    api.get(`/vlogs/user/${userId}`, { params }),
+  searchVlogs: (query, params = {}) =>
+    api.get("/vlogs/search", { params: { ...params, q: query } }),
+};
 
 // Upload API methods
 export const uploadAPI = {
   uploadSingle: (file) => {
-    const formData = new FormData()
-    formData.append('image', file)
+    const formData = new FormData();
+    formData.append("image", file);
     // CRITICAL: Remove Content-Type to let axios auto-set multipart/form-data with boundary
     // Default header 'application/json' prevents proper file upload
-    return api.post('/upload/single', formData, {
-      headers: { 'Content-Type': undefined }
-    })
+    return api.post("/upload/single", formData, {
+      headers: { "Content-Type": undefined },
+    });
   },
   uploadMultiple: (files) => {
-    const formData = new FormData()
-    files.forEach(file => formData.append('images', file))
+    const formData = new FormData();
+    files.forEach((file) => formData.append("images", file));
     // CRITICAL: Remove Content-Type to let axios auto-set multipart/form-data with boundary
     // Default header 'application/json' prevents proper file upload
-    return api.post('/upload/multiple', formData, {
-      headers: { 'Content-Type': undefined }
-    })
+    return api.post("/upload/multiple", formData, {
+      headers: { "Content-Type": undefined },
+    });
   },
   deleteImage: (publicId) => api.delete(`/upload/${publicId}`),
-}
+};
 
 // User API methods
 export const userAPI = {
@@ -116,135 +127,156 @@ export const userAPI = {
   getUserByUsername: (username) => api.get(`/users/profile/${username}`),
   followUser: (userId) => api.post(`/users/${userId}/follow`),
   unfollowUser: (userId) => api.delete(`/users/${userId}/follow`),
-  getFollowers: (userId, params = {}) => api.get(`/users/${userId}/followers`, { params }),
-  getFollowing: (userId, params = {}) => api.get(`/users/${userId}/following`, { params }),
-  searchUsers: (query, params = {}) => api.get('/users/search', { params: { ...params, q: query } }),
-  getLikedVlogs: (params = {}) => api.get('/users/likes', { params }),
-  getBookmarks: (params = {}) => api.get('/users/bookmarks', { params }),
+  getFollowers: (userId, params = {}) =>
+    api.get(`/users/${userId}/followers`, { params }),
+  getFollowing: (userId, params = {}) =>
+    api.get(`/users/${userId}/following`, { params }),
+  searchUsers: (query, params = {}) =>
+    api.get("/users/search", { params: { ...params, q: query } }),
+  getLikedVlogs: (params = {}) => api.get("/users/likes", { params }),
+  getBookmarks: (params = {}) => api.get("/users/bookmarks", { params }),
   addBookmark: (vlogId) => api.post(`/users/bookmarks/${vlogId}`),
   removeBookmark: (vlogId) => api.delete(`/users/bookmarks/${vlogId}`),
-  deleteAccount: (password) => api.delete('/users/me', { data: { password } }),
-}
+  deleteAccount: (password) => api.delete("/users/me", { data: { password } }),
+};
 
 // Convenience: export deleteUserAccount for direct import
-export const deleteUserAccount = userAPI.deleteAccount
-
+export const deleteUserAccount = userAPI.deleteAccount;
 
 // Request interceptor for error handling
 api.interceptors.request.use(
   (config) => {
     // Add timestamp to prevent caching
-    if (config.method === 'get') {
-      config.params = { ...config.params, _t: Date.now() }
+    if (config.method === "get") {
+      config.params = { ...config.params, _t: Date.now() };
     }
 
     // Initialize retry count if not present
-    config.retryCount = config.retryCount || 0
+    config.retryCount = config.retryCount || 0;
 
-    return config
+    return config;
   },
   (error) => {
-    return Promise.reject(error)
-  }
-)
+    return Promise.reject(error);
+  },
+);
 
 // Response interceptor for error handling and retry logic
 api.interceptors.response.use(
   (response) => {
-    return response
+    return response;
   },
   async (error) => {
-    const originalRequest = error.config
+    const originalRequest = error.config;
 
     // Handle network errors with retry logic
     if (!error.response) {
       // Timeout handling - do NOT retry timeouts
-      if (error.code === 'ECONNABORTED') {
-        error.message = 'Request timed out. Server is not responding.'
-        toast.error(error.message, { duration: 5000 })
-        return Promise.reject(error)
+      if (error.code === "ECONNABORTED") {
+        error.message = "Request timed out. Server is not responding.";
+        toast.error(error.message, { duration: 5000 });
+        return Promise.reject(error);
       }
 
       // Check if we should retry (network errors only, not timeouts)
-      const maxRetries = 2
-      const retryCount = originalRequest.retryCount || 0
+      const maxRetries = 2;
+      const retryCount = originalRequest.retryCount || 0;
 
       if (retryCount < maxRetries) {
-        originalRequest.retryCount = retryCount + 1
+        originalRequest.retryCount = retryCount + 1;
 
         // Wait before retrying (exponential backoff)
-        const delay = Math.pow(2, retryCount) * 1000 // 1s, 2s
-        await new Promise(resolve => setTimeout(resolve, delay))
+        const delay = Math.pow(2, retryCount) * 1000; // 1s, 2s
+        await new Promise((resolve) => setTimeout(resolve, delay));
 
         // Retry the request
-        return api(originalRequest)
+        return api(originalRequest);
       }
 
       // Max retries reached (network error, not timeout)
-      error.message = 'Network error. Please check your connection.'
-      toast.error(error.message, { duration: 5000 })
-      return Promise.reject(error)
+      error.message = "Network error. Please check your connection.";
+      toast.error(error.message, { duration: 5000 });
+      return Promise.reject(error);
     }
 
     // Handle specific HTTP status codes
-    const { status, data } = error.response
+    const { status, data } = error.response;
 
     switch (status) {
       case 400:
-        error.message = data.error?.message || data.message || 'Invalid request. Please check your input.'
-        break
+        error.message =
+          data.error?.message ||
+          data.message ||
+          "Invalid request. Please check your input.";
+        break;
 
       case 401: {
         // PRODUCTION FIX: Do NOT use window.location.href (causes infinite reload loop)
         // Let AuthContext handle the 401 and manage logout/redirect via React Router
 
-        error.message = data.error?.message || data.message || 'Your session has expired. Please log in again.'
+        error.message =
+          data.error?.message ||
+          data.message ||
+          "Your session has expired. Please log in again.";
 
         // Store current location for redirect after login (but only if not already on auth pages)
-        const currentPath = window.location.pathname
-        if (currentPath !== '/login' && currentPath !== '/register') {
-          localStorage.setItem('redirectAfterLogin', currentPath)
+        const currentPath = window.location.pathname;
+        if (currentPath !== "/login" && currentPath !== "/register") {
+          localStorage.setItem("redirectAfterLogin", currentPath);
         }
 
         // CRITICAL: Do NOT redirect here - just reject the error
         // AuthContext will handle logout and navigation without page reload
-        break
+        break;
       }
 
       case 403:
-        error.message = data.error?.message || data.message || "You don't have permission to perform this action."
-        break
+        error.message =
+          data.error?.message ||
+          data.message ||
+          "You don't have permission to perform this action.";
+        break;
 
       case 404:
-        error.message = data.error?.message || data.message || 'Content not found.'
-        break
+        error.message =
+          data.error?.message || data.message || "Content not found.";
+        break;
 
       case 429:
-        error.message = data.error?.message || data.message || 'Too many requests. Please try again later.'
-        break
+        error.message =
+          data.error?.message ||
+          data.message ||
+          "Too many requests. Please try again later.";
+        break;
 
       case 500:
-        error.message = data.error?.message || data.message || 'Server error. Please try again.'
-        break
+        error.message =
+          data.error?.message ||
+          data.message ||
+          "Server error. Please try again.";
+        break;
 
       case 502:
-        error.message = 'Bad gateway. The server is temporarily unavailable.'
-        break
+        error.message = "Bad gateway. The server is temporarily unavailable.";
+        break;
 
       case 503:
-        error.message = 'Service unavailable. Please try again later.'
-        break
+        error.message = "Service unavailable. Please try again later.";
+        break;
 
       case 504:
-        error.message = 'Gateway timeout. The request took too long.'
-        break
+        error.message = "Gateway timeout. The request took too long.";
+        break;
 
       default:
-        error.message = data.error?.message || data.message || 'An unexpected error occurred. Please try again.'
+        error.message =
+          data.error?.message ||
+          data.message ||
+          "An unexpected error occurred. Please try again.";
     }
 
-    return Promise.reject(error)
-  }
-)
+    return Promise.reject(error);
+  },
+);
 
-export default api
+export default api;

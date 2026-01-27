@@ -20,7 +20,9 @@ const redisConfig = {
   retryStrategy: (times) => {
     // Cap retries at 10 attempts, then stop (return null = stop retrying)
     if (times > 10) {
-      logger.warn('Redis retry limit reached (10 attempts), stopping reconnection attempts');
+      logger.warn(
+        'Redis retry limit reached (10 attempts), stopping reconnection attempts',
+      );
       return null; // Stop retrying
     }
     const delay = Math.min(times * 50, 2000);
@@ -178,7 +180,10 @@ redis.safeScanDelPattern = async function safeScanDelPattern(pattern) {
     if (keys.length === 0) return 0;
     return await this.del(...keys);
   } catch (error) {
-    logger.error('Redis safeScanDelPattern error', { pattern, error: error.message });
+    logger.error('Redis safeScanDelPattern error', {
+      pattern,
+      error: error.message,
+    });
     return 0;
   }
 };

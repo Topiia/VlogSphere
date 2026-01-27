@@ -1,8 +1,8 @@
-import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { motion, AnimatePresence } from 'framer-motion'
-import { useAuth } from '../../contexts/AuthContext'
-import { getInitials } from '../../utils/helpers'
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "../../contexts/AuthContext";
+import { getInitials } from "../../utils/helpers";
 import {
   UserIcon,
   Cog6ToothIcon,
@@ -10,51 +10,51 @@ import {
   HeartIcon,
   ArrowRightOnRectangleIcon,
   PlusIcon,
-  ChevronDownIcon
-} from '@heroicons/react/24/outline'
+  ChevronDownIcon,
+} from "@heroicons/react/24/outline";
 
 const UserMenu = ({ user }) => {
-  const [isOpen, setIsOpen] = useState(false)
-  const { logout } = useAuth()
-  const navigate = useNavigate()
+  const [isOpen, setIsOpen] = useState(false);
+  const { logout } = useAuth();
+  const navigate = useNavigate();
 
   const menuItems = [
     {
-      label: 'My Profile',
+      label: "My Profile",
       href: `/profile/${user?.username}`,
       icon: UserIcon,
-      action: () => navigate(`/profile/${user?.username}`)
+      action: () => navigate(`/profile/${user?.username}`),
     },
     {
-      label: 'Create Vlog',
-      href: '/create',
+      label: "Create Vlog",
+      href: "/create",
       icon: PlusIcon,
-      action: () => navigate('/create')
+      action: () => navigate("/create"),
     },
     {
-      label: 'Bookmarks',
-      href: '/bookmarks',
+      label: "Bookmarks",
+      href: "/bookmarks",
       icon: BookmarkIcon,
-      action: () => navigate('/bookmarks')
+      action: () => navigate("/bookmarks"),
     },
     {
-      label: 'Liked Vlogs',
-      href: '/liked',
+      label: "Liked Vlogs",
+      href: "/liked",
       icon: HeartIcon,
-      action: () => navigate('/liked')
+      action: () => navigate("/liked"),
     },
     {
-      label: 'Settings',
-      href: '/settings',
+      label: "Settings",
+      href: "/settings",
       icon: Cog6ToothIcon,
-      action: () => navigate('/settings')
+      action: () => navigate("/settings"),
     },
-  ]
+  ];
 
   const handleLogout = async () => {
-    await logout()
-    setIsOpen(false)
-  }
+    await logout();
+    setIsOpen(false);
+  };
 
   return (
     <div className="relative">
@@ -79,15 +79,17 @@ const UserMenu = ({ user }) => {
             </span>
           )}
         </div>
-        
+
         {/* Username and Dropdown Icon */}
         <div className="hidden md:flex items-center space-x-1">
           <span className="text-sm font-medium text-[var(--theme-text)]">
             {user?.username}
           </span>
-          <ChevronDownIcon className={`w-4 h-4 text-[var(--theme-text-secondary)] transition-transform duration-200 ${
-            isOpen ? 'rotate-180' : ''
-          }`} />
+          <ChevronDownIcon
+            className={`w-4 h-4 text-[var(--theme-text-secondary)] transition-transform duration-200 ${
+              isOpen ? "rotate-180" : ""
+            }`}
+          />
         </div>
       </motion.button>
 
@@ -129,7 +131,9 @@ const UserMenu = ({ user }) => {
                     )}
                   </div>
                   <div>
-                    <h3 className="font-semibold text-[var(--theme-text)]">{user?.username}</h3>
+                    <h3 className="font-semibold text-[var(--theme-text)]">
+                      {user?.username}
+                    </h3>
                     <p className="text-sm text-[var(--theme-text-secondary)]">
                       {user?.email}
                     </p>
@@ -145,8 +149,8 @@ const UserMenu = ({ user }) => {
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => {
-                      item.action()
-                      setIsOpen(false)
+                      item.action();
+                      setIsOpen(false);
                     }}
                     className="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-[var(--theme-text-secondary)] hover:text-[var(--theme-text)] hover:bg-[var(--glass-white)] transition-all duration-200"
                   >
@@ -176,7 +180,7 @@ const UserMenu = ({ user }) => {
         )}
       </AnimatePresence>
     </div>
-  )
-}
+  );
+};
 
-export default UserMenu
+export default UserMenu;

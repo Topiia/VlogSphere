@@ -5,8 +5,9 @@ const { followUser, unfollowUser } = require('../controllers/userController');
 jest.mock('../models/User');
 
 describe('Follow/Unfollow Controller', () => {
-  let req; let res; let
-    next;
+  let req;
+  let res;
+  let next;
 
   beforeEach(() => {
     req = {
@@ -39,7 +40,8 @@ describe('Follow/Unfollow Controller', () => {
         save: jest.fn(),
       };
 
-      User.findById = jest.fn()
+      User.findById = jest
+        .fn()
         .mockResolvedValueOnce(mockUserToFollow)
         .mockResolvedValueOnce(mockFollower);
 
@@ -86,7 +88,8 @@ describe('Follow/Unfollow Controller', () => {
         save: jest.fn(),
       };
 
-      User.findById = jest.fn()
+      User.findById = jest
+        .fn()
         .mockResolvedValueOnce(mockUserToFollow)
         .mockResolvedValueOnce(mockFollower);
 
@@ -117,7 +120,8 @@ describe('Follow/Unfollow Controller', () => {
         save: jest.fn(),
       };
 
-      User.findById = jest.fn()
+      User.findById = jest
+        .fn()
         .mockResolvedValueOnce(mockUserToFollow)
         .mockResolvedValueOnce(mockFollower);
 
@@ -151,7 +155,8 @@ describe('Follow/Unfollow Controller', () => {
         save: jest.fn(),
       };
 
-      User.findById = jest.fn()
+      User.findById = jest
+        .fn()
         .mockResolvedValueOnce(mockUserToFollow)
         .mockResolvedValueOnce(mockFollower);
 
@@ -184,7 +189,8 @@ describe('Follow/Unfollow Controller', () => {
         save: jest.fn(),
       };
 
-      User.findById = jest.fn()
+      User.findById = jest
+        .fn()
         .mockResolvedValueOnce(mockUserToUnfollow)
         .mockResolvedValueOnce(mockFollower);
 
@@ -220,7 +226,8 @@ describe('Follow/Unfollow Controller', () => {
         save: jest.fn(),
       };
 
-      User.findById = jest.fn()
+      User.findById = jest
+        .fn()
         .mockResolvedValueOnce(mockUserToUnfollow)
         .mockResolvedValueOnce(mockFollower);
 
@@ -254,17 +261,22 @@ describe('Follow/Unfollow Controller', () => {
         save: jest.fn(),
       };
 
-      User.findById = jest.fn()
+      User.findById = jest
+        .fn()
         .mockResolvedValueOnce(mockUserToUnfollow)
         .mockResolvedValueOnce(mockFollower);
 
       await unfollowUser(req, res, next);
 
-      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
-        success: true,
-      }));
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: true,
+        }),
+      );
       const responseData = res.json.mock.calls[0][0];
-      expect(responseData.data.following).toEqual(expect.arrayContaining(['user3']));
+      expect(responseData.data.following).toEqual(
+        expect.arrayContaining(['user3']),
+      );
       expect(responseData.data.following).not.toContain('user2');
     });
   });

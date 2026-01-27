@@ -31,10 +31,11 @@ const app = require('../server');
  */
 
 describe('Bookmark Controller Unit Tests', () => {
-  let testUser; let
-    userToken;
-  let testVlog1; let testVlog2; let
-    testVlog3;
+  let testUser;
+  let userToken;
+  let testVlog1;
+  let testVlog2;
+  let testVlog3;
   let otherUser;
 
   beforeAll(async () => {
@@ -44,7 +45,8 @@ describe('Bookmark Controller Unit Tests', () => {
 
     // Connect to test database
     if (mongoose.connection.readyState === 0) {
-      const mongoUri = process.env.MONGO_URI_TEST || 'mongodb://localhost:27017/vlogsphere-test';
+      const mongoUri = process.env.MONGO_URI_TEST
+        || 'mongodb://localhost:27017/vlogsphere-test';
       await mongoose.connect(mongoUri, {
         useNewUrlParser: true,
         useUnifiedTopology: true,
@@ -87,11 +89,13 @@ describe('Bookmark Controller Unit Tests', () => {
       description: 'This is test vlog number one for bookmark testing',
       category: 'technology',
       tags: ['test', 'bookmark'],
-      images: [{
-        url: 'https://example.com/image1.jpg',
-        publicId: 'test_image_1',
-        order: 0,
-      }],
+      images: [
+        {
+          url: 'https://example.com/image1.jpg',
+          publicId: 'test_image_1',
+          order: 0,
+        },
+      ],
       author: otherUser._id,
     });
 
@@ -100,11 +104,13 @@ describe('Bookmark Controller Unit Tests', () => {
       description: 'This is test vlog number two for bookmark testing',
       category: 'lifestyle',
       tags: ['test', 'bookmark'],
-      images: [{
-        url: 'https://example.com/image2.jpg',
-        publicId: 'test_image_2',
-        order: 0,
-      }],
+      images: [
+        {
+          url: 'https://example.com/image2.jpg',
+          publicId: 'test_image_2',
+          order: 0,
+        },
+      ],
       author: otherUser._id,
     });
 
@@ -113,11 +119,13 @@ describe('Bookmark Controller Unit Tests', () => {
       description: 'This is test vlog number three for bookmark testing',
       category: 'travel',
       tags: ['test', 'bookmark'],
-      images: [{
-        url: 'https://example.com/image3.jpg',
-        publicId: 'test_image_3',
-        order: 0,
-      }],
+      images: [
+        {
+          url: 'https://example.com/image3.jpg',
+          publicId: 'test_image_3',
+          order: 0,
+        },
+      ],
       author: otherUser._id,
     });
   });
@@ -135,7 +143,7 @@ describe('Bookmark Controller Unit Tests', () => {
       expect(response.body.total).toBe(0);
     });
 
-    test('should return user\'s bookmarked vlogs', async () => {
+    test("should return user's bookmarked vlogs", async () => {
       // Add bookmarks to user
       testUser.bookmarks = [testVlog1._id, testVlog2._id];
       await testUser.save();
@@ -201,8 +209,7 @@ describe('Bookmark Controller Unit Tests', () => {
     });
 
     test('should require authentication', async () => {
-      const response = await request(app)
-        .get('/api/users/bookmarks');
+      const response = await request(app).get('/api/users/bookmarks');
 
       expect(response.status).toBe(401);
       expect(response.body.success).toBe(false);
@@ -210,7 +217,7 @@ describe('Bookmark Controller Unit Tests', () => {
   });
 
   describe('addBookmark', () => {
-    test('should add vlog to user\'s bookmarks array', async () => {
+    test("should add vlog to user's bookmarks array", async () => {
       const response = await request(app)
         .post(`/api/users/bookmarks/${testVlog1._id}`)
         .set('Authorization', `Bearer ${userToken}`);
@@ -222,7 +229,9 @@ describe('Bookmark Controller Unit Tests', () => {
       // Verify bookmark was added to database
       const updatedUser = await User.findById(testUser._id);
       expect(updatedUser.bookmarks).toHaveLength(1);
-      expect(updatedUser.bookmarks[0].toString()).toBe(testVlog1._id.toString());
+      expect(updatedUser.bookmarks[0].toString()).toBe(
+        testVlog1._id.toString(),
+      );
     });
 
     test('should not add duplicate bookmark', async () => {
@@ -258,8 +267,12 @@ describe('Bookmark Controller Unit Tests', () => {
       // Verify both bookmarks exist
       const updatedUser = await User.findById(testUser._id);
       expect(updatedUser.bookmarks).toHaveLength(2);
-      expect(updatedUser.bookmarks.map((id) => id.toString())).toContain(testVlog1._id.toString());
-      expect(updatedUser.bookmarks.map((id) => id.toString())).toContain(testVlog2._id.toString());
+      expect(updatedUser.bookmarks.map((id) => id.toString())).toContain(
+        testVlog1._id.toString(),
+      );
+      expect(updatedUser.bookmarks.map((id) => id.toString())).toContain(
+        testVlog2._id.toString(),
+      );
     });
 
     test('should return 404 for invalid vlog ID', async () => {
@@ -271,7 +284,9 @@ describe('Bookmark Controller Unit Tests', () => {
 
       expect(response.status).toBe(404);
       expect(response.body.success).toBe(false);
-      expect(response.body.error.message || response.body.error).toMatch(/not found/i);
+      expect(response.body.error.message || response.body.error).toMatch(
+        /not found/i,
+      );
 
       // Verify no bookmark was added
       const updatedUser = await User.findById(testUser._id);
@@ -294,8 +309,9 @@ describe('Bookmark Controller Unit Tests', () => {
     });
 
     test('should require authentication', async () => {
-      const response = await request(app)
-        .post(`/api/users/bookmarks/${testVlog1._id}`);
+      const response = await request(app).post(
+        `/api/users/bookmarks/${testVlog1._id}`,
+      );
 
       expect(response.status).toBe(401);
       expect(response.body.success).toBe(false);
@@ -303,7 +319,7 @@ describe('Bookmark Controller Unit Tests', () => {
   });
 
   describe('removeBookmark', () => {
-    test('should remove vlog from user\'s bookmarks array', async () => {
+    test("should remove vlog from user's bookmarks array", async () => {
       // Add bookmark first
       testUser.bookmarks = [testVlog1._id];
       await testUser.save();
@@ -337,9 +353,15 @@ describe('Bookmark Controller Unit Tests', () => {
       // Verify only the specified bookmark was removed
       const updatedUser = await User.findById(testUser._id);
       expect(updatedUser.bookmarks).toHaveLength(2);
-      expect(updatedUser.bookmarks.map((id) => id.toString())).toContain(testVlog1._id.toString());
-      expect(updatedUser.bookmarks.map((id) => id.toString())).toContain(testVlog3._id.toString());
-      expect(updatedUser.bookmarks.map((id) => id.toString())).not.toContain(testVlog2._id.toString());
+      expect(updatedUser.bookmarks.map((id) => id.toString())).toContain(
+        testVlog1._id.toString(),
+      );
+      expect(updatedUser.bookmarks.map((id) => id.toString())).toContain(
+        testVlog3._id.toString(),
+      );
+      expect(updatedUser.bookmarks.map((id) => id.toString())).not.toContain(
+        testVlog2._id.toString(),
+      );
     });
 
     test('should handle removing non-existent bookmark gracefully', async () => {
@@ -383,8 +405,9 @@ describe('Bookmark Controller Unit Tests', () => {
     });
 
     test('should require authentication', async () => {
-      const response = await request(app)
-        .delete(`/api/users/bookmarks/${testVlog1._id}`);
+      const response = await request(app).delete(
+        `/api/users/bookmarks/${testVlog1._id}`,
+      );
 
       expect(response.status).toBe(401);
       expect(response.body.success).toBe(false);
@@ -414,8 +437,12 @@ describe('Bookmark Controller Unit Tests', () => {
       // Verify remaining bookmarks
       const updatedUser = await User.findById(testUser._id);
       expect(updatedUser.bookmarks).toHaveLength(2);
-      expect(updatedUser.bookmarks[0].toString()).toBe(testVlog1._id.toString());
-      expect(updatedUser.bookmarks[1].toString()).toBe(testVlog3._id.toString());
+      expect(updatedUser.bookmarks[0].toString()).toBe(
+        testVlog1._id.toString(),
+      );
+      expect(updatedUser.bookmarks[1].toString()).toBe(
+        testVlog3._id.toString(),
+      );
     });
 
     test('should handle concurrent bookmark operations', async () => {

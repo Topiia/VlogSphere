@@ -26,10 +26,25 @@ exports.sanitizeHTML = (dirty) => {
   }
 
   return DOMPurify.sanitize(dirty, {
-    ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'a', 'p', 'br', 'ul', 'ol', 'li', 'blockquote', 'code', 'pre'],
+    ALLOWED_TAGS: [
+      'b',
+      'i',
+      'em',
+      'strong',
+      'a',
+      'p',
+      'br',
+      'ul',
+      'ol',
+      'li',
+      'blockquote',
+      'code',
+      'pre',
+    ],
     ALLOWED_ATTR: ['href', 'title', 'target'],
     ALLOW_DATA_ATTR: false,
-    ALLOWED_URI_REGEXP: /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|cid|xmpp):|[^a-z]|[a-z+.-]+(?:[^a-z+.-:]|$))/i,
+    ALLOWED_URI_REGEXP:
+      /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|cid|xmpp):|[^a-z]|[a-z+.-]+(?:[^a-z+.-:]|$))/i,
   });
 };
 
@@ -153,7 +168,9 @@ exports.sanitizeUserProfile = (userData) => {
 
   return {
     ...userData,
-    username: userData.username ? exports.stripHTML(userData.username) : userData.username,
+    username: userData.username
+      ? exports.stripHTML(userData.username)
+      : userData.username,
     bio: userData.bio ? exports.sanitizeHTML(userData.bio) : userData.bio,
   };
 };

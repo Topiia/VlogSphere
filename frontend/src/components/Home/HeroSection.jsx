@@ -83,8 +83,8 @@ const HeroSection = () => {
           transition={{ duration: 0.6 }}
           className="text-base sm:text-lg md:text-xl text-[var(--theme-text-secondary)] mb-8 leading-relaxed px-2"
         >
-          Create, share, and explore stunning AI-enhanced vlogs — where creativity
-          meets futuristic design.
+          Create, share, and explore stunning AI-enhanced vlogs — where
+          creativity meets futuristic design.
         </motion.p>
 
         {/* Feature Highlights */}

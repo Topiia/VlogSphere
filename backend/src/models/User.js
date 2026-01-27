@@ -2,122 +2,137 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 
-const userSchema = new mongoose.Schema({
-  username: {
-    type: String,
-    required: [true, 'Username is required'],
-    unique: true,
-    trim: true,
-    minlength: [3, 'Username must be at least 3 characters'],
-    maxlength: [30, 'Username cannot exceed 30 characters'],
-    match: [/^[a-zA-Z0-9_]+$/, 'Username can only contain letters, numbers, and underscores'],
-  },
-  email: {
-    type: String,
-    required: [true, 'Email is required'],
-    unique: true,
-    lowercase: true,
-    trim: true,
-    match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Please enter a valid email'],
-  },
-  isActive: {
-    type: Boolean,
-    default: true,
-  },
-
-  password: {
-    type: String,
-    required: [true, 'Password is required'],
-    minlength: [6, 'Password must be at least 6 characters'],
-  },
-  avatar: {
-    type: String,
-    default: '',
-  },
-  bio: {
-    type: String,
-    maxlength: [500, 'Bio cannot exceed 500 characters'],
-    default: '',
-  },
-  followers: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-  }],
-  following: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-  }],
-  bookmarks: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Vlog',
-  }],
-  // SECURITY: Refresh token rotation and secure storage
-  // Tokens are stored as bcrypt hashes to prevent replay attacks from database breaches
-  refreshTokenHash: {
-    type: String,
-    default: '',
-  },
-  // Token family groups related tokens in a rotation chain
-  // Used to detect when an old token in the chain is reused (compromise indicator)
-  tokenFamily: {
-    type: String,
-    default: '',
-  },
-  // Token version increments on each refresh, enforcing single-use tokens
-  // If client presents old version, it indicates token reuse (security violation)
-  tokenVersion: {
-    type: Number,
-    default: 0,
-  },
-  // Set when session is revoked due to compromise detection or logout
-  // Any token with matching tokenFamily is rejected if revokedAt is set
-  revokedAt: {
-    type: Date,
-    default: null,
-  },
-  isVerified: {
-    type: Boolean,
-    default: false,
-  },
-  verificationToken: {
-    type: String,
-    default: '',
-  },
-  // SECURITY: Password reset tokens - single-use enforcement
-  passwordResetToken: {
-    type: String,
-    default: '',
-  },
-  passwordResetExpires: {
-    type: Date,
-    default: null,
-  },
-  passwordResetUsed: {
-    type: Boolean,
-    default: false,
-  },
-  lastLogin: {
-    type: Date,
-    default: Date.now,
-  },
-  preferences: {
-    theme: {
+const userSchema = new mongoose.Schema(
+  {
+    username: {
       type: String,
-      enum: ['noir-velvet', 'deep-space', 'crimson-night', 'light'],
-      default: 'noir-velvet',
+      required: [true, 'Username is required'],
+      unique: true,
+      trim: true,
+      minlength: [3, 'Username must be at least 3 characters'],
+      maxlength: [30, 'Username cannot exceed 30 characters'],
+      match: [
+        /^[a-zA-Z0-9_]+$/,
+        'Username can only contain letters, numbers, and underscores',
+      ],
     },
-    notifications: {
-      email: { type: Boolean, default: true },
-      push: { type: Boolean, default: true },
-      follows: { type: Boolean, default: true },
-      comments: { type: Boolean, default: true },
+    email: {
+      type: String,
+      required: [true, 'Email is required'],
+      unique: true,
+      lowercase: true,
+      trim: true,
+      match: [
+        /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/,
+        'Please enter a valid email',
+      ],
+    },
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
+
+    password: {
+      type: String,
+      required: [true, 'Password is required'],
+      minlength: [6, 'Password must be at least 6 characters'],
+    },
+    avatar: {
+      type: String,
+      default: '',
+    },
+    bio: {
+      type: String,
+      maxlength: [500, 'Bio cannot exceed 500 characters'],
+      default: '',
+    },
+    followers: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+      },
+    ],
+    following: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+      },
+    ],
+    bookmarks: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Vlog',
+      },
+    ],
+    // SECURITY: Refresh token rotation and secure storage
+    // Tokens are stored as bcrypt hashes to prevent replay attacks from database breaches
+    refreshTokenHash: {
+      type: String,
+      default: '',
+    },
+    // Token family groups related tokens in a rotation chain
+    // Used to detect when an old token in the chain is reused (compromise indicator)
+    tokenFamily: {
+      type: String,
+      default: '',
+    },
+    // Token version increments on each refresh, enforcing single-use tokens
+    // If client presents old version, it indicates token reuse (security violation)
+    tokenVersion: {
+      type: Number,
+      default: 0,
+    },
+    // Set when session is revoked due to compromise detection or logout
+    // Any token with matching tokenFamily is rejected if revokedAt is set
+    revokedAt: {
+      type: Date,
+      default: null,
+    },
+    isVerified: {
+      type: Boolean,
+      default: false,
+    },
+    verificationToken: {
+      type: String,
+      default: '',
+    },
+    // SECURITY: Password reset tokens - single-use enforcement
+    passwordResetToken: {
+      type: String,
+      default: '',
+    },
+    passwordResetExpires: {
+      type: Date,
+      default: null,
+    },
+    passwordResetUsed: {
+      type: Boolean,
+      default: false,
+    },
+    lastLogin: {
+      type: Date,
+      default: Date.now,
+    },
+    preferences: {
+      theme: {
+        type: String,
+        enum: ['noir-velvet', 'deep-space', 'crimson-night', 'light'],
+        default: 'noir-velvet',
+      },
+      notifications: {
+        email: { type: Boolean, default: true },
+        push: { type: Boolean, default: true },
+        follows: { type: Boolean, default: true },
+        comments: { type: Boolean, default: true },
+      },
     },
   },
-}, {
-  timestamps: true,
-  toJSON: { virtuals: true },
-  toObject: { virtuals: true },
-});
+  {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  },
+);
 
 // Virtual for follower count
 userSchema.virtual('followerCount').get(function getFollowerCount() {
@@ -143,7 +158,9 @@ userSchema.pre('save', async function hashPassword(next) {
 });
 
 // Method to compare password
-userSchema.methods.comparePassword = async function comparePassword(candidatePassword) {
+userSchema.methods.comparePassword = async function comparePassword(
+  candidatePassword,
+) {
   return bcrypt.compare(candidatePassword, this.password);
 };
 

@@ -1,77 +1,86 @@
-import { motion } from 'framer-motion'
-import { Link } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
-import { useAuth } from '../contexts/AuthContext'
-import { vlogAPI } from '../services/api'
-import VlogCard from '../components/Vlog/VlogCard'
-import Button from '../components/UI/Button'
-import LoadingSpinner from '../components/UI/LoadingSpinner'
+import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "../contexts/AuthContext";
+import { vlogAPI } from "../services/api";
+import VlogCard from "../components/Vlog/VlogCard";
+import Button from "../components/UI/Button";
+import LoadingSpinner from "../components/UI/LoadingSpinner";
 import {
   PlusIcon,
   ChartBarIcon,
   UserIcon,
   EyeIcon,
   HeartIcon,
-  ChatBubbleLeftIcon
-} from '@heroicons/react/24/outline'
+  ChatBubbleLeftIcon,
+} from "@heroicons/react/24/outline";
 
 const Dashboard = () => {
-  const { user } = useAuth()
+  const { user } = useAuth();
 
   // Fetch user's vlogs
   const { data: userVlogs, isLoading: loadingVlogs } = useQuery({
-    queryKey: ['userVlogs', user?.id],
+    queryKey: ["userVlogs", user?.id],
     queryFn: () => vlogAPI.getUserVlogs(user?.id, { limit: 6 }),
     select: (response) => response.data.data,
-    enabled: !!user?.id
-  })
+    enabled: !!user?.id,
+  });
 
   // Fetch analytics data
   const { data: analytics } = useQuery({
-    queryKey: ['analytics', user?.id],
+    queryKey: ["analytics", user?.id],
     queryFn: () => vlogAPI.getUserVlogs(user?.id, { limit: 100 }),
     select: (response) => {
-      const vlogs = response.data.data
-      const totalViews = vlogs.reduce((sum, vlog) => sum + (vlog.views || 0), 0)
-      const totalLikes = vlogs.reduce((sum, vlog) => sum + (vlog.likeCount || 0), 0)
-      const totalComments = vlogs.reduce((sum, vlog) => sum + (vlog.commentCount || 0), 0)
-      
+      const vlogs = response.data.data;
+      const totalViews = vlogs.reduce(
+        (sum, vlog) => sum + (vlog.views || 0),
+        0,
+      );
+      const totalLikes = vlogs.reduce(
+        (sum, vlog) => sum + (vlog.likeCount || 0),
+        0,
+      );
+      const totalComments = vlogs.reduce(
+        (sum, vlog) => sum + (vlog.commentCount || 0),
+        0,
+      );
+
       return {
         totalVlogs: vlogs.length,
         totalViews,
         totalLikes,
-        totalComments
-      }
+        totalComments,
+      };
     },
-    enabled: !!user?.id
-  })
+    enabled: !!user?.id,
+  });
 
   const stats = [
     {
-      name: 'Total Vlogs',
+      name: "Total Vlogs",
       value: analytics?.totalVlogs || 0,
       icon: ChartBarIcon,
-      color: 'text-blue-400'
+      color: "text-blue-400",
     },
     {
-      name: 'Total Views',
+      name: "Total Views",
       value: analytics?.totalViews || 0,
       icon: EyeIcon,
-      color: 'text-green-400'
+      color: "text-green-400",
     },
     {
-      name: 'Total Likes',
+      name: "Total Likes",
       value: analytics?.totalLikes || 0,
       icon: HeartIcon,
-      color: 'text-red-400'
+      color: "text-red-400",
     },
     {
-      name: 'Total Comments',
+      name: "Total Comments",
       value: analytics?.totalComments || 0,
       icon: ChatBubbleLeftIcon,
-      color: 'text-purple-400'
-    }
-  ]
+      color: "text-purple-400",
+    },
+  ];
 
   return (
     <div className="min-h-screen">
@@ -90,7 +99,7 @@ const Dashboard = () => {
               Here's what's happening with your content today
             </p>
           </div>
-          
+
           <div className="mt-4 sm:mt-0 flex space-x-3">
             <Link to="/create">
               <Button
@@ -120,7 +129,9 @@ const Dashboard = () => {
             whileHover={{ scale: 1.05 }}
             className="glass-card p-6 rounded-xl text-center"
           >
-            <div className={`inline-flex items-center justify-center w-12 h-12 rounded-lg bg-[var(--glass-white)] mb-4`}>
+            <div
+              className={`inline-flex items-center justify-center w-12 h-12 rounded-lg bg-[var(--glass-white)] mb-4`}
+            >
               <stat.icon className={`w-6 h-6 ${stat.color}`} />
             </div>
             <div className="text-2xl font-bold text-[var(--theme-text)] mb-1">
@@ -254,7 +265,7 @@ const Dashboard = () => {
         </div>
       </motion.div>
     </div>
-  )
-}
+  );
+};
 
-export default Dashboard
+export default Dashboard;

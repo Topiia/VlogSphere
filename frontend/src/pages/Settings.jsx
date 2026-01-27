@@ -20,7 +20,6 @@ import {
 } from "@heroicons/react/24/outline";
 
 const Settings = () => {
-
   const [activeTab, setActiveTab] = useState("account");
 
   const tabs = [
@@ -68,9 +67,10 @@ const Settings = () => {
                   className={`
                     flex items-center space-x-2 px-6 py-4 font-medium text-sm whitespace-nowrap
                     transition-all duration-200 border-b-2
-                    ${activeTab === tab.id
-                      ? "border-[var(--theme-accent)] text-[var(--theme-accent)]"
-                      : "border-transparent text-[var(--theme-text-secondary)] hover:text-[var(--theme-text)] hover:border-white/20"
+                    ${
+                      activeTab === tab.id
+                        ? "border-[var(--theme-accent)] text-[var(--theme-accent)]"
+                        : "border-transparent text-[var(--theme-text-secondary)] hover:text-[var(--theme-text)] hover:border-white/20"
                     }
                   `}
                 >
@@ -524,9 +524,10 @@ const PrivacySettings = () => {
                   key={option.value}
                   className={`
                     flex items-start p-4 rounded-lg border-2 cursor-pointer transition-all
-                    ${privacySettings.profileVisibility === option.value
-                      ? "border-[var(--theme-accent)] bg-[var(--theme-accent)]/10"
-                      : "border-white/10 hover:border-white/20 bg-[var(--glass-white)]"
+                    ${
+                      privacySettings.profileVisibility === option.value
+                        ? "border-[var(--theme-accent)] bg-[var(--theme-accent)]/10"
+                        : "border-white/10 hover:border-white/20 bg-[var(--glass-white)]"
                     }
                   `}
                 >
@@ -964,9 +965,10 @@ const AppearanceSettings = () => {
                   onClick={() => changeTheme(key)}
                   className={`
                     p-4 rounded-lg border-2 transition-all duration-200
-                    ${theme === key
-                      ? "border-[var(--theme-accent)] bg-[var(--theme-accent)]/20"
-                      : "border-white/10 hover:border-white/20 bg-[var(--glass-white)]"
+                    ${
+                      theme === key
+                        ? "border-[var(--theme-accent)] bg-[var(--theme-accent)]/20"
+                        : "border-white/10 hover:border-white/20 bg-[var(--glass-white)]"
                     }
                   `}
                 >
@@ -1039,9 +1041,10 @@ const AppearanceSettings = () => {
                   key={option.value}
                   className={`
                     flex items-start p-4 rounded-lg border-2 cursor-pointer transition-all
-                    ${appearanceSettings.displayDensity === option.value
-                      ? "border-[var(--theme-accent)] bg-[var(--theme-accent)]/10"
-                      : "border-white/10 hover:border-white/20 bg-[var(--glass-white)]"
+                    ${
+                      appearanceSettings.displayDensity === option.value
+                        ? "border-[var(--theme-accent)] bg-[var(--theme-accent)]/10"
+                        : "border-white/10 hover:border-white/20 bg-[var(--glass-white)]"
                     }
                   `}
                 >

@@ -17,7 +17,9 @@ const path = require('path');
 const logFormat = winston.format.combine(
   winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
   winston.format.errors({ stack: true }),
-  winston.format.metadata({ fillExcept: ['message', 'level', 'timestamp', 'label'] }),
+  winston.format.metadata({
+    fillExcept: ['message', 'level', 'timestamp', 'label'],
+  }),
   winston.format.json(),
 );
 
@@ -25,13 +27,17 @@ const logFormat = winston.format.combine(
 const consoleFormat = winston.format.combine(
   winston.format.colorize(),
   winston.format.timestamp({ format: 'HH:mm:ss' }),
-  winston.format.printf(({
-    timestamp, level, message, correlationId, ...meta
-  }) => {
-    const corrId = correlationId ? `[${correlationId.slice(0, 8)}]` : '';
-    const metaStr = Object.keys(meta).length ? JSON.stringify(meta, null, 2) : '';
-    return `${timestamp} ${level} ${corrId} ${message} ${metaStr}`;
-  }),
+  winston.format.printf(
+    ({
+      timestamp, level, message, correlationId, ...meta
+    }) => {
+      const corrId = correlationId ? `[${correlationId.slice(0, 8)}]` : '';
+      const metaStr = Object.keys(meta).length
+        ? JSON.stringify(meta, null, 2)
+        : '';
+      return `${timestamp} ${level} ${corrId} ${message} ${metaStr}`;
+    },
+  ),
 );
 
 // Transport for errors (separate file)
@@ -67,26 +73,27 @@ const auditTransport = new DailyRotateFile({
 
 // Create logger instance
 const logger = winston.createLogger({
-  level: process.env.LOG_LEVEL || (process.env.NODE_ENV === 'production' ? 'info' : 'debug'),
+  level:
+    process.env.LOG_LEVEL
+    || (process.env.NODE_ENV === 'production' ? 'info' : 'debug'),
   format: logFormat,
   defaultMeta: {
     service: 'vlogsphere-api',
     environment: process.env.NODE_ENV || 'development',
   },
-  transports: [
-    errorTransport,
-    combinedTransport,
-  ],
+  transports: [errorTransport, combinedTransport],
   exitOnError: false,
 });
 
 // Add console transport in development
 if (process.env.NODE_ENV !== 'production') {
-  logger.add(new winston.transports.Console({
-    format: consoleFormat,
-    handleExceptions: true,
-    handleRejections: true,
-  }));
+  logger.add(
+    new winston.transports.Console({
+      format: consoleFormat,
+      handleExceptions: true,
+      handleRejections: true,
+    }),
+  );
 }
 
 // Helper method to log with correlation ID

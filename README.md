@@ -7,6 +7,7 @@ VLOGSPHERE is a cutting-edge, production-ready vlogging platform that combines f
 ## ✨ Key Features
 
 ### Frontend
+
 - **Futuristic UI/UX** with 3 premium gradient themes
 - **Responsive Design** for mobile, tablet, and desktop
 - **Smooth Animations** and 3D transitions
@@ -14,6 +15,7 @@ VLOGSPHERE is a cutting-edge, production-ready vlogging platform that combines f
 - **Theme Engine** with localStorage persistence
 
 ### Backend
+
 - **Secure Authentication** with JWT + Refresh Tokens
 - **RESTful API** with comprehensive endpoints
 - **File Upload** with image storage
@@ -21,6 +23,7 @@ VLOGSPHERE is a cutting-edge, production-ready vlogging platform that combines f
 - **Security Features** (CORS, Helmet, Rate Limiting)
 
 ### Core Functionality
+
 - User registration and authentication
 - Create, edit, delete vlogs
 - Multiple image uploads
@@ -33,6 +36,7 @@ VLOGSPHERE is a cutting-edge, production-ready vlogging platform that combines f
 ## 🛠 Tech Stack
 
 ### Frontend
+
 - React 18 with Vite
 - Tailwind CSS
 - Framer Motion (animations)
@@ -41,6 +45,7 @@ VLOGSPHERE is a cutting-edge, production-ready vlogging platform that combines f
 - React Query for state management
 
 ### Backend
+
 - Node.js + Express
 - MongoDB with Mongoose
 - JWT for authentication
@@ -51,6 +56,7 @@ VLOGSPHERE is a cutting-edge, production-ready vlogging platform that combines f
 - Helmet for security
 
 ### AI/ML
+
 - Simple NLP model for auto-tagging
 - Content analysis for category suggestions
 
@@ -89,11 +95,13 @@ vlogsphere/
 ## 🎨 Theme System
 
 ### Available Themes
+
 1. **Noir Velvet** → `#232526` → `#414345`
 2. **Deep Space** → `#0D1452` → `#004E92`
 3. **Crimson Night** → `#3A1C71` → `#D76D77`
 
 ### Theme Features
+
 - Smooth transitions between themes
 - Persistent user preference
 - Dynamic CSS variable system
@@ -113,7 +121,8 @@ vlogsphere/
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Node.js 18+ 
+
+- Node.js 18+
 - MongoDB (local installation OR MongoDB Atlas)
 - npm or yarn
 - Cloudinary account (for image storage)
@@ -122,77 +131,88 @@ vlogsphere/
 ### Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone <repository-url>
    cd vlogsphere
    ```
 
 2. **Install backend dependencies**
+
    ```bash
    cd backend
    npm install
    ```
 
 3. **Install frontend dependencies**
+
    ```bash
    cd ../frontend
    npm install
    ```
 
 4. **Set up environment variables**
-   
+
    **Backend** (`backend/.env`):
+
    ```bash
    cp backend/.env.example backend/.env
    ```
-   
+
    Edit `backend/.env` with your credentials:
+
    ```env
    # Database
    MONGODB_URI=mongodb://localhost:27017/vlogsphere
    # OR for MongoDB Atlas:
    # MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/vlogsphere
-   
+
    # JWT Secrets (generate strong random strings)
    JWT_SECRET=your-super-secret-jwt-key-here
    JWT_REFRESH_SECRET=your-super-secret-refresh-key
-   
+
    # Resend Email API
    RESEND_API_KEY=re_your_resend_api_key
    FROM_EMAIL=onboarding@resend.dev
    FROM_NAME=VlogSphere
-   
+
    # Cloudinary
    CLOUDINARY_URL=cloudinary://api_key:api_secret@cloud_name
-   
+
    # Frontend URL
    FRONTEND_URL=http://localhost:3000
    ```
-   
+
    **Frontend** (`frontend/.env` - Optional):
+
    ```bash
    cp frontend/.env.example frontend/.env
    ```
 
 5. **Start MongoDB** (if using local installation)
+
    ```bash
    mongod
    ```
 
 6. **Start the development servers**
-   
+
    **Terminal 1 - Backend:**
+
    ```bash
    cd backend
    npm run dev
    ```
+
    Backend runs on: `http://localhost:5000`
-   
+
    **Terminal 2 - Frontend:**
+
    ```bash
    cd frontend
    npm run dev
    ```
+
    Frontend runs on: `http://localhost:3000`
 
 7. **Access the application**
@@ -202,12 +222,14 @@ vlogsphere/
 ## 📡 API Endpoints
 
 ### Authentication
+
 - `POST /api/auth/register` - User registration
 - `POST /api/auth/login` - User login
 - `POST /api/auth/logout` - User logout
 - `POST /api/auth/refresh` - Refresh access token
 
 ### Vlogs
+
 - `GET /api/vlogs` - Get all vlogs (paginated)
 - `GET /api/vlogs/:id` - Get single vlog
 - `POST /api/vlogs` - Create new vlog
@@ -216,6 +238,7 @@ vlogsphere/
 - `GET /api/vlogs/search` - Search vlogs
 
 ### Images
+
 - `POST /api/upload` - Upload images
 - `DELETE /api/upload/:id` - Delete images
 
@@ -234,18 +257,21 @@ npm test
 ## 🚀 Deployment
 
 ### Frontend Deployment (Vercel)
+
 1. Connect your GitHub repository to Vercel
 2. Configure build settings
 3. Add environment variables
 4. Deploy
 
 ### Backend Deployment (Render/Railway)
+
 1. Connect your repository
 2. Configure build command and start command
 3. Add environment variables
 4. Deploy
 
 ### Database (MongoDB Atlas)
+
 1. Create a MongoDB Atlas cluster
 2. Configure connection string
 3. Set up database access
@@ -254,12 +280,14 @@ npm test
 ## 📈 Scaling to SaaS
 
 ### Infrastructure
+
 - Load balancing with NGINX
 - Redis for caching and sessions
 - CDN for static assets
 - Microservices architecture
 
 ### Features
+
 - Multi-tenant support
 - Advanced analytics
 - Monetization features
@@ -268,6 +296,7 @@ npm test
 - Advanced search with Elasticsearch
 
 ### Monitoring
+
 - Error tracking with Sentry
 - Performance monitoring
 - User analytics

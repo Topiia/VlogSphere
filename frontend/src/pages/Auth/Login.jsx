@@ -1,55 +1,55 @@
-import { useState } from 'react'
-import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { motion } from 'framer-motion'
-import { useForm } from 'react-hook-form'
-import { useAuth } from '../../contexts/AuthContext'
-import Button from '../../components/UI/Button'
-import Logo from '../../components/UI/Logo'
+import { useState } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { motion } from "framer-motion";
+import { useForm } from "react-hook-form";
+import { useAuth } from "../../contexts/AuthContext";
+import Button from "../../components/UI/Button";
+import Logo from "../../components/UI/Logo";
 import {
   EyeIcon,
   EyeSlashIcon,
   EnvelopeIcon,
-  LockClosedIcon
-} from '@heroicons/react/24/outline'
+  LockClosedIcon,
+} from "@heroicons/react/24/outline";
 
 const Login = () => {
-  const navigate = useNavigate()
-  const location = useLocation()
-  const { login } = useAuth()
-  const [showPassword, setShowPassword] = useState(false)
-  const [loading, setLoading] = useState(false)
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { login } = useAuth();
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const {
     register,
     handleSubmit,
-    formState: { errors }
+    formState: { errors },
   } = useForm({
     defaultValues: {
-      email: '',
-      password: '',
-      rememberMe: false
-    }
-  })
+      email: "",
+      password: "",
+      rememberMe: false,
+    },
+  });
 
   const onSubmit = async (data) => {
-    setLoading(true)
+    setLoading(true);
     try {
-      const result = await login(data.email, data.password, data.rememberMe)
+      const result = await login(data.email, data.password, data.rememberMe);
       if (result.success) {
         // Check for redirect path from 401 error handling
-        const redirectPath = localStorage.getItem('redirectAfterLogin')
+        const redirectPath = localStorage.getItem("redirectAfterLogin");
         if (redirectPath) {
-          localStorage.removeItem('redirectAfterLogin')
-          navigate(redirectPath, { replace: true })
+          localStorage.removeItem("redirectAfterLogin");
+          navigate(redirectPath, { replace: true });
         } else {
-          const from = location.state?.from?.pathname || '/dashboard'
-          navigate(from, { replace: true })
+          const from = location.state?.from?.pathname || "/dashboard";
+          navigate(from, { replace: true });
         }
       }
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const containerVariants = {
     hidden: { opacity: 0, scale: 0.9 },
@@ -59,10 +59,10 @@ const Login = () => {
       transition: {
         type: "spring",
         stiffness: 100,
-        damping: 15
-      }
-    }
-  }
+        damping: 15,
+      },
+    },
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden pb-20">
@@ -92,11 +92,17 @@ const Login = () => {
         </div>
 
         {/* Login Form */}
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 max-[480px]:space-y-4">
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="space-y-6 max-[480px]:space-y-4"
+        >
           <div className="glass-card p-8 max-[480px]:p-5 rounded-2xl space-y-5 max-[480px]:space-y-4">
             {/* Email Field */}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-[var(--theme-text)] mb-2">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-[var(--theme-text)] mb-2"
+              >
                 Email Address
               </label>
               <div className="relative">
@@ -104,12 +110,12 @@ const Login = () => {
                   <EnvelopeIcon className="h-5 w-5 text-[var(--theme-text-secondary)]" />
                 </div>
                 <input
-                  {...register('email', {
-                    required: 'Email is required',
+                  {...register("email", {
+                    required: "Email is required",
                     pattern: {
                       value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                      message: 'Invalid email address'
-                    }
+                      message: "Invalid email address",
+                    },
                   })}
                   type="email"
                   id="email"
@@ -131,7 +137,10 @@ const Login = () => {
 
             {/* Password Field */}
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-[var(--theme-text)] mb-2">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-[var(--theme-text)] mb-2"
+              >
                 Password
               </label>
               <div className="relative">
@@ -139,14 +148,14 @@ const Login = () => {
                   <LockClosedIcon className="h-5 w-5 text-[var(--theme-text-secondary)]" />
                 </div>
                 <input
-                  {...register('password', {
-                    required: 'Password is required',
+                  {...register("password", {
+                    required: "Password is required",
                     minLength: {
                       value: 6,
-                      message: 'Password must be at least 6 characters'
-                    }
+                      message: "Password must be at least 6 characters",
+                    },
                   })}
-                  type={showPassword ? 'text' : 'password'}
+                  type={showPassword ? "text" : "password"}
                   id="password"
                   className="glass-input pl-11 pr-11"
                   placeholder="Enter your password"
@@ -179,7 +188,7 @@ const Login = () => {
             <div className="flex items-center justify-between">
               <label className="flex items-center">
                 <input
-                  {...register('rememberMe')}
+                  {...register("rememberMe")}
                   type="checkbox"
                   className="w-4 h-4 text-[var(--theme-accent)] bg-transparent border-[var(--theme-text-secondary)] rounded focus:ring-[var(--theme-accent)]"
                   disabled={loading}
@@ -206,7 +215,7 @@ const Login = () => {
                 loading={loading}
                 className="mt-4"
               >
-                {loading ? 'Signing in...' : 'Sign In'}
+                {loading ? "Signing in..." : "Sign In"}
               </Button>
             </div>
           </div>
@@ -255,7 +264,7 @@ const Login = () => {
         {/* Sign Up Link */}
         <div className="text-center mt-8">
           <p className="text-[var(--theme-text-secondary)]">
-            Don&apos;t have an account?{' '}
+            Don&apos;t have an account?{" "}
             <Link
               to="/register"
               className="text-[var(--theme-accent)] hover:text-[var(--theme-accent)]/80 font-medium transition-colors"
@@ -266,7 +275,7 @@ const Login = () => {
         </div>
       </motion.div>
     </div>
-  )
-}
+  );
+};
 
-export default Login
+export default Login;
