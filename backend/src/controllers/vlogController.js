@@ -6,6 +6,7 @@ const ErrorResponse = require('../utils/errorResponse');
 const { generateTags } = require('../services/aiService');
 const VlogService = require('../services/vlogService');
 const { invalidateVlogCache } = require('../middleware/cache');
+const logger = require('../config/logger');
 
 /* ----------------------------------------------------------
    GET ALL VLOGS (Public)
@@ -359,6 +360,18 @@ exports.recordView = asyncHandler(async (req, res) => {
 
   // Record view with Redis deduplication
   const result = await VlogService.recordView(req.params.id, viewerId);
+
+  // OBSERVABILITY: Log view event for monitoring
+  logger.info('Vlog view recorded', {
+    eventType: 'view_recorded',
+    vlogId: req.params.id,
+    viewerId, // Hashed if anonymous
+    incremented: result.incremented, // True if new view
+    degraded: result.degraded || false, // True if Redis failed
+    views: result.views,
+    correlationId: req.correlationId,
+    ip: req.ip, // Useful for abuse monitoring (if generic IP logging allowed)
+  });
 
   res.status(200).json({
     success: true,

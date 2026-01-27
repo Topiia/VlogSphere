@@ -1,6 +1,7 @@
 const VlogService = require('../services/vlogService');
 const Vlog = require('../models/Vlog');
 const redis = require('../config/redis');
+const vlogController = require('../controllers/vlogController'); // Chaos testing import
 
 jest.mock('../models/Vlog');
 jest.mock('../config/redis');
@@ -251,6 +252,61 @@ describe('Redis TTL-Based Unique View Counting', () => {
         'EX',
         300, // Default
       );
+    });
+  });
+  describe('REGRESSION GUARDS: GET operations must be read-only', () => {
+    test('getVlog (Single Page) NEVER increments views', async () => {
+      // Mock Mongoose query chain for findById
+      const mockPopulate = jest.fn().mockResolvedValue({
+        _id: 'vlog123',
+        views: 500,
+        author: { _id: 'author1', followers: [] },
+        isPublic: true,
+      });
+
+      Vlog.findById = jest.fn().mockReturnValue({
+        populate: mockPopulate,
+      });
+
+      // Execute
+      await VlogService.getVlog('vlog123');
+
+      // Assertions: STRICTLY READ-ONLY
+      expect(Vlog.findByIdAndUpdate).not.toHaveBeenCalled();
+      expect(redis.set).not.toHaveBeenCalled(); // No Redis writes
+    });
+  });
+
+  describe('CHAOS: Redis Down Simulation', () => {
+    test('Should increment view even when Redis is down (degraded mode)', async () => {
+      // 1. Mock critical infrastructure failure
+      redis.set = jest.fn().mockRejectedValue(new Error('Redis connection died'));
+
+      // 2. Mock DB to succeed (Degraded mode relies on DB)
+      Vlog.findByIdAndUpdate = jest.fn().mockResolvedValue({ views: 999 });
+
+      // 3. Setup Request/Response
+      const req = {
+        params: { id: 'chaos_vlog' },
+        ip: '10.0.0.1',
+      };
+      const res = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+      };
+
+      // 4. Fire endpoint integration test
+      await vlogController.recordView(req, res);
+
+      // 5. Verify Isolation
+      expect(res.status).toHaveBeenCalledWith(200); // NO 500!
+      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
+        data: expect.objectContaining({
+          incremented: true,
+          degraded: true, // The signal we want
+          views: 999,
+        }),
+      }));
     });
   });
 });

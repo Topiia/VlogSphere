@@ -8,7 +8,7 @@ export const useVlogView = (vlogId) => {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    if (!isAuthenticated || !vlogId) return;
+    if (!vlogId) return;
 
     // Check if already recorded in session
     const sessionKey = `view_recorded_${vlogId}`;
@@ -17,14 +17,33 @@ export const useVlogView = (vlogId) => {
     // Record view (fire-and-forget, no refetch to prevent increment loop)
     vlogAPI
       .recordView(vlogId)
-      .then(() => {
+      .then((response) => {
         sessionStorage.setItem(sessionKey, "true");
-        // DO NOT invalidate queries here - prevents refetch that causes double increment
-        // View count will update naturally when user navigates away and back
+
+        // INSTANT UPDATE: Update UI directly from response without refetching
+        const { views, incremented } = response.data?.data || {};
+
+        if (incremented && views) {
+          queryClient.setQueryData(['vlog', vlogId], (oldData) => {
+            if (!oldData?.data?.data) return oldData;
+
+            // OpenAI/cursor style immutable update of deep property
+            return {
+              ...oldData,
+              data: {
+                ...oldData.data,
+                data: {
+                  ...oldData.data.data,
+                  views: views
+                }
+              }
+            };
+          });
+        }
       })
       .catch((error) => {
         // Log errors silently - don't show error toasts for view tracking failures
         console.error("Failed to record view:", error);
       });
-  }, [vlogId, isAuthenticated, queryClient]);
+  }, [vlogId, queryClient]);
 };
