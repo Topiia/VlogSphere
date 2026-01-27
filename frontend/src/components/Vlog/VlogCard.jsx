@@ -45,12 +45,25 @@ const VlogCard = ({ vlog, featured = false, compact = false }) => {
     isBookmarking,
   } = useVlogInteractions();
 
-  // Compute interaction states
-  const isLiked = vlog.likes?.includes(user?._id) || false;
-  const isDisliked = vlog.dislikes?.includes(user?._id) || false;
+  // Compute interaction states - prioritize direct properties (e.g. from optimistic updates)
+  const isLiked =
+    typeof vlog.isLiked === "boolean"
+      ? vlog.isLiked
+      : vlog.likes?.includes(user?._id) || false;
+  const isDisliked =
+    typeof vlog.isDisliked === "boolean"
+      ? vlog.isDisliked
+      : vlog.dislikes?.includes(user?._id) || false;
   const isBookmarked = vlog.isBookmarked || false;
-  const likeCount = vlog.likes?.length || 0;
-  const dislikeCount = vlog.dislikes?.length || 0;
+
+  const likeCount =
+    typeof vlog.likeCount === "number"
+      ? vlog.likeCount
+      : vlog.likes?.length || 0;
+  const dislikeCount =
+    typeof vlog.dislikeCount === "number"
+      ? vlog.dislikeCount
+      : vlog.dislikes?.length || 0;
 
   const handleLike = (e) => {
     e.preventDefault();
@@ -192,9 +205,8 @@ const VlogCard = ({ vlog, featured = false, compact = false }) => {
       initial="hidden"
       animate="visible"
       whileHover="hover"
-      className={`glass-card rounded-2xl overflow-hidden group cursor-pointer ${
-        featured ? "lg:col-span-2" : ""
-      }`}
+      className={`glass-card rounded-2xl overflow-hidden group cursor-pointer ${featured ? "lg:col-span-2" : ""
+        }`}
     >
       <Link to={`/vlog/${vlog._id}`}>
         {/* Image Section */}
@@ -269,17 +281,16 @@ const VlogCard = ({ vlog, featured = false, compact = false }) => {
               whileTap={{ scale: 0.9 }}
               animate={isLiking ? { scale: [1, 1.1, 1] } : {}}
               transition={isLiking ? { repeat: Infinity, duration: 0.6 } : {}}
-              className={`p-2.5 rounded-full transition-all duration-300 ${
-                isLiked
+              className={`p-2.5 rounded-full transition-all duration-300 ${isLiked
                   ? "bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-lg shadow-red-500/30"
                   : "bg-white/10 backdrop-blur-md text-white hover:bg-white/20 border border-white/20"
-              } ${isLiking ? "opacity-50 cursor-not-allowed" : ""}`}
+                } ${isLiking ? "opacity-50 cursor-not-allowed" : ""}`}
               style={
                 !isLiked
                   ? {
-                      backdropFilter: "blur(12px) saturate(180%)",
-                      WebkitBackdropFilter: "blur(12px) saturate(180%)",
-                    }
+                    backdropFilter: "blur(12px) saturate(180%)",
+                    WebkitBackdropFilter: "blur(12px) saturate(180%)",
+                  }
                   : {}
               }
             >
@@ -306,17 +317,16 @@ const VlogCard = ({ vlog, featured = false, compact = false }) => {
               transition={
                 isDisliking ? { repeat: Infinity, duration: 0.6 } : {}
               }
-              className={`p-2.5 rounded-full transition-all duration-300 ${
-                isDisliked
+              className={`p-2.5 rounded-full transition-all duration-300 ${isDisliked
                   ? "bg-gradient-to-r from-[var(--theme-accent)] to-[var(--theme-secondary)] text-white shadow-lg"
                   : "bg-white/10 backdrop-blur-md text-white hover:bg-white/20 border border-white/20"
-              } ${isDisliking ? "opacity-50 cursor-not-allowed" : ""}`}
+                } ${isDisliking ? "opacity-50 cursor-not-allowed" : ""}`}
               style={
                 !isDisliked
                   ? {
-                      backdropFilter: "blur(12px) saturate(180%)",
-                      WebkitBackdropFilter: "blur(12px) saturate(180%)",
-                    }
+                    backdropFilter: "blur(12px) saturate(180%)",
+                    WebkitBackdropFilter: "blur(12px) saturate(180%)",
+                  }
                   : {}
               }
             >
@@ -343,17 +353,16 @@ const VlogCard = ({ vlog, featured = false, compact = false }) => {
               transition={
                 isBookmarking ? { repeat: Infinity, duration: 0.6 } : {}
               }
-              className={`p-2.5 rounded-full transition-all duration-300 ${
-                isBookmarked
+              className={`p-2.5 rounded-full transition-all duration-300 ${isBookmarked
                   ? "bg-gradient-to-r from-[var(--theme-accent)] to-[var(--theme-secondary)] text-white shadow-lg"
                   : "bg-white/10 backdrop-blur-md text-white hover:bg-white/20 border border-white/20"
-              } ${isBookmarking ? "opacity-50 cursor-not-allowed" : ""}`}
+                } ${isBookmarking ? "opacity-50 cursor-not-allowed" : ""}`}
               style={
                 !isBookmarked
                   ? {
-                      backdropFilter: "blur(12px) saturate(180%)",
-                      WebkitBackdropFilter: "blur(12px) saturate(180%)",
-                    }
+                    backdropFilter: "blur(12px) saturate(180%)",
+                    WebkitBackdropFilter: "blur(12px) saturate(180%)",
+                  }
                   : {}
               }
             >
@@ -412,9 +421,8 @@ const VlogCard = ({ vlog, featured = false, compact = false }) => {
 
           {/* Title and Description */}
           <h3
-            className={`font-bold text-[var(--theme-text)] mb-2 ${
-              featured ? "text-2xl" : "text-lg"
-            }`}
+            className={`font-bold text-[var(--theme-text)] mb-2 ${featured ? "text-2xl" : "text-lg"
+              }`}
           >
             {vlog.title}
           </h3>
@@ -466,11 +474,10 @@ const VlogCard = ({ vlog, featured = false, compact = false }) => {
                 whileTap={{ scale: 0.95 }}
                 animate={isLiking ? { scale: [1, 1.05, 1] } : {}}
                 transition={isLiking ? { repeat: Infinity, duration: 0.6 } : {}}
-                className={`flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg transition-all duration-300 ${
-                  isLiked
+                className={`flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg transition-all duration-300 ${isLiked
                     ? "bg-gradient-to-r from-red-500/20 to-pink-500/20 backdrop-blur-sm border border-red-500/30"
                     : "hover:bg-white/5"
-                }`}
+                  }`}
               >
                 <motion.div
                   animate={isLiked ? { scale: [1, 1.2, 1] } : {}}
@@ -509,11 +516,10 @@ const VlogCard = ({ vlog, featured = false, compact = false }) => {
                 transition={
                   isDisliking ? { repeat: Infinity, duration: 0.6 } : {}
                 }
-                className={`flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg transition-all duration-300 ${
-                  isDisliked
+                className={`flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg transition-all duration-300 ${isDisliked
                     ? "bg-gradient-to-r from-[var(--theme-accent)]/20 to-[var(--theme-secondary)]/20 backdrop-blur-sm border border-[var(--theme-accent)]/30"
                     : "hover:bg-white/5"
-                }`}
+                  }`}
               >
                 <motion.div
                   animate={isDisliked ? { scale: [1, 1.2, 1] } : {}}

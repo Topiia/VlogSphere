@@ -13,7 +13,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 export const useVlogInteractions = () => {
   const queryClient = useQueryClient();
   const { showToast } = useToast();
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -40,97 +40,111 @@ export const useVlogInteractions = () => {
       }
 
       // Cancel outgoing refetches
-      await queryClient.cancelQueries(["vlog", vlogId]);
-      await queryClient.cancelQueries(["vlogs"]);
+      await queryClient.cancelQueries({ queryKey: ["vlog", vlogId] });
+      await queryClient.cancelQueries({ queryKey: ["vlogs"] });
+      await queryClient.cancelQueries({ queryKey: ["exploreVlogs"] });
+      await queryClient.cancelQueries({ queryKey: ["featuredVlogs"] });
+      await queryClient.cancelQueries({ queryKey: ["latestVlogs"] });
+      await queryClient.cancelQueries({ queryKey: ["trendingVlogs"] });
+      await queryClient.cancelQueries({ queryKey: ["userVlogs"] });
 
-      // Snapshot previous values
+      // Snapshot previous values (minimal for single vlog correctness)
       const previousVlog = queryClient.getQueryData(["vlog", vlogId]);
-      const previousVlogs = queryClient.getQueryData(["vlogs"]);
+
+      // Helper for updating vlog state
+      const getUpdatedVlog = (vlog) => {
+        const wasLiked = !!vlog.isLiked;
+        let diff = {};
+        if (!wasLiked) {
+          diff = {
+            isLiked: true,
+            likeCount: (vlog.likeCount || 0) + 1,
+            isDisliked: false,
+            dislikeCount: vlog.isDisliked
+              ? Math.max(0, (vlog.dislikeCount || 0) - 1)
+              : vlog.dislikeCount || 0,
+          };
+        } else {
+          diff = {
+            isLiked: false,
+            likeCount: Math.max(0, (vlog.likeCount || 0) - 1),
+          };
+        }
+        return { ...vlog, ...diff };
+      };
+
+      const updateVlogList = (list) => {
+        return list.map((v) => (v._id === vlogId ? getUpdatedVlog(v) : v));
+      };
 
       // Optimistically update single vlog
       queryClient.setQueryData(["vlog", vlogId], (old) => {
         if (!old) return old;
-
         const vlogData = old.data?.data || old.data || old;
-        const currentLikes = vlogData.likes || [];
-        const currentDislikes = vlogData.dislikes || [];
-        const userId = user?._id;
+        const updatedVlog = getUpdatedVlog(vlogData);
 
-        // Check if already liked
-        const isLiked = currentLikes.includes(userId);
-        const isDisliked = currentDislikes.includes(userId);
-
-        // Toggle like and remove dislike if present
-        const newLikes = isLiked
-          ? currentLikes.filter((id) => id !== userId)
-          : [...currentLikes, userId];
-
-        const newDislikes = isDisliked
-          ? currentDislikes.filter((id) => id !== userId)
-          : currentDislikes;
-
-        const updatedVlog = {
-          ...vlogData,
-          likes: newLikes,
-          dislikes: newDislikes,
-        };
-
-        // Preserve response structure
-        if (old.data?.data) {
+        if (old.data?.data)
           return { ...old, data: { ...old.data, data: updatedVlog } };
-        } else if (old.data) {
-          return { ...old, data: updatedVlog };
-        }
+        if (old.data) return { ...old, data: updatedVlog };
         return updatedVlog;
       });
 
-      // Optimistically update vlog lists
-      queryClient.setQueriesData(["vlogs"], (old) => {
-        if (!old) return old;
-
-        const updateVlogInList = (vlogs) => {
-          return vlogs.map((vlog) => {
-            if (vlog._id === vlogId) {
-              const currentLikes = vlog.likes || [];
-              const currentDislikes = vlog.dislikes || [];
-              const userId = user?._id;
-
-              const isLiked = currentLikes.includes(userId);
-              const isDisliked = currentDislikes.includes(userId);
-
-              const newLikes = isLiked
-                ? currentLikes.filter((id) => id !== userId)
-                : [...currentLikes, userId];
-
-              const newDislikes = isDisliked
-                ? currentDislikes.filter((id) => id !== userId)
-                : currentDislikes;
-
-              return { ...vlog, likes: newLikes, dislikes: newDislikes };
-            }
-            return vlog;
-          });
-        };
-
-        if (old.data?.data && Array.isArray(old.data.data)) {
-          return {
-            ...old,
-            data: { ...old.data, data: updateVlogInList(old.data.data) },
-          };
-        } else if (Array.isArray(old.data)) {
-          return { ...old, data: updateVlogInList(old.data) };
-        }
-        return old;
+      // Optimistically update standard lists
+      [
+        ["vlogs"],
+        ["featuredVlogs"],
+        ["latestVlogs"],
+        ["trendingVlogs"],
+        ["userVlogs"],
+      ].forEach((key) => {
+        queryClient.setQueriesData({ queryKey: key }, (old) => {
+          if (!old) return old;
+          if (old.data?.data && Array.isArray(old.data.data)) {
+            return {
+              ...old,
+              data: { ...old.data, data: updateVlogList(old.data.data) },
+            };
+          }
+          if (Array.isArray(old)) return updateVlogList(old);
+          return old;
+        });
       });
 
-      return { previousVlog, previousVlogs };
+      // Optimistically update Infinite Queries (Explore)
+      queryClient.setQueriesData({ queryKey: ["exploreVlogs"] }, (old) => {
+        if (!old?.pages) return old;
+        return {
+          ...old,
+          pages: old.pages.map((page) => {
+            if (page.data?.data && Array.isArray(page.data.data)) {
+              return {
+                ...page,
+                data: { ...page.data, data: updateVlogList(page.data.data) },
+              };
+            }
+            return page;
+          }),
+        };
+      });
+
+      return { previousVlog };
     },
     onSuccess: (response, vlogId, context) => {
       if (context?.skipUpdate) return;
 
-      // Update with server response
-      if (response?.data) {
-        queryClient.setQueryData(["vlog", vlogId], response);
+      // Update with server response (Merge)
+      if (response?.data?.data) {
+        const serverData = response.data.data;
+        queryClient.setQueryData(["vlog", vlogId], (old) => {
+          if (!old) return old;
+          const vlogData = old.data?.data || old.data || old;
+          const mergedVlog = { ...vlogData, ...serverData };
+
+          if (old.data?.data)
+            return { ...old, data: { ...old.data, data: mergedVlog } };
+          if (old.data) return { ...old, data: mergedVlog };
+          return mergedVlog;
+        });
       }
 
       showToast("Vlog liked!", "success");
@@ -142,9 +156,6 @@ export const useVlogInteractions = () => {
       if (context?.previousVlog) {
         queryClient.setQueryData(["vlog", vlogId], context.previousVlog);
       }
-      if (context?.previousVlogs) {
-        queryClient.setQueryData(["vlogs"], context.previousVlogs);
-      }
 
       showToast(error.message || "Failed to like vlog", "error");
     },
@@ -152,10 +163,13 @@ export const useVlogInteractions = () => {
       if (context?.skipUpdate) return;
 
       // Refetch to ensure consistency
-      queryClient.invalidateQueries(["vlog", vlogId]);
-      queryClient.invalidateQueries(["vlogs"]);
-      queryClient.invalidateQueries(["trending"]);
-      queryClient.invalidateQueries(["userVlogs"]);
+      queryClient.invalidateQueries({ queryKey: ["vlog", vlogId] });
+      queryClient.invalidateQueries({ queryKey: ["vlogs"] });
+      queryClient.invalidateQueries({ queryKey: ["exploreVlogs"] });
+      queryClient.invalidateQueries({ queryKey: ["featuredVlogs"] });
+      queryClient.invalidateQueries({ queryKey: ["latestVlogs"] });
+      queryClient.invalidateQueries({ queryKey: ["trendingVlogs"] });
+      queryClient.invalidateQueries({ queryKey: ["userVlogs"] });
     },
   });
 
@@ -182,97 +196,111 @@ export const useVlogInteractions = () => {
       }
 
       // Cancel outgoing refetches
-      await queryClient.cancelQueries(["vlog", vlogId]);
-      await queryClient.cancelQueries(["vlogs"]);
+      await queryClient.cancelQueries({ queryKey: ["vlog", vlogId] });
+      await queryClient.cancelQueries({ queryKey: ["vlogs"] });
+      await queryClient.cancelQueries({ queryKey: ["exploreVlogs"] });
+      await queryClient.cancelQueries({ queryKey: ["featuredVlogs"] });
+      await queryClient.cancelQueries({ queryKey: ["latestVlogs"] });
+      await queryClient.cancelQueries({ queryKey: ["trendingVlogs"] });
+      await queryClient.cancelQueries({ queryKey: ["userVlogs"] });
 
       // Snapshot previous values
       const previousVlog = queryClient.getQueryData(["vlog", vlogId]);
-      const previousVlogs = queryClient.getQueryData(["vlogs"]);
+
+      // Helper for updating vlog state
+      const getUpdatedVlog = (vlog) => {
+        const wasDisliked = !!vlog.isDisliked;
+        let diff = {};
+        if (!wasDisliked) {
+          diff = {
+            isDisliked: true,
+            dislikeCount: (vlog.dislikeCount || 0) + 1,
+            isLiked: false,
+            likeCount: vlog.isLiked
+              ? Math.max(0, (vlog.likeCount || 0) - 1)
+              : vlog.likeCount || 0,
+          };
+        } else {
+          diff = {
+            isDisliked: false,
+            dislikeCount: Math.max(0, (vlog.dislikeCount || 0) - 1),
+          };
+        }
+        return { ...vlog, ...diff };
+      };
+
+      const updateVlogList = (list) => {
+        return list.map((v) => (v._id === vlogId ? getUpdatedVlog(v) : v));
+      };
 
       // Optimistically update single vlog
       queryClient.setQueryData(["vlog", vlogId], (old) => {
         if (!old) return old;
-
         const vlogData = old.data?.data || old.data || old;
-        const currentLikes = vlogData.likes || [];
-        const currentDislikes = vlogData.dislikes || [];
-        const userId = user?._id;
+        const updatedVlog = getUpdatedVlog(vlogData);
 
-        // Check if already disliked
-        const isLiked = currentLikes.includes(userId);
-        const isDisliked = currentDislikes.includes(userId);
-
-        // Toggle dislike and remove like if present
-        const newDislikes = isDisliked
-          ? currentDislikes.filter((id) => id !== userId)
-          : [...currentDislikes, userId];
-
-        const newLikes = isLiked
-          ? currentLikes.filter((id) => id !== userId)
-          : currentLikes;
-
-        const updatedVlog = {
-          ...vlogData,
-          likes: newLikes,
-          dislikes: newDislikes,
-        };
-
-        // Preserve response structure
-        if (old.data?.data) {
+        if (old.data?.data)
           return { ...old, data: { ...old.data, data: updatedVlog } };
-        } else if (old.data) {
-          return { ...old, data: updatedVlog };
-        }
+        if (old.data) return { ...old, data: updatedVlog };
         return updatedVlog;
       });
 
-      // Optimistically update vlog lists
-      queryClient.setQueriesData(["vlogs"], (old) => {
-        if (!old) return old;
-
-        const updateVlogInList = (vlogs) => {
-          return vlogs.map((vlog) => {
-            if (vlog._id === vlogId) {
-              const currentLikes = vlog.likes || [];
-              const currentDislikes = vlog.dislikes || [];
-              const userId = user?._id;
-
-              const isLiked = currentLikes.includes(userId);
-              const isDisliked = currentDislikes.includes(userId);
-
-              const newDislikes = isDisliked
-                ? currentDislikes.filter((id) => id !== userId)
-                : [...currentDislikes, userId];
-
-              const newLikes = isLiked
-                ? currentLikes.filter((id) => id !== userId)
-                : currentLikes;
-
-              return { ...vlog, likes: newLikes, dislikes: newDislikes };
-            }
-            return vlog;
-          });
-        };
-
-        if (old.data?.data && Array.isArray(old.data.data)) {
-          return {
-            ...old,
-            data: { ...old.data, data: updateVlogInList(old.data.data) },
-          };
-        } else if (Array.isArray(old.data)) {
-          return { ...old, data: updateVlogInList(old.data) };
-        }
-        return old;
+      // Optimistically update standard lists
+      [
+        ["vlogs"],
+        ["featuredVlogs"],
+        ["latestVlogs"],
+        ["trendingVlogs"],
+        ["userVlogs"],
+      ].forEach((key) => {
+        queryClient.setQueriesData({ queryKey: key }, (old) => {
+          if (!old) return old;
+          if (old.data?.data && Array.isArray(old.data.data)) {
+            return {
+              ...old,
+              data: { ...old.data, data: updateVlogList(old.data.data) },
+            };
+          }
+          if (Array.isArray(old)) return updateVlogList(old);
+          return old;
+        });
       });
 
-      return { previousVlog, previousVlogs };
+      // Optimistically update Infinite Queries (Explore)
+      queryClient.setQueriesData({ queryKey: ["exploreVlogs"] }, (old) => {
+        if (!old?.pages) return old;
+        return {
+          ...old,
+          pages: old.pages.map((page) => {
+            if (page.data?.data && Array.isArray(page.data.data)) {
+              return {
+                ...page,
+                data: { ...page.data, data: updateVlogList(page.data.data) },
+              };
+            }
+            return page;
+          }),
+        };
+      });
+
+      return { previousVlog };
     },
     onSuccess: (response, vlogId, context) => {
       if (context?.skipUpdate) return;
 
-      // Update with server response
-      if (response?.data) {
-        queryClient.setQueryData(["vlog", vlogId], response);
+      // Update with server response (Merge)
+      if (response?.data?.data) {
+        const serverData = response.data.data;
+        queryClient.setQueryData(["vlog", vlogId], (old) => {
+          if (!old) return old;
+          const vlogData = old.data?.data || old.data || old;
+          const mergedVlog = { ...vlogData, ...serverData };
+
+          if (old.data?.data)
+            return { ...old, data: { ...old.data, data: mergedVlog } };
+          if (old.data) return { ...old, data: mergedVlog };
+          return mergedVlog;
+        });
       }
 
       showToast("Vlog disliked!", "success");
@@ -284,9 +312,6 @@ export const useVlogInteractions = () => {
       if (context?.previousVlog) {
         queryClient.setQueryData(["vlog", vlogId], context.previousVlog);
       }
-      if (context?.previousVlogs) {
-        queryClient.setQueryData(["vlogs"], context.previousVlogs);
-      }
 
       showToast(error.message || "Failed to dislike vlog", "error");
     },
@@ -294,10 +319,13 @@ export const useVlogInteractions = () => {
       if (context?.skipUpdate) return;
 
       // Refetch to ensure consistency
-      queryClient.invalidateQueries(["vlog", vlogId]);
-      queryClient.invalidateQueries(["vlogs"]);
-      queryClient.invalidateQueries(["trending"]);
-      queryClient.invalidateQueries(["userVlogs"]);
+      queryClient.invalidateQueries({ queryKey: ["vlog", vlogId] });
+      queryClient.invalidateQueries({ queryKey: ["vlogs"] });
+      queryClient.invalidateQueries({ queryKey: ["exploreVlogs"] });
+      queryClient.invalidateQueries({ queryKey: ["featuredVlogs"] });
+      queryClient.invalidateQueries({ queryKey: ["latestVlogs"] });
+      queryClient.invalidateQueries({ queryKey: ["trendingVlogs"] });
+      queryClient.invalidateQueries({ queryKey: ["userVlogs"] });
     },
   });
 
