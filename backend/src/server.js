@@ -328,13 +328,16 @@ app.use(errorHandler);
 const PORT = process.env.PORT || 5000;
 
 // Start server and export for potential shutdown handling
-const server = app.listen(PORT, () => {
-  logger.info('Server started', {
-    port: PORT,
-    environment: process.env.NODE_ENV,
-    nodeVersion: process.version,
+let server;
+if (process.env.NODE_ENV !== 'test') {
+  server = app.listen(PORT, () => {
+    logger.info('Server started', {
+      port: PORT,
+      environment: process.env.NODE_ENV,
+      nodeVersion: process.version,
+    });
   });
-});
+}
 
 module.exports = app;
 module.exports.server = server; // Export server for graceful shutdown if needed

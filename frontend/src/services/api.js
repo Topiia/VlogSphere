@@ -92,14 +92,20 @@ export const uploadAPI = {
   uploadSingle: (file) => {
     const formData = new FormData()
     formData.append('image', file)
-    // Let axios set Content-Type automatically with multipart boundary
-    return api.post('/upload/single', formData)
+    // CRITICAL: Remove Content-Type to let axios auto-set multipart/form-data with boundary
+    // Default header 'application/json' prevents proper file upload
+    return api.post('/upload/single', formData, {
+      headers: { 'Content-Type': undefined }
+    })
   },
   uploadMultiple: (files) => {
     const formData = new FormData()
     files.forEach(file => formData.append('images', file))
-    // Let axios set Content-Type automatically with multipart boundary
-    return api.post('/upload/multiple', formData)
+    // CRITICAL: Remove Content-Type to let axios auto-set multipart/form-data with boundary
+    // Default header 'application/json' prevents proper file upload
+    return api.post('/upload/multiple', formData, {
+      headers: { 'Content-Type': undefined }
+    })
   },
   deleteImage: (publicId) => api.delete(`/upload/${publicId}`),
 }
@@ -117,7 +123,12 @@ export const userAPI = {
   getBookmarks: (params = {}) => api.get('/users/bookmarks', { params }),
   addBookmark: (vlogId) => api.post(`/users/bookmarks/${vlogId}`),
   removeBookmark: (vlogId) => api.delete(`/users/bookmarks/${vlogId}`),
+  deleteAccount: (password) => api.delete('/users/me', { data: { password } }),
 }
+
+// Convenience: export deleteUserAccount for direct import
+export const deleteUserAccount = userAPI.deleteAccount
+
 
 // Request interceptor for error handling
 api.interceptors.request.use(
