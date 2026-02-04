@@ -6,6 +6,7 @@ import {
   useEffect,
   useCallback,
   useMemo,
+  useRef,
 } from "react";
 import { authAPI } from "../services/api";
 import toast from "react-hot-toast";
@@ -52,6 +53,11 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  // UX FIX: Guard to suppress toasts during passive initial session restoration
+  // Prevents "Too many requests" toasts on app load when user hasn't acted yet
+  // After initial load completes, all future auth errors show toasts normally
+  const isInitialLoadRef = useRef(true);
 
   // Logout: Call API to clear cookies, then clear state
   const logout = useCallback(async () => {
@@ -273,10 +279,18 @@ export const AuthProvider = ({ children }) => {
               const retryAfter =
                 refreshError.response.data?.retryAfterSeconds || 60;
               console.warn(`Rate limited. Retry after ${retryAfter} seconds`);
-              toast.error(
-                `Too many requests. Please wait ${retryAfter} seconds and refresh.`,
-                { duration: retryAfter * 1000 },
-              );
+
+              // UX FIX: Only show toast if NOT initial load (user took explicit action)
+              if (!isInitialLoadRef.current) {
+                toast.error(
+                  `Too many requests. Please wait ${retryAfter} seconds and refresh.`,
+                  { duration: retryAfter * 1000 },
+                );
+              } else {
+                console.log(
+                  "[AuthContext] Rate limit during initial load - toast suppressed",
+                );
+              }
             } else {
               // Refresh failed, user not logged in
               console.log("Session restoration failed, user not logged in");
@@ -289,9 +303,17 @@ export const AuthProvider = ({ children }) => {
           console.warn(
             `Rate limited on /me. Retry after ${retryAfter} seconds`,
           );
-          toast.error(`Too many requests. Please wait ${retryAfter} seconds.`, {
-            duration: retryAfter * 1000,
-          });
+
+          // UX FIX: Only show toast if NOT initial load (user took explicit action)
+          if (!isInitialLoadRef.current) {
+            toast.error(`Too many requests. Please wait ${retryAfter} seconds.`, {
+              duration: retryAfter * 1000,
+            });
+          } else {
+            console.log(
+              "[AuthContext] Rate limit during initial load - toast suppressed",
+            );
+          }
           setIsAuthenticated(false);
         } else {
           // Other error, assume not logged in
@@ -302,6 +324,7 @@ export const AuthProvider = ({ children }) => {
         setLoading(false);
         globalAuthInitializing = false;
         globalAuthInitialized = true;
+        isInitialLoadRef.current = false; // UX FIX: Mark initial load complete
         console.log("[AuthContext] Authentication initialization complete");
       }
     };
