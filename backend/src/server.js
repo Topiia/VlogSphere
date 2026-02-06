@@ -8,6 +8,7 @@ const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
 const path = require('path');
 const mongoose = require('mongoose');
+const statusMonitor = require('express-status-monitor');
 
 // OBSERVABILITY: Structured logging
 const logger = require('./config/logger');
@@ -144,6 +145,47 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
+
+// OBSERVABILITY: Real-time monitoring dashboard
+// Accessible at /status - Shows CPU, Memory, Request stats
+// Configuration below app.use(cors())
+
+app.use(
+  statusMonitor({
+    title: 'VlogSphere Status',
+    path: '/status',
+    spans: [
+      {
+        interval: 1, // Every second
+        retention: 60, // Keep for 60 seconds
+      },
+      {
+        interval: 5, // Every 5 seconds
+        retention: 60, // Keep for 5 minutes
+      },
+      {
+        interval: 15, // Every 15 seconds
+        retention: 60, // Keep for 15 minutes
+      },
+    ],
+    chartVisibility: {
+      cpu: true,
+      mem: true,
+      load: true,
+      responseTime: true,
+      rps: true,
+      statusCodes: true,
+    },
+    healthChecks: [
+      {
+        protocol: 'http',
+        host: 'localhost',
+        path: '/health',
+        port: process.env.PORT || 5000,
+      },
+    ],
+  }),
+);
 
 // Rate limiting (disabled in test mode)
 if (process.env.NODE_ENV !== 'test') {
