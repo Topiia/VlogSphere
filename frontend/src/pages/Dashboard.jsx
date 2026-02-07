@@ -152,7 +152,7 @@ const Dashboard = () => {
       >
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-bold text-[var(--theme-text)]">
-            Your Recent Vlogs
+            Your Recent Capsules
           </h2>
           <Link to="/profile">
             <Button variant="ghost" size="sm">
@@ -190,17 +190,17 @@ const Dashboard = () => {
               <ChartBarIcon className="w-8 h-8 text-[var(--theme-text-secondary)]" />
             </div>
             <h3 className="text-lg font-medium text-[var(--theme-text)] mb-2">
-              No vlogs yet
+              No capsules yet
             </h3>
             <p className="text-[var(--theme-text-secondary)] mb-6">
-              Start creating content to see your stats and vlogs here
+              Start creating content to see your stats and capsules here
             </p>
             <Link to="/create">
               <Button
                 variant="primary"
                 leftIcon={<PlusIcon className="w-5 h-5" />}
               >
-                Create Your First Vlog
+                Create Your First Capsule
               </Button>
             </Link>
           </div>
@@ -254,11 +254,11 @@ const Dashboard = () => {
             Create Content
           </h3>
           <p className="text-sm text-[var(--theme-text-secondary)] mb-4">
-            Start creating and sharing your vlogs
+            Start creating and sharing your capsules
           </p>
           <Link to="/create">
             <Button variant="outline" size="sm">
-              Create Vlog
+              Create Capsule
             </Button>
           </Link>
         </div>
