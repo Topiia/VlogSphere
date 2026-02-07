@@ -379,7 +379,7 @@ exports.recordView = asyncHandler(async (req, res) => {
       views: result.views,
       hasViewed: true,
       incremented: result.incremented,
-      ttl: parseInt(process.env.VIEW_TTL_SECONDS, 10) || 300,
+      ttl: parseInt(process.env.VIEW_TTL_SECONDS, 10) || 86400,
     },
   });
 });

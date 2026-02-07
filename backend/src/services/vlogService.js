@@ -85,13 +85,21 @@ class VlogService {
       const isDisliked = false;
 
       if (existingLike) {
-        // Unlike
+        // Unlike: Remove existing like
         await Like.deleteOne({ _id: existingLike._id }).session(session);
         await Vlog.findByIdAndUpdate(vlogId, {
           $inc: { likeCount: -1 },
         }).session(session);
       } else {
-        // Like
+        // Like: First remove dislike if it exists (CRITICAL: prevent duplicate key error)
+        if (existingDislike) {
+          await Like.deleteOne({ _id: existingDislike._id }).session(session);
+          await Vlog.findByIdAndUpdate(vlogId, {
+            $inc: { dislikeCount: -1 },
+          }).session(session);
+        }
+
+        // Then create the like
         await Like.create([{ vlog: vlogId, user: userId, type: 'like' }], {
           session,
         });
@@ -99,14 +107,6 @@ class VlogService {
           $inc: { likeCount: 1 },
         }).session(session);
         isLiked = true;
-
-        // Remove dislike if exists
-        if (existingDislike) {
-          await Like.deleteOne({ _id: existingDislike._id }).session(session);
-          await Vlog.findByIdAndUpdate(vlogId, {
-            $inc: { dislikeCount: -1 },
-          }).session(session);
-        }
       }
 
       await session.commitTransaction();
@@ -146,17 +146,34 @@ class VlogService {
         type: 'like',
       }).session(session);
 
-      let isLiked = !!existingLike; // State before change
+      let isLiked = false;
       let isDisliked = false;
 
       if (existingDislike) {
-        // Remove Dislike
+        // Undislike: Remove existing dislike
         await Like.deleteOne({ _id: existingDislike._id }).session(session);
         await Vlog.findByIdAndUpdate(vlogId, {
           $inc: { dislikeCount: -1 },
         }).session(session);
+
+        // Restore like state if it was there? No, typical behavior is just remove dislike.
+        // Wait, if I am undisliking, does that mean I am liking? No, back to neutral.
+        // But we need to correctly return isLiked status if it somehow exists
+        // (which it shouldn't if mutually exclusive).
+        // Actually, logic above ensures mutual exclusion.
+        // So if I undislike, I am neutral.
+        // existingLike should definitely be null here if we enforce mutual exclusion.
+        isLiked = !!existingLike;
       } else {
-        // Dislike
+        // Dislike: First remove like if it exists (CRITICAL: prevent duplicate key error)
+        if (existingLike) {
+          await Like.deleteOne({ _id: existingLike._id }).session(session);
+          await Vlog.findByIdAndUpdate(vlogId, {
+            $inc: { likeCount: -1 },
+          }).session(session);
+        }
+
+        // Then create the dislike
         await Like.create([{ vlog: vlogId, user: userId, type: 'dislike' }], {
           session,
         });
@@ -164,15 +181,6 @@ class VlogService {
           $inc: { dislikeCount: 1 },
         }).session(session);
         isDisliked = true;
-
-        // Remove like if exists
-        if (existingLike) {
-          await Like.deleteOne({ _id: existingLike._id }).session(session);
-          await Vlog.findByIdAndUpdate(vlogId, {
-            $inc: { likeCount: -1 },
-          }).session(session);
-          isLiked = false;
-        }
       }
 
       await session.commitTransaction();
@@ -193,16 +201,30 @@ class VlogService {
   }
 
   async addComment(vlogId, userId, text) {
+    if (!text || !text.trim()) {
+      throw new ErrorResponse('Comment cannot be empty', 400);
+    }
+
+    if (text.length > 500) {
+      throw new ErrorResponse('Comment cannot exceed 500 characters', 400);
+    }
+
     const comment = await Comment.create({
       vlog: vlogId,
       user: userId,
-      text,
+      text: text.trim(),
     });
 
     // Increment count (atomic)
     await Vlog.findByIdAndUpdate(vlogId, { $inc: { commentCount: 1 } });
 
-    return comment.populate('user', 'username avatar');
+    const populatedComment = await comment.populate('user', 'username avatar');
+    // Normalize response contract
+    const commentObj = populatedComment.toObject();
+    return {
+      ...commentObj,
+      content: commentObj.text, // contract requires 'content'
+    };
   }
 
   async deleteComment(vlogId, commentId, userId, isAdmin = false) {
@@ -225,7 +247,8 @@ class VlogService {
   }
 
   async recordView(vlogId, viewerId) {
-    const VIEW_TTL_SECONDS = parseInt(process.env.VIEW_TTL_SECONDS, 10) || 300; // 5 minutes default
+    // 24 hours default
+    const VIEW_TTL_SECONDS = parseInt(process.env.VIEW_TTL_SECONDS, 10) || 86400;
 
     // Generate unique Redis key: view:{vlogId}:{viewerId}
     const redisKey = `view:${vlogId}:${viewerId}`;
