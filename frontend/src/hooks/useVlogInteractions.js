@@ -54,23 +54,26 @@ export const useVlogInteractions = () => {
       // Helper for updating vlog state
       const getUpdatedVlog = (vlog) => {
         const wasLiked = !!vlog.isLiked;
-        let diff = {};
-        if (!wasLiked) {
-          diff = {
-            isLiked: true,
-            likeCount: (vlog.likeCount || 0) + 1,
-            isDisliked: false,
-            dislikeCount: vlog.isDisliked
-              ? Math.max(0, (vlog.dislikeCount || 0) - 1)
-              : vlog.dislikeCount || 0,
-          };
-        } else {
-          diff = {
+        // If it was already liked, we are toggling it OFF
+        if (wasLiked) {
+          return {
+            ...vlog,
             isLiked: false,
             likeCount: Math.max(0, (vlog.likeCount || 0) - 1),
           };
         }
-        return { ...vlog, ...diff };
+
+        // If it wasn't liked, we are toggling it ON
+        // This also means we must turn OFF dislike if it exists
+        return {
+          ...vlog,
+          isLiked: true,
+          likeCount: (vlog.likeCount || 0) + 1,
+          isDisliked: false, // Mutual exclusion
+          dislikeCount: vlog.isDisliked
+            ? Math.max(0, (vlog.dislikeCount || 0) - 1)
+            : vlog.dislikeCount || 0,
+        };
       };
 
       const updateVlogList = (list) => {
@@ -127,7 +130,7 @@ export const useVlogInteractions = () => {
         };
       });
 
-      return { previousVlog };
+      return { previousVlog, wasLiked: !!previousVlog?.isLiked };
     },
     onSuccess: (response, vlogId, context) => {
       if (context?.skipUpdate) return;
@@ -147,7 +150,10 @@ export const useVlogInteractions = () => {
         });
       }
 
-      showToast("Vlog liked!", "success");
+      // Dynamic toast based on server response (Truthful)
+      const isLiked = response?.data?.data?.isLiked;
+      const message = isLiked ? "Capsule liked!" : "Capsule like removed";
+      showToast(message, "success");
     },
     onError: (error, vlogId, context) => {
       if (context?.skipUpdate || error.message === "Not authenticated") return;
@@ -157,7 +163,7 @@ export const useVlogInteractions = () => {
         queryClient.setQueryData(["vlog", vlogId], context.previousVlog);
       }
 
-      showToast(error.message || "Failed to like vlog", "error");
+      showToast(error.message || "Failed to update like", "error");
     },
     onSettled: (_data, _error, vlogId, context) => {
       if (context?.skipUpdate) return;
@@ -210,23 +216,26 @@ export const useVlogInteractions = () => {
       // Helper for updating vlog state
       const getUpdatedVlog = (vlog) => {
         const wasDisliked = !!vlog.isDisliked;
-        let diff = {};
-        if (!wasDisliked) {
-          diff = {
-            isDisliked: true,
-            dislikeCount: (vlog.dislikeCount || 0) + 1,
-            isLiked: false,
-            likeCount: vlog.isLiked
-              ? Math.max(0, (vlog.likeCount || 0) - 1)
-              : vlog.likeCount || 0,
-          };
-        } else {
-          diff = {
+        // If it was already disliked, we are toggling it OFF
+        if (wasDisliked) {
+          return {
+            ...vlog,
             isDisliked: false,
             dislikeCount: Math.max(0, (vlog.dislikeCount || 0) - 1),
           };
         }
-        return { ...vlog, ...diff };
+
+        // If it wasn't disliked, we are toggling it ON
+        // This also means we must turn OFF like if it exists
+        return {
+          ...vlog,
+          isDisliked: true,
+          dislikeCount: (vlog.dislikeCount || 0) + 1,
+          isLiked: false, // Mutual exclusion
+          likeCount: vlog.isLiked
+            ? Math.max(0, (vlog.likeCount || 0) - 1)
+            : vlog.likeCount || 0,
+        };
       };
 
       const updateVlogList = (list) => {
@@ -283,7 +292,7 @@ export const useVlogInteractions = () => {
         };
       });
 
-      return { previousVlog };
+      return { previousVlog, wasDisliked: !!previousVlog?.isDisliked };
     },
     onSuccess: (response, vlogId, context) => {
       if (context?.skipUpdate) return;
@@ -303,7 +312,10 @@ export const useVlogInteractions = () => {
         });
       }
 
-      showToast("Vlog disliked!", "success");
+       // Dynamic toast based on server response (Truthful)
+      const isDisliked = response?.data?.data?.isDisliked;
+      const message = isDisliked ? "Capsule disliked" : "Capsule dislike removed";
+      showToast(message, "success");
     },
     onError: (error, vlogId, context) => {
       if (context?.skipUpdate || error.message === "Not authenticated") return;
@@ -313,7 +325,7 @@ export const useVlogInteractions = () => {
         queryClient.setQueryData(["vlog", vlogId], context.previousVlog);
       }
 
-      showToast(error.message || "Failed to dislike vlog", "error");
+      showToast(error.message || "Failed to dislike capsule", "error");
     },
     onSettled: (_data, _error, vlogId, context) => {
       if (context?.skipUpdate) return;
@@ -400,7 +412,7 @@ export const useVlogInteractions = () => {
       return { previousVlog };
     },
     onSuccess: (_response, { _vlogId }) => {
-      showToast("Vlog shared successfully!", "success");
+      showToast("Capsule shared successfully!", "success");
     },
     onError: (error, { vlogId }, context) => {
       // Don't show error for cancelled shares
@@ -420,7 +432,7 @@ export const useVlogInteractions = () => {
         queryClient.setQueryData(["vlog", vlogId], context.previousVlog);
       }
 
-      showToast(error.message || "Failed to share vlog", "error");
+      showToast(error.message || "Failed to share capsule", "error");
     },
     onSettled: (_data, error, { vlogId }) => {
       // Skip refetch if share was cancelled or not authenticated
@@ -522,7 +534,7 @@ export const useVlogInteractions = () => {
       return { previousVlog };
     },
     onSuccess: (_response, { _vlogId, isBookmarked }) => {
-      const message = isBookmarked ? "Bookmark removed!" : "Vlog bookmarked!";
+      const message = isBookmarked ? "Bookmark removed" : "Capsule bookmarked";
       showToast(message, "success");
     },
     onError: (error, { vlogId }, context) => {
@@ -550,6 +562,62 @@ export const useVlogInteractions = () => {
     },
   });
 
+  /**
+   * Add a comment to a vlog
+   */
+  const addCommentMutation = useMutation({
+    mutationFn: async ({ vlogId, text }) => {
+      if (!isAuthenticated) throw new Error("Not authenticated");
+      // CRITICAL FIX: Pass text directly, api.js helper handles the object wrapping
+      return vlogAPI.addComment(vlogId, text);
+    },
+    onMutate: async ({ vlogId, text, user }) => {
+      await queryClient.cancelQueries(["vlog", vlogId]);
+
+      const previousVlog = queryClient.getQueryData(["vlog", vlogId]);
+
+      queryClient.setQueryData(["vlog", vlogId], (old) => {
+        if (!old) return old;
+        const vlogData = old.data?.data || old.data || old;
+
+        // Create temporary optimistic comment
+        const tempComment = {
+          _id: `temp-${Date.now()}`,
+          text,
+          user: {
+            _id: user._id,
+            username: user.username,
+            avatar: user.avatar,
+          },
+          createdAt: new Date().toISOString(),
+          isOptimistic: true,
+        };
+
+        const updatedVlog = {
+          ...vlogData,
+          commentCount: (vlogData.commentCount || 0) + 1,
+          comments: [tempComment, ...(vlogData.comments || [])],
+        };
+
+        if (old.data?.data)
+          return { ...old, data: { ...old.data, data: updatedVlog } };
+        if (old.data) return { ...old, data: updatedVlog };
+        return updatedVlog;
+      });
+
+      return { previousVlog };
+    },
+    onError: (err, { vlogId }, context) => {
+      if (context?.previousVlog) {
+        queryClient.setQueryData(["vlog", vlogId], context.previousVlog);
+      }
+      showToast(err.message || "Failed to post comment", "error");
+    },
+    onSettled: (_data, _error, { vlogId }) => {
+      queryClient.invalidateQueries(["vlog", vlogId]);
+    },
+  });
+
   return {
     // Like/Dislike
     toggleLike: (vlogId) => likeMutation.mutate(vlogId),
@@ -565,5 +633,10 @@ export const useVlogInteractions = () => {
     toggleBookmark: (vlogId, isBookmarked) =>
       bookmarkMutation.mutate({ vlogId, isBookmarked }),
     isBookmarking: bookmarkMutation.isPending,
+
+    // Comments
+    addComment: (vlogId, text, user) =>
+      addCommentMutation.mutate({ vlogId, text, user }),
+    isAddingComment: addCommentMutation.isPending,
   };
 };
