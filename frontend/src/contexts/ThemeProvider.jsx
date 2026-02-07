@@ -28,6 +28,12 @@ export const ThemeProvider = ({ children }) => {
       accent: "pink-400",
       description: "Bold, passionate crimson theme",
     },
+    "rose-quartz": {
+      name: "Rose Quartz",
+      gradient: "from-pink-200 to-rose-300",
+      accent: "pink-400",
+      description: "Soft blush tones with elegant contrast",
+    },
   };
 
   useEffect(() => {

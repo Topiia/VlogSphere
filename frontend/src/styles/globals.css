@@ -30,6 +30,14 @@
   --crimson-night-text-secondary: #fee2e2;
   --crimson-night-bg: linear-gradient(135deg, #3a1c71 0%, #d76d77 100%);
 
+  /* Rose Quartz */
+  --rose-quartz-primary: #F2EBEB;
+  --rose-quartz-secondary: #ECAAD3;
+  --rose-quartz-accent: #FA8DC1;
+  --rose-quartz-text: #3d0a1f; /* Very dark burgundy for maximum contrast */
+  --rose-quartz-text-secondary: #5d1931; /* Dark rose-brown for secondary text */
+  --rose-quartz-bg: linear-gradient(135deg, #F2EBEB 0%, #ECAAD3 100%);
+
   /* Glass */
   --glass-white: rgba(255, 255, 255, 0.1);
   --glass-black: rgba(0, 0, 0, 0.1);
@@ -64,6 +72,15 @@
   --theme-text: var(--crimson-night-text);
   --theme-text-secondary: var(--crimson-night-text-secondary);
   --theme-bg: var(--crimson-night-bg);
+}
+
+.theme-rose-quartz {
+  --theme-primary: var(--rose-quartz-primary);
+  --theme-secondary: var(--rose-quartz-secondary);
+  --theme-accent: var(--rose-quartz-accent);
+  --theme-text: var(--rose-quartz-text);
+  --theme-text-secondary: var(--rose-quartz-text-secondary);
+  --theme-bg: var(--rose-quartz-bg);
 }
 
 /* ---------------------------------------------------------
