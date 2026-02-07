@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
 import {
   formatRelativeTime,
   formatNumber,
@@ -15,7 +16,6 @@ import {
   ChatBubbleLeftIcon,
   ShareIcon,
   BookmarkIcon,
-  PlayIcon,
   HandThumbDownIcon,
 } from "@heroicons/react/24/outline";
 import {
@@ -46,24 +46,13 @@ const CapsuleCard = ({ vlog, featured = false, compact = false }) => {
   } = useVlogInteractions();
 
   // Compute interaction states - prioritize direct properties (e.g. from optimistic updates)
-  const isLiked =
-    typeof vlog.isLiked === "boolean"
-      ? vlog.isLiked
-      : vlog.likes?.includes(user?._id) || false;
-  const isDisliked =
-    typeof vlog.isDisliked === "boolean"
-      ? vlog.isDisliked
-      : vlog.dislikes?.includes(user?._id) || false;
-  const isBookmarked = vlog.isBookmarked || false;
+  // Compute interaction states - rely on boolean flags from backend/optimistic updates
+  const isLiked = !!vlog.isLiked;
+  const isDisliked = !!vlog.isDisliked;
+  const isBookmarked = !!vlog.isBookmarked;
 
-  const likeCount =
-    typeof vlog.likeCount === "number"
-      ? vlog.likeCount
-      : vlog.likes?.length || 0;
-  const dislikeCount =
-    typeof vlog.dislikeCount === "number"
-      ? vlog.dislikeCount
-      : vlog.dislikes?.length || 0;
+  const likeCount = vlog.likeCount || 0;
+  const dislikeCount = vlog.dislikeCount || 0;
 
   const handleLike = (e) => {
     e.preventDefault();
@@ -97,6 +86,18 @@ const CapsuleCard = ({ vlog, featured = false, compact = false }) => {
     shareVlog(vlog._id, vlog);
   };
 
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  useEffect(() => {
+    if (!vlog.images || vlog.images.length <= 1) return;
+
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prev) => (prev + 1) % vlog.images.length);
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [vlog.images]);
+
   const cardVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: {
@@ -122,7 +123,8 @@ const CapsuleCard = ({ vlog, featured = false, compact = false }) => {
     hover: {
       scale: 1.05,
       transition: {
-        duration: 0.3,
+        duration: 0.8,
+        ease: "easeOut",
       },
     },
   };
@@ -141,23 +143,29 @@ const CapsuleCard = ({ vlog, featured = false, compact = false }) => {
           <div className="relative aspect-video overflow-hidden">
             <motion.img
               variants={imageVariants}
+              key={currentImageIndex}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5 }}
               src={
-                vlog.images?.[0]?.url ||
+                vlog.images?.[currentImageIndex]?.url ||
                 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"%3E%3Crect width="400" height="225" fill="%23374151"/%3E%3Ctext x="50%25" y="50%25" fill="%23d1d5db" font-family="Arial, sans-serif" font-size="18" text-anchor="middle" dy=".3em"%3ENo Image%3C/text%3E%3C/svg%3E'
               }
               alt={vlog.title}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover absolute inset-0"
             />
+             {/* Background Image for Smooth Transition (Previous Image) */}
+             {vlog.images?.length > 1 && (
+              <img
+                src={vlog.images[(currentImageIndex - 1 + vlog.images.length) % vlog.images.length]?.url}
+                alt=""
+                className="w-full h-full object-cover absolute inset-0 -z-10"
+              />
+            )}
 
             {/* Overlay */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-            {/* Play Button */}
-            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-              <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center">
-                <PlayIcon className="w-6 h-6 text-white ml-1" />
-              </div>
-            </div>
 
             {/* Duration Badge */}
             {vlog.duration && (
@@ -213,27 +221,28 @@ const CapsuleCard = ({ vlog, featured = false, compact = false }) => {
         <div className="relative aspect-video overflow-hidden">
           <motion.img
             variants={imageVariants}
+            key={currentImageIndex}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
             src={
-              vlog.images?.[0]?.url ||
+              vlog.images?.[currentImageIndex]?.url ||
               'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"%3E%3Crect width="400" height="225" fill="%23374151"/%3E%3Ctext x="50%25" y="50%25" fill="%23d1d5db" font-family="Arial, sans-serif" font-size="18" text-anchor="middle" dy=".3em"%3ENo Image%3C/text%3E%3C/svg%3E'
             }
             alt={vlog.title}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover absolute inset-0"
           />
+           {/* Background Image for Smooth Transition (Previous Image) */}
+           {vlog.images?.length > 1 && (
+            <img
+              src={vlog.images[(currentImageIndex - 1 + vlog.images.length) % vlog.images.length]?.url}
+              alt=""
+              className="w-full h-full object-cover absolute inset-0 -z-10"
+            />
+          )}
 
           {/* Overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
-          {/* Play Button */}
-          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <motion.div
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center"
-            >
-              <PlayIcon className="w-8 h-8 text-white ml-1" />
-            </motion.div>
-          </div>
 
           {/* Category Badge */}
           <div className="absolute top-4 left-4">
