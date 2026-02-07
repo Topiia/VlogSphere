@@ -1,18 +1,26 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { vlogAPI } from "../services/api";
-import { useAuth } from "../contexts/AuthContext";
 
 export const useVlogView = (vlogId) => {
-  const { isAuthenticated } = useAuth();
   const queryClient = useQueryClient();
+  const hasRecordedView = useRef(false);
 
   useEffect(() => {
     if (!vlogId) return;
+    
+    // CRITICAL: Only record view ONCE per hook instance
+    if (hasRecordedView.current) return;
 
     // Check if already recorded in session
     const sessionKey = `view_recorded_${vlogId}`;
-    if (sessionStorage.getItem(sessionKey)) return;
+    if (sessionStorage.getItem(sessionKey)) {
+      hasRecordedView.current = true;
+      return;
+    }
+
+    // Mark as recorded immediately to prevent race conditions
+    hasRecordedView.current = true;
 
     // Record view (fire-and-forget, no refetch to prevent increment loop)
     vlogAPI
@@ -45,5 +53,7 @@ export const useVlogView = (vlogId) => {
         // Log errors silently - don't show error toasts for view tracking failures
         console.error("Failed to record view:", error);
       });
-  }, [vlogId, queryClient]);
+  // CRITICAL: Only vlogId in deps - prevents re-run on query invalidations
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [vlogId]);
 };
